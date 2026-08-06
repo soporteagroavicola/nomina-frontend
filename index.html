@@ -28,6 +28,10 @@
         .header-title { text-align: center; color: #2c3e50; margin-bottom: 25px; font-size: 28px; }
         .loading { color: #666; font-style: italic; margin: 10px 0; }
         .error-text { color: #dc3545; font-weight: bold; margin: 10px 0; }
+        
+        /* Estilo para la barra de búsqueda y filtro */
+        .filters-container { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .filters-container input, .filters-container select { width: auto; min-width: 200px; padding: 8px; }
     </style>
 </head>
 <body>
@@ -81,6 +85,16 @@
                     <button class="btn-success" onclick="crearEmpleado()">➕ Guardar Empleado</button>
                 </div>
             </div>
+            
+            <!-- 🔽 NUEVOS FILTROS PARA LA TABLA -->
+            <div class="filters-container">
+                <input type="text" id="search_empleado" placeholder="🔍 Buscar por cédula o nombre..." oninput="cargarEmpleadosAdmin()">
+                <select id="filter_sucursal" onchange="cargarEmpleadosAdmin()">
+                    <option value="">Ver todas las sucursales</option>
+                </select>
+            </div>
+            <!-- 🔽 FIN DE FILTROS -->
+
             <table>
                 <thead>
                     <tr>
@@ -170,12 +184,23 @@
             const tableBody = document.getElementById('tabla_empleados');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading">Cargando empleados...</td></tr>';
             try {
-                const res = await fetch(`${API_URL}/api/empleados`);
+                // 🔽 Leer los valores de los filtros y pasarlos a la URL
+                const searchText = document.getElementById('search_empleado').value;
+                const filterSucursal = document.getElementById('filter_sucursal').value;
+                
+                let url = `${API_URL}/api/empleados`;
+                const params = [];
+                if (searchText) params.push(`search=${encodeURIComponent(searchText)}`);
+                if (filterSucursal) params.push(`sucursal_id=${encodeURIComponent(filterSucursal)}`);
+                if (params.length > 0) url += '?' + params.join('&');
+                // 🔽 Fin de la preparación de URL
+
+                const res = await fetch(url);
                 if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const empleados = await res.json();
                 
                 if(empleados.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No hay empleados creados.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No se encontraron empleados con esos filtros.</td></tr>';
                 } else {
                     tableBody.innerHTML = empleados.map(e => 
                         `<tr>
@@ -189,11 +214,22 @@
                     ).join('');
                 }
                 
+                // Cargar opciones para el select de Sucursales (tanto para el formulario como para el filtro)
                 const resSuc = await fetch(`${API_URL}/api/sucursales`);
                 if(resSuc.ok) {
                     const sucs = await resSuc.json();
-                    const selectSuc = document.getElementById('emp_sucursal');
-                    selectSuc.innerHTML = '<option value="">Seleccione una sucursal...</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+                    
+                    // Select del formulario de agregar
+                    const selectSucForm = document.getElementById('emp_sucursal');
+                    selectSucForm.innerHTML = '<option value="">Seleccione una sucursal...</option>' + 
+                        sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+                    
+                    // Select del filtro (Asegurarnos de mantener la opción "Todas" al recargar)
+                    const selectSucFilter = document.getElementById('filter_sucursal');
+                    const currentFilterValue = selectSucFilter.value; // Guardamos el valor seleccionado
+                    selectSucFilter.innerHTML = '<option value="">Ver todas las sucursales</option>' + 
+                        sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+                    selectSucFilter.value = currentFilterValue; // Reasignamos el valor para que no se pierda al actualizar
                 }
             } catch(e) { 
                 tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar empleados: ${e.message}</td></tr>`;
@@ -213,7 +249,7 @@
                 fecha_nacimiento: document.getElementById('emp_fecha_nacimiento').value || null,
                 fecha_ingreso: document.getElementById('emp_fecha_ingreso').value || null,
                 cuenta_bancaria: document.getElementById('emp_cuenta_bancaria').value || '',
-                tipo_pago: document.getElementById('emp_tipo_pago').value // ¡AQUÍ ESTABA EL FALLO!
+                tipo_pago: document.getElementById('emp_tipo_pago').value
             };
             try {
                 const res = await fetch(`${API_URL}/api/empleados`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
