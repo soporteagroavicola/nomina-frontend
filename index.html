@@ -33,7 +33,6 @@
     
     <div id="app" class="tab-container">
         <div class="tabs">
-            <!-- CAMBIO: Usamos data-target en lugar de onclick para mayor compatibilidad -->
             <button class="tab-btn active" data-target="nomina">📊 Calcular Nómina</button>
             <button class="tab-btn" data-target="empleados">👤 Empleados</button>
             <button class="tab-btn" data-target="sucursales">🏢 Sucursales</button>
@@ -85,27 +84,22 @@
         // URL de tu Backend en la nube
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
 
-        // Nueva función robusta para cambiar de pestaña
+        // Cambio de pestañas
         document.addEventListener('DOMContentLoaded', function() {
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => {
                 btn.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-target');
-                    
-                    // 1. Cambiar clases visuales
                     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
                     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
                     document.getElementById(tabId).classList.add('active');
                     this.classList.add('active');
 
-                    // 2. Cargar datos correspondientes
                     if (tabId === 'empleados') cargarEmpleadosAdmin();
                     else if (tabId === 'sucursales') cargarSucursales();
                     else if (tabId === 'nomina') cargarEmpleados();
                 });
             });
-
-            // Cargar datos por defecto al abrir la página
             cargarEmpleados();
         });
 
@@ -146,7 +140,7 @@
                 html += `</table>`;
                 document.getElementById('resultado_content').innerHTML = html;
             } catch(e) { 
-                alert('Error al calcular la nómina. El servidor puede estar despertando (espera 30 segundos).');
+                alert('Error de conexión con el servidor.');
             }
         }
 
@@ -183,7 +177,7 @@
                 if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; cargarEmpleadosAdmin(); }
                 else { alertBox.innerHTML = `<div class="alert alert-danger">Error: ${resp.error}</div>`; }
             } catch (error) {
-                alert("No se pudo conectar con el servidor. Asegúrate de que el backend esté activo (espera 30 segundos si recién abres la página).");
+                alert("Error de conexión. Verifica que el servidor esté accesible.");
             }
         }
 
@@ -196,7 +190,7 @@
             } catch (e) { alert("Error de conexión con el servidor."); }
         }
 
-        // --- GESTIÓN SUCURSALES ---
+        // --- GESTIÓN SUCURSALES (ACTUALIZADO PARA VER EL ERROR REAL) ---
         async function cargarSucursales() {
             try {
                 document.getElementById('tabla_sucursales').innerHTML = '<tr><td colspan="3" class="loading">Cargando sucursales...</td></tr>';
@@ -220,15 +214,17 @@
                 const res = await fetch(`${API_URL}/api/sucursales`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({nombre}) });
                 const resp = await res.json();
                 const alertBox = document.getElementById('alert_suc');
+                
                 if(res.ok) { 
                     alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; 
                     document.getElementById('suc_nombre').value = ''; 
                     cargarSucursales(); 
                 } else { 
-                    alertBox.innerHTML = `<div class="alert alert-danger">Error: ${resp.error}</div>`; 
+                    // Aquí se mostrará el error REAL que devuelve el servidor (ej: "duplicate key value violates unique constraint")
+                    alertBox.innerHTML = `<div class="alert alert-danger">⚠️ Error del servidor: ${resp.error || 'Error desconocido'}</div>`; 
                 }
             } catch (error) {
-                alert("⏳ El servidor está despertando. Por favor, espera unos 30 segundos y vuelve a intentarlo.");
+                alert("Error de conexión. Verifica que el servidor esté accesible.");
             }
         }
 
