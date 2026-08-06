@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Nómina Web</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        label { display: inline-block; width: 120px; }
+        input, select { padding: 8px; margin: 5px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+        .btn { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
+        .resultado { background: #e9f7ef; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧾 Sistema de Nómina Venezuela</h1>
+    <div id="app">
+        <div class="card">
+            <h2>Calcular Nómina</h2>
+            <label>Tipo:</label>
+            <select id="tipo">
+                <option value="Quincenal">Quincenal</option>
+                <option value="Semanal">Semanal</option>
+            </select>
+            <label>Fecha Inicio:</label>
+            <input type="date" id="fecha_inicio" value="2026-08-01">
+            <label>Fecha Fin:</label>
+            <input type="date" id="fecha_fin" value="2026-08-15">
+            <br><br>
+            <label>Seleccionar empleados:</label>
+            <div id="lista_empleados"></div>
+            <br>
+            <button class="btn" onclick="calcularNomina()">📊 Calcular Nómina</button>
+        </div>
+
+        <div id="resultados" class="card">
+            <h2>Resultados</h2>
+            <div id="resultado_content">Aquí se mostrarán los resultados.</div>
+        </div>
+    </div>
+
+    <script>
+        // URL del backend (YA ACTUALIZADA A LA NUBE)
+        const API_URL = 'https://nomina-backend-kc2j.onrender.com';
+
+        // Cargar empleados al iniciar
+        async function cargarEmpleados() {
+            try {
+                const response = await fetch(`${API_URL}/api/empleados`);
+                const empleados = await response.json();
+                const container = document.getElementById('lista_empleados');
+                container.innerHTML = '';
+                empleados.forEach(emp => {
+                    const label = document.createElement('label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = emp.id_empleado;
+                    checkbox.checked = true;
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(` ${emp.cedula} - ${emp.nombres} ${emp.apellidos}`));
+                    container.appendChild(label);
+                    container.appendChild(document.createElement('br'));
+                });
+            } catch (error) {
+                console.error('Error al cargar empleados:', error);
+                alert('No se pudieron cargar los empleados.');
+            }
+        }
+
+        // Calcular nómina
+        async function calcularNomina() {
+            const tipo = document.getElementById('tipo').value;
+            const fecha_inicio = document.getElementById('fecha_inicio').value;
+            const fecha_fin = document.getElementById('fecha_fin').value;
+
+            // Obtener empleados seleccionados
+            const checkboxes = document.querySelectorAll('#lista_empleados input[type="checkbox"]:checked');
+            const empleados_ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+            if (empleados_ids.length === 0) {
+                alert('Selecciona al menos un empleado');
+                return;
+            }
+
+            const payload = {
+                tipo: tipo,
+                fecha_inicio: fecha_inicio,
+                fecha_fin: fecha_fin,
+                empleados_ids: empleados_ids,
+                faltas: {},
+                horas_extras: {}
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/api/calcular_nomina`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                mostrarResultados(data);
+            } catch (error) {
+                console.error(error);
+                alert('Error al calcular la nómina.');
+            }
+        }
+
+        function mostrarResultados(data) {
+            const container = document.getElementById('resultado_content');
+            let html = `<p><strong>Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(2)}</p>`;
+            html += `<table><tr><th>Empleado</th><th>Salario Base</th><th>Horas Extras</th><th>Total Asign.</th><th>Deducciones</th><th>Neto USD</th><th>Neto Bs</th></tr>`;
+            let total_usd = 0;
+            data.resultados.forEach(r => {
+                total_usd += r.neto_pagar_usd;
+                html += `<tr>
+                    <td>${r.empleado.nombre_completo}</td>
+                    <td>$${r.salario_base_usd.toFixed(2)}</td>
+                    <td>$${r.horas_extras_usd.toFixed(2)}</td>
+                    <td>$${r.total_asignaciones_usd.toFixed(2)}</td>
+                    <td>$${r.total_deducciones_usd.toFixed(2)}</td>
+                    <td><strong>$${r.neto_pagar_usd.toFixed(2)}</strong></td>
+                    <td><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td>
+                </tr>`;
+            });
+            html += `<tr><td colspan="5"><strong>TOTAL</strong></td><td><strong>$${total_usd.toFixed(2)}</strong></td><td></td></tr>`;
+            html += `</table>`;
+            container.innerHTML = html;
+        }
+
+        // Cargar empleados al inicio
+        cargarEmpleados();
+    </script>
+</body>
+</html>
