@@ -60,9 +60,10 @@
                 <div><label>Fecha Inicio:</label><input type="date" id="fecha_inicio"></div>
                 <div><label>Fecha Fin:</label><input type="date" id="fecha_fin"></div>
             </div>
-            <!-- 🆕 Filtro por Sucursal y Descripción -->
+            <!-- 🆕 Filtro por Sucursal y Tipo de Pago -->
             <div class="form-group">
                 <div><label>Filtrar por Sucursal:</label><select id="calc_sucursal"><option value="">Todas las sucursales</option></select></div>
+                <div><label>Filtrar por Tipo de Pago:</label><select id="calc_tipo_pago"><option value="">Todos</option><option value="Quincenal">Quincenal</option><option value="Semanal">Semanal</option></select></div>
                 <div><label>Descripción:</label><input type="text" id="calc_descripcion" placeholder="Ej: Nómina 1ra Quincena Agosto 2026"></div>
             </div>
             <!-- 🆕 Fin de filtros -->
@@ -179,12 +180,16 @@
                 });
             });
             
-            // 🆕 Inicializar eventos de la calculadora
+            // 🆕 Eventos combinados de filtros
             document.getElementById('calc_sucursal').addEventListener('change', function() {
-                cargarEmpleadosCalc(this.value);
+                cargarEmpleadosCalc(this.value, document.getElementById('calc_tipo_pago').value);
             });
+            document.getElementById('calc_tipo_pago').addEventListener('change', function() {
+                cargarEmpleadosCalc(document.getElementById('calc_sucursal').value, this.value);
+            });
+            
             cargarSucursalesCalc();
-            cargarEmpleadosCalc('');
+            cargarEmpleadosCalc('', ''); // Cargar todo inicialmente
         });
 
         // =========================================
@@ -201,7 +206,8 @@
             } catch(e) { console.error(e); }
         }
 
-        async function cargarEmpleadosCalc(sucursal_id = '') {
+        // 🆕 La función ahora recibe y usa el filtro tipo_pago
+        async function cargarEmpleadosCalc(sucursal_id = '', tipo_pago = '') {
             try {
                 const container = document.getElementById('lista_empleados');
                 const detalleContainer = document.getElementById('cuerpo_detalle_nomina');
@@ -211,26 +217,26 @@
                 inputsContainer.style.display = 'none';
 
                 let url = `${API_URL}/api/empleados`;
-                if (sucursal_id) url += `?sucursal_id=${sucursal_id}`;
+                const params = [];
+                if (sucursal_id) params.push(`sucursal_id=${encodeURIComponent(sucursal_id)}`);
+                if (tipo_pago) params.push(`tipo_pago=${encodeURIComponent(tipo_pago)}`); // 🆕 Nuevo parámetro
+                if (params.length > 0) url += '?' + params.join('&');
                 
                 const res = await fetch(url);
                 if(!res.ok) throw new Error("Error al obtener empleados");
                 const empleados = await res.json();
 
                 if(empleados.length === 0) {
-                    container.innerHTML = "<p style='color: #888;'>No hay empleados en esta sucursal (o no hay registrados).</p>";
+                    container.innerHTML = "<p style='color: #888;'>No hay empleados con esos filtros.</p>";
                 } else {
-                    // 🆕 Agrupar por tipo de pago
                     const quincenal = empleados.filter(e => e.tipo_pago === 'Quincenal');
                     const semanal = empleados.filter(e => e.tipo_pago === 'Semanal');
                     
                     let html = '';
-                    // Grupo Quincenal
                     if (quincenal.length > 0) {
                         html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#007bff;">📅 Pago Quincenal</div>`;
                         html += quincenal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="emp-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
                     }
-                    // Grupo Semanal
                     if (semanal.length > 0) {
                         html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#856404;">📅 Pago Semanal</div>`;
                         html += semanal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="emp-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
@@ -238,7 +244,6 @@
                     container.innerHTML = html;
                     document.querySelectorAll('.emp-check').forEach(cb => cb.addEventListener('change', actualizarTablaNomina));
 
-                    // Construir tabla de inputs (también agrupada visualmente para claridad)
                     let detalleHtml = '';
                     if (quincenal.length > 0) {
                         detalleHtml += `<tr style="background:#f0f7ff; font-weight:bold;"><td colspan="4">📅 Quincenales</td></tr>`;
@@ -258,7 +263,6 @@
         function actualizarTablaNomina() {
             const checkboxes = document.querySelectorAll('.emp-check');
             const rows = document.querySelectorAll('#cuerpo_detalle_nomina tr');
-            // Saltar filas de encabezado de grupo (no tienen data-cedula)
             let empIdx = 0;
             rows.forEach(row => {
                 if(row.hasAttribute('data-cedula')) {
@@ -274,7 +278,7 @@
             const tipo = document.getElementById('tipo').value;
             const fecha_inicio = document.getElementById('fecha_inicio').value;
             const fecha_fin = document.getElementById('fecha_fin').value;
-            const descripcion = document.getElementById('calc_descripcion').value; // 🆕 Leer descripción
+            const descripcion = document.getElementById('calc_descripcion').value;
             
             const ids = Array.from(document.querySelectorAll('.emp-check:checked')).map(c => parseInt(c.value));
             if(!ids.length) return alert('Selecciona al menos un empleado');
@@ -297,7 +301,7 @@
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        tipo, fecha_inicio, fecha_fin, descripcion, // 🆕 Enviar descripción
+                        tipo, fecha_inicio, fecha_fin, descripcion,
                         empleados_ids: ids, faltas: faltas, horas_extras: horas_extras
                     })
                 });
@@ -314,7 +318,7 @@
         }
 
         // =========================================
-        // 2. MÓDULO EMPLEADOS, 3. SUCURSALES (Sin cambios mayores)
+        // 2. MÓDULO EMPLEADOS, 3. SUCURSALES
         // =========================================
         async function cargarEmpleadosAdmin() {
             const tableBody = document.getElementById('tabla_empleados');
@@ -412,7 +416,7 @@
         }
 
         // =========================================
-        // 4. MÓDULO HISTORIAL DE NÓMINAS (Actualizado)
+        // 4. MÓDULO HISTORIAL DE NÓMINAS
         // =========================================
         async function cargarHistorial() {
             const tableBody = document.getElementById('tabla_historial');
@@ -446,7 +450,7 @@
                     tableBody.innerHTML = nominas.map(n => `
                         <tr>
                             <td>${n.id_nomina}</td>
-                            <td><strong>${n.descripcion || 'Sin descripción'}</strong></td> <!-- 🆕 Mostrar descripción -->
+                            <td><strong>${n.descripcion || 'Sin descripción'}</strong></td>
                             <td><strong>${n.nombres} ${n.apellidos}</strong><br><small>${n.cedula}</small></td>
                             <td>${n.fecha_inicio} a ${n.fecha_fin}</td>
                             <td>${n.sucursal_nombre || 'Sin sucursal'}</td>
@@ -466,7 +470,7 @@
         }
 
         // =========================================
-        // 5. EDITAR NÓMINA (Actualizado)
+        // 5. EDITAR NÓMINA
         // =========================================
         let nominaEditandoId = null;
 
@@ -481,7 +485,7 @@
                 const n = await res.json();
                 
                 document.getElementById('edit_empleado_nombre').innerText = `${n.nombres} ${n.apellidos} (${n.cedula})`;
-                document.getElementById('edit_descripcion').innerText = n.descripcion || 'Sin descripción'; // 🆕 Mostrar descripción
+                document.getElementById('edit_descripcion').innerText = n.descripcion || 'Sin descripción';
                 document.getElementById('edit_faltas').value = n.faltas_dias || 0;
                 document.getElementById('edit_horas').value = 0; 
                 document.getElementById('edit_valor_hora').value = 0;
