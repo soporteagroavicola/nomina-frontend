@@ -79,7 +79,7 @@
             <div id="resultado_content"></div>
         </div>
 
-        <!-- OTRAS PESTAÑAS SIN CAMBIOS RELEVANTES (EMPLEADOS / SUCURSALES / HISTORIAL) -->
+        <!-- PESTAÑA EMPLEADOS -->
         <div id="empleados" class="tab-content">
             <h2>Gestión de Empleados</h2>
             <div id="alert_emp"></div>
@@ -108,6 +108,7 @@
             <table><thead><tr><th>ID</th><th>Cédula</th><th>Nombre</th><th>Cargo</th><th>Salario USD</th><th>Pago</th><th>Fec. Ingreso</th><th>Acciones</th></tr></thead><tbody id="tabla_empleados"></tbody></table>
         </div>
 
+        <!-- PESTAÑA SUCURSALES -->
         <div id="sucursales" class="tab-content">
             <h2>Gestión de Sucursales</h2>
             <div id="alert_suc"></div>
@@ -118,6 +119,7 @@
             <table><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="tabla_sucursales"></tbody></table>
         </div>
 
+        <!-- PESTAÑA HISTORIAL -->
         <div id="historial" class="tab-content">
             <h2>📋 Historial de Nóminas</h2>
             <div id="alert_hist"></div>
@@ -125,7 +127,10 @@
                 <input type="text" id="search_historial" placeholder="🔍 Buscar por empleado..." oninput="cargarHistorial()">
                 <select id="filter_sucursal_hist" onchange="cargarHistorial()"><option value="">Filtrar por Sucursal</option></select>
             </div>
-            <table><thead><tr><th>ID</th><th>Descripción</th><th>Empleado</th><th>Fecha</th><th>Sucursal</th><th>Neto USD</th><th>Neto Bs</th><th>Acciones</th></tr></thead><tbody id="tabla_historial"></tbody></table>
+            <table>
+                <thead><tr><th>ID</th><th>Descripción</th><th>Empleado</th><th>Fecha</th><th>Sucursal</th><th>Neto USD</th><th>Neto Bs</th><th>Acciones</th></tr></thead>
+                <tbody id="tabla_historial"></tbody>
+            </table>
         </div>
     </div>
 
@@ -215,13 +220,22 @@
                 
                 const res = await fetch(url);
                 if(!res.ok) throw new Error("Error al obtener empleados");
-                const empleados = await res.json();
+                
+                let data;
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    data = await res.json();
+                } else {
+                    // Si el servidor devuelve HTML de error (ej: 500), mostrarlo
+                    const text = await res.text();
+                    throw new Error(`El servidor devolvió HTML. Revisa los logs de Render. Fragmento: ${text.substring(0, 80)}...`);
+                }
 
-                if(empleados.length === 0) {
+                if(data.length === 0) {
                     container.innerHTML = "<p style='color: #888;'>No hay empleados con esos filtros.</p>";
                 } else {
-                    const quincenal = empleados.filter(e => e.tipo_pago === 'Quincenal');
-                    const semanal = empleados.filter(e => e.tipo_pago === 'Semanal');
+                    const quincenal = data.filter(e => e.tipo_pago === 'Quincenal');
+                    const semanal = data.filter(e => e.tipo_pago === 'Semanal');
                     
                     let html = '';
                     if (quincenal.length > 0) {
@@ -248,7 +262,10 @@
                     inputsContainer.style.display = 'block';
                     actualizarTablaNomina();
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                container.innerHTML = `<p style='color: red; font-weight: bold;'>❌ Error al cargar empleados: ${e.message}</p>`;
+                console.error(e);
+            }
         }
 
         function actualizarTablaNomina() {
@@ -299,7 +316,6 @@
                 const data = await res.json();
                 if(data.error) return alert('Error: '+data.error);
                 
-                // Sumatorias del TOTAL GENERAL
                 let total_usd = 0;
                 let total_bs = 0;
                 data.resultados.forEach(r => {
@@ -307,7 +323,6 @@
                     total_bs += r.neto_pagar_bs;
                 });
 
-                // 🆕 NUEVAS COLUMNAS DE CALENDARIO
                 let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)}</h3>`;
                 html += `<table>
                     <tr>
@@ -336,7 +351,6 @@
                     <td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td>
                 </tr>`);
                 
-                // 🆕 FILA DE TOTAL GENERAL (Colspan 8 para dejar las 2 últimas columnas de dinero alineadas)
                 html += `<tr style="background-color: #e9ecef; font-weight: bold; border-top: 2px solid #0056b3;">
                     <td colspan="8" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL</strong></td>
                     <td><strong>$${total_usd.toFixed(2)}</strong></td>
@@ -347,12 +361,14 @@
                 document.getElementById('resultado_content').innerHTML = html;
                 alert('✅ Nómina calculada y guardada en el Historial!');
                 cargarHistorial();
-            } catch(e) { alert('Error al calcular la nómina.'); }
+            } catch(e) { 
+                console.error(e);
+                alert('Error al calcular la nómina. El Backend puede tener un error interno. Revisa los logs de Render.');
+            }
         }
 
         // =========================================
-        // 2. MÓDULO EMPLEADOS, 3. SUCURSALES, 4. HISTORIAL
-        // (Las funciones de carga son las mismas que antes, sin cambios mayores)
+        // 2. MÓDULO EMPLEADOS
         // =========================================
         async function cargarEmpleadosAdmin() {
             const tableBody = document.getElementById('tabla_empleados');
@@ -386,11 +402,37 @@
         }
 
         async function crearEmpleado() {
-            const data = { ... }; // Misma estructura del empleado
-        } // Simplificando para el código final
+            const data = {
+                cedula: document.getElementById('emp_cedula').value, nombres: document.getElementById('emp_nombres').value,
+                apellidos: document.getElementById('emp_apellidos').value, cargo: document.getElementById('emp_cargo').value,
+                departamento: document.getElementById('emp_depto').value, salario_mensual_usd: parseFloat(document.getElementById('emp_salario').value) || 0,
+                sucursal_id: parseInt(document.getElementById('emp_sucursal').value) || null,
+                fecha_nacimiento: document.getElementById('emp_fecha_nacimiento').value || null,
+                fecha_ingreso: document.getElementById('emp_fecha_ingreso').value || null,
+                cuenta_bancaria: document.getElementById('emp_cuenta_bancaria').value || '',
+                tipo_pago: document.getElementById('emp_tipo_pago').value
+            };
+            try {
+                const res = await fetch(`${API_URL}/api/empleados`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+                let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor respondió con HTML en lugar de JSON" }; }
+                const alertBox = document.getElementById('alert_emp');
+                if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; cargarEmpleadosAdmin(); }
+                else { alertBox.innerHTML = `<div class="alert alert-danger">Error: ${resp.error}</div>`; }
+            } catch (error) { document.getElementById('alert_emp').innerHTML = `<div class="alert alert-danger">Error de red: ${error.message}</div>`; }
+        }
 
-        async function eliminarEmpleado(id) { ... }
+        async function eliminarEmpleado(id) {
+            if(!confirm('¿Seguro que quieres eliminar este empleado?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/empleados/${id}`, { method: 'DELETE' });
+                const resp = await res.json();
+                if(res.ok) { cargarEmpleadosAdmin(); } else { alert('Error: '+resp.error); }
+            } catch (e) { alert("Error de red al eliminar."); }
+        }
 
+        // =========================================
+        // 3. MÓDULO SUCURSALES
+        // =========================================
         async function cargarSucursales() {
             const tableBody = document.getElementById('tabla_sucursales');
             tableBody.innerHTML = '<tr><td colspan="3" class="loading">Cargando sucursales...</td></tr>';
@@ -404,9 +446,31 @@
                 else tableBody.innerHTML = data.map(s => `<tr><td>${s.id_sucursal}</td><td>${s.nombre}</td><td><button class="btn-danger" onclick="eliminarSucursal(${s.id_sucursal})">🗑️ Eliminar</button></td></tr>`).join('');
             } catch(e) { tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`; console.error(e); }
         }
-        async function crearSucursal() { ... }
-        async function eliminarSucursal(id) { ... }
 
+        async function crearSucursal() {
+            const nombre = document.getElementById('suc_nombre').value;
+            if(!nombre) return alert("El nombre de la sucursal no puede estar vacío.");
+            try {
+                const res = await fetch(`${API_URL}/api/sucursales`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({nombre}) });
+                let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor no respondió con JSON" }; }
+                const alertBox = document.getElementById('alert_suc');
+                if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; document.getElementById('suc_nombre').value = ''; cargarSucursales(); } 
+                else { alertBox.innerHTML = `<div class="alert alert-danger">⚠️ Error del servidor: ${resp.error || 'Error desconocido'}</div>`; }
+            } catch (error) { document.getElementById('alert_suc').innerHTML = `<div class="alert alert-danger">❌ Error de red: ${error.message}</div>`; }
+        }
+
+        async function eliminarSucursal(id) {
+            if(!confirm('¿Seguro que quieres eliminar esta sucursal? Si tiene empleados, elimínalos primero.')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/sucursales/${id}`, { method: 'DELETE' });
+                const resp = await res.json();
+                if(res.ok) { cargarSucursales(); } else { alert('Error: '+resp.error); }
+            } catch (e) { alert("Error de red al eliminar."); }
+        }
+
+        // =========================================
+        // 4. MÓDULO HISTORIAL
+        // =========================================
         async function cargarHistorial() {
             const tableBody = document.getElementById('tabla_historial');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading">Cargando historial de nóminas...</td></tr>';
@@ -458,11 +522,66 @@
             }
         }
 
-        // Funciones del Modal Edit ...
-        async function abrirModalEditar(id) { ... } // Omitido por brevedad pero igual al anterior
-        function cerrarModal() { ... }
-        async function guardarEdicionNomina() { ... }
-        async function eliminarNomina(id) { ... }
+        // =========================================
+        // 5. EDITAR NÓMINA (Modal)
+        // =========================================
+        let nominaEditandoId = null;
+
+        async function abrirModalEditar(id) {
+            nominaEditandoId = id;
+            const modal = document.getElementById('modalEditarNomina');
+            modal.style.display = 'flex';
+            try {
+                const res = await fetch(`${API_URL}/api/nominas/${id}`);
+                if(!res.ok) throw new Error("Error al obtener datos de la nómina");
+                const n = await res.json();
+                document.getElementById('edit_empleado_nombre').innerText = `${n.nombres} ${n.apellidos} (${n.cedula})`;
+                document.getElementById('edit_descripcion').innerText = n.descripcion || 'Sin descripción';
+                document.getElementById('edit_faltas').value = n.faltas_dias || 0;
+                document.getElementById('edit_horas').value = 0; 
+                document.getElementById('edit_valor_hora').value = 0;
+            } catch (e) { alert("Error al cargar los datos para editar: " + e.message); }
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalEditarNomina').style.display = 'none';
+            nominaEditandoId = null;
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalEditarNomina');
+            if (event.target == modal) { cerrarModal(); }
+        }
+
+        async function guardarEdicionNomina() {
+            if (!nominaEditandoId) return;
+            const data = {
+                faltas_dias: parseInt(document.getElementById('edit_faltas').value) || 0,
+                horas_extras: parseFloat(document.getElementById('edit_horas').value) || 0,
+                valor_hora: parseFloat(document.getElementById('edit_valor_hora').value) || 0
+            };
+            try {
+                const res = await fetch(`${API_URL}/api/nominas/${nominaEditandoId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                const resp = await res.json();
+                if(res.ok) { alert('✅ ' + resp.mensaje); cerrarModal(); cargarHistorial(); }
+                else { alert('❌ Error al guardar: ' + resp.error); }
+            } catch (e) { alert("Error de red al guardar: " + e.message); }
+        }
+
+        async function eliminarNomina(id) {
+            if(!confirm('⚠️ ¿Estás seguro de que quieres ELIMINAR este registro de nómina? Esta acción no se puede deshacer.')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/nominas/${id}`, { method: 'DELETE' });
+                const resp = await res.json();
+                if(res.ok) { alert('🗑️ ' + resp.mensaje); cargarHistorial(); }
+                else { alert('Error: '+resp.error); }
+            } catch (e) { alert("Error de red al eliminar."); }
+        }
+
     </script>
 </body>
 </html>
