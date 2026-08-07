@@ -60,13 +60,11 @@
                 <div><label>Fecha Inicio:</label><input type="date" id="fecha_inicio"></div>
                 <div><label>Fecha Fin:</label><input type="date" id="fecha_fin"></div>
             </div>
-            <!-- 🆕 Filtro por Sucursal y Tipo de Pago -->
             <div class="form-group">
                 <div><label>Filtrar por Sucursal:</label><select id="calc_sucursal"><option value="">Todas las sucursales</option></select></div>
                 <div><label>Filtrar por Tipo de Pago:</label><select id="calc_tipo_pago"><option value="">Todos</option><option value="Quincenal">Quincenal</option><option value="Semanal">Semanal</option></select></div>
                 <div><label>Descripción:</label><input type="text" id="calc_descripcion" placeholder="Ej: Nómina 1ra Quincena Agosto 2026"></div>
             </div>
-            <!-- 🆕 Fin de filtros -->
             
             <div><label>Seleccionar empleados:</label><div id="lista_empleados" class="loading">Cargando empleados...</div></div>
             <div id="nomina_inputs_container" style="display:none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
@@ -180,7 +178,6 @@
                 });
             });
             
-            // 🆕 Eventos combinados de filtros
             document.getElementById('calc_sucursal').addEventListener('change', function() {
                 cargarEmpleadosCalc(this.value, document.getElementById('calc_tipo_pago').value);
             });
@@ -189,11 +186,11 @@
             });
             
             cargarSucursalesCalc();
-            cargarEmpleadosCalc('', ''); // Cargar todo inicialmente
+            cargarEmpleadosCalc('', '');
         });
 
         // =========================================
-        // 1. CALCULADORA DE NÓMINA (Actualizada)
+        // 1. CALCULADORA DE NÓMINA
         // =========================================
         async function cargarSucursalesCalc() {
             try {
@@ -206,7 +203,6 @@
             } catch(e) { console.error(e); }
         }
 
-        // 🆕 La función ahora recibe y usa el filtro tipo_pago
         async function cargarEmpleadosCalc(sucursal_id = '', tipo_pago = '') {
             try {
                 const container = document.getElementById('lista_empleados');
@@ -219,7 +215,7 @@
                 let url = `${API_URL}/api/empleados`;
                 const params = [];
                 if (sucursal_id) params.push(`sucursal_id=${encodeURIComponent(sucursal_id)}`);
-                if (tipo_pago) params.push(`tipo_pago=${encodeURIComponent(tipo_pago)}`); // 🆕 Nuevo parámetro
+                if (tipo_pago) params.push(`tipo_pago=${encodeURIComponent(tipo_pago)}`);
                 if (params.length > 0) url += '?' + params.join('&');
                 
                 const res = await fetch(url);
@@ -308,9 +304,49 @@
                 const data = await res.json();
                 if(data.error) return alert('Error: '+data.error);
                 
-                let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)}</h3><table><tr><th>Empleado</th><th>Base</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr>`;
-                data.resultados.forEach(r => html += `<tr><td>${r.empleado.nombre_completo}</td><td>$${r.salario_base_usd.toFixed(2)}</td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.total_asignaciones_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td><td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td></tr>`);
+                // 🔽 SUMATORIAS DEL TOTAL GENERAL
+                let total_usd = 0;
+                let total_bs = 0;
+                data.resultados.forEach(r => {
+                    total_usd += r.neto_pagar_usd;
+                    total_bs += r.neto_pagar_bs;
+                });
+
+                // 🔽 NUEVAS COLUMNAS: Días de descanso y días trabajados
+                let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)}</h3>`;
+                html += `<table>
+                    <tr>
+                        <th>Empleado</th>
+                        <th>Días Descanso</th>
+                        <th>Días Trabajados</th>
+                        <th>Base</th>
+                        <th>Hrs Extras</th>
+                        <th>Asign.</th>
+                        <th>Deducc.</th>
+                        <th>Neto USD</th>
+                        <th>Neto Bs</th>
+                    </tr>`;
+                
+                data.resultados.forEach(r => html += `<tr>
+                    <td>${r.empleado.nombre_completo}</td>
+                    <td>${r.dias_descanso}</td>
+                    <td>${r.dias_reales_trabajados}</td>
+                    <td>$${r.salario_base_usd.toFixed(2)}</td>
+                    <td>$${r.horas_extras_usd.toFixed(2)}</td>
+                    <td>$${r.total_asignaciones_usd.toFixed(2)}</td>
+                    <td>$${r.total_deducciones_usd.toFixed(2)}</td>
+                    <td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td>
+                    <td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td>
+                </tr>`);
+                
+                // 🔽 FILA DE TOTAL GENERAL (colspan=7 porque hay 9 columnas totales)
+                html += `<tr style="background-color: #e9ecef; font-weight: bold; border-top: 2px solid #0056b3;">
+                    <td colspan="7" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL</strong></td>
+                    <td><strong>$${total_usd.toFixed(2)}</strong></td>
+                    <td><strong>Bs. ${total_bs.toFixed(2)}</strong></td>
+                </tr>`;
                 html += `</table>`;
+                
                 document.getElementById('resultado_content').innerHTML = html;
                 alert('✅ Nómina calculada y guardada en el Historial!');
                 cargarHistorial();
