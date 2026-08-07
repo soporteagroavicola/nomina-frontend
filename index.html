@@ -27,11 +27,7 @@
         .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
         .header-title { text-align: center; color: #2c3e50; margin-bottom: 25px; font-size: 28px; }
         .loading { color: #666; font-style: italic; margin: 10px 0; }
-        .error-text { color: #dc3545; font-weight: bold; margin: 10px 0; }
-        
-        /* Estilo para la barra de búsqueda y filtro */
-        .filters-container { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        .filters-container input, .filters-container select { width: auto; min-width: 200px; padding: 8px; }
+        .input-detalle { width: 80px; text-align: center; }
     </style>
 </head>
 <body>
@@ -51,7 +47,20 @@
                 <div><label>Fecha Inicio:</label><input type="date" id="fecha_inicio"></div>
                 <div><label>Fecha Fin:</label><input type="date" id="fecha_fin"></div>
             </div>
+            
             <div><label>Seleccionar empleados:</label><div id="lista_empleados" class="loading">Cargando empleados...</div></div>
+            
+            <!-- 🔽 NUEVO: Tabla de Detalles de Nómina (Faltas y Horas Extras) -->
+            <div id="nomina_inputs_container" style="display:none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
+                <h4 style="margin-top:0;">📝 Detalles de Nómina por Empleado</h4>
+                <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Ingresa los días de falta, horas extras y el valor de la hora extra en USD para cada empleado seleccionado.</div>
+                <table id="tabla_detalle_nomina">
+                    <thead><tr><th>Empleado</th><th style="width:100px;">Faltas (Días)</th><th style="width:100px;">Horas Extras</th><th style="width:130px;">Valor Hora (USD)</th></tr></thead>
+                    <tbody id="cuerpo_detalle_nomina"></tbody>
+                </table>
+            </div>
+            <!-- 🔽 FIN DE NUEVO -->
+
             <br><button class="btn-primary" onclick="calcularNomina()">📊 Calcular Nómina</button>
             <div id="resultado_content"></div>
         </div>
@@ -61,46 +70,31 @@
             <div id="alert_emp"></div>
             <div style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px; background: #f9f9f9;">
                 <h4>Agregar Nuevo Empleado</h4>
-                <!-- Fila 1 -->
                 <div class="form-group-3cols">
                     <input placeholder="Cédula" id="emp_cedula"><input placeholder="Nombres" id="emp_nombres">
                     <input placeholder="Apellidos" id="emp_apellidos"><input placeholder="Cargo" id="emp_cargo">
                     <input placeholder="Departamento" id="emp_depto"><input type="number" step="0.01" placeholder="Salario USD" id="emp_salario">
                 </div>
-                <!-- Fila 2 -->
                 <div class="form-group-3cols">
                     <input type="date" placeholder="Fecha Nacimiento" id="emp_fecha_nacimiento">
                     <input type="date" placeholder="Fecha Ingreso" id="emp_fecha_ingreso">
                     <input placeholder="Cuenta Bancaria" id="emp_cuenta_bancaria">
                 </div>
-                <!-- Fila 3 (Nuevo campo agregado: Tipo Pago) -->
                 <div class="form-group-3cols">
-                    <select id="emp_sucursal">
-                        <option value="">Seleccione una sucursal...</option>
-                    </select>
-                    <select id="emp_tipo_pago">
-                        <option value="Quincenal">Pago Quincenal</option>
-                        <option value="Semanal">Pago Semanal</option>
-                    </select>
+                    <select id="emp_sucursal"><option value="">Seleccione una sucursal...</option></select>
+                    <select id="emp_tipo_pago"><option value="Quincenal">Pago Quincenal</option><option value="Semanal">Pago Semanal</option></select>
                     <button class="btn-success" onclick="crearEmpleado()">➕ Guardar Empleado</button>
                 </div>
             </div>
             
-            <!-- 🔽 NUEVOS FILTROS PARA LA TABLA -->
-            <div class="filters-container">
+            <div class="filters-container" style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
                 <input type="text" id="search_empleado" placeholder="🔍 Buscar por cédula o nombre..." oninput="cargarEmpleadosAdmin()">
-                <select id="filter_sucursal" onchange="cargarEmpleadosAdmin()">
-                    <option value="">Ver todas las sucursales</option>
-                </select>
+                <select id="filter_sucursal" onchange="cargarEmpleadosAdmin()"><option value="">Ver todas las sucursales</option></select>
             </div>
-            <!-- 🔽 FIN DE FILTROS -->
 
             <table>
                 <thead>
-                    <tr>
-                        <th>ID</th><th>Cédula</th><th>Nombre</th><th>Cargo</th>
-                        <th>Salario USD</th><th>Pago</th><th>Fec. Ingreso</th><th>Acciones</th>
-                    </tr>
+                    <tr><th>ID</th><th>Cédula</th><th>Nombre</th><th>Cargo</th><th>Salario USD</th><th>Pago</th><th>Fec. Ingreso</th><th>Acciones</th></tr>
                 </thead>
                 <tbody id="tabla_empleados"></tbody>
             </table>
@@ -132,7 +126,9 @@
 
                     if (tabId === 'empleados') cargarEmpleadosAdmin();
                     else if (tabId === 'sucursales') cargarSucursales();
-                    else if (tabId === 'nomina') cargarEmpleados();
+                    else if (tabId === 'nomina') {
+                        cargarEmpleados(); 
+                    }
                 });
             });
             cargarEmpleados();
@@ -145,14 +141,46 @@
                 if(!res.ok) throw new Error("Error al obtener empleados");
                 const empleados = await res.json();
                 const container = document.getElementById('lista_empleados');
+                const detalleContainer = document.getElementById('cuerpo_detalle_nomina');
+                const inputsContainer = document.getElementById('nomina_inputs_container');
+                
                 if(empleados.length === 0) {
                     container.innerHTML = "<p style='color: #888;'>No hay empleados registrados. Ve a la pestaña 'Empleados' para crear uno.</p>";
+                    inputsContainer.style.display = 'none';
                 } else {
                     container.innerHTML = empleados.map(e => 
-                        `<label><input type="checkbox" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label><br>`
+                        `<label style="display:block; margin-bottom:4px;">
+                            <input type="checkbox" value="${e.id_empleado}" checked onchange="actualizarTablaNomina()"> 
+                            ${e.cedula} - ${e.nombres} ${e.apellidos}
+                        </label>`
                     ).join('');
+                    
+                    // Construir filas de la tabla de inputs
+                    detalleContainer.innerHTML = empleados.map(e => `
+                        <tr data-cedula="${e.cedula}" style="display:table-row;">
+                            <td>${e.nombres} ${e.apellidos}</td>
+                            <td><input type="number" class="input-detalle input_faltas" min="0" value="0"></td>
+                            <td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0"></td>
+                            <td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0"></td>
+                        </tr>
+                    `).join('');
+                    
+                    inputsContainer.style.display = 'block';
+                    actualizarTablaNomina(); // Ocultar filas no seleccionadas inicialmente
                 }
             } catch (e) { console.error(e); }
+        }
+
+        function actualizarTablaNomina() {
+            // Ocultar/Mostrar filas de la tabla de inputs basado en los checkboxes seleccionados
+            const checkboxes = document.querySelectorAll('#lista_empleados input[type="checkbox"]');
+            const rows = document.querySelectorAll('#cuerpo_detalle_nomina tr');
+            
+            checkboxes.forEach((cb, index) => {
+                if(index < rows.length) {
+                    rows[index].style.display = cb.checked ? 'table-row' : 'none';
+                }
+            });
         }
 
         async function calcularNomina() {
@@ -160,18 +188,45 @@
             const fecha_inicio = document.getElementById('fecha_inicio').value;
             const fecha_fin = document.getElementById('fecha_fin').value;
             const ids = Array.from(document.querySelectorAll('#lista_empleados input:checked')).map(c => parseInt(c.value));
+            
             if(!ids.length) return alert('Selecciona al menos un empleado');
             
+            // 🔽 Construir objetos de Faltas y Horas Extras desde la tabla
+            const faltas = {};
+            const horas_extras = {};
+            const rows = document.querySelectorAll('#cuerpo_detalle_nomina tr');
+            
+            rows.forEach(row => {
+                if(row.style.display !== 'none') {
+                    const cedula = row.getAttribute('data-cedula');
+                    const faltas_val = parseInt(row.querySelector('.input_faltas').value) || 0;
+                    const horas_val = parseFloat(row.querySelector('.input_horas').value) || 0;
+                    const valor_val = parseFloat(row.querySelector('.input_valor_hora').value) || 0;
+
+                    if (faltas_val > 0) faltas[cedula] = faltas_val;
+                    if (horas_val > 0 || valor_val > 0) {
+                        horas_extras[cedula] = { horas: horas_val, valor_hora: valor_val };
+                    }
+                }
+            });
+            // 🔽 Fin de construcción de objetos
+
             try {
                 const res = await fetch(`${API_URL}/api/calcular_nomina`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({tipo, fecha_inicio, fecha_fin, empleados_ids: ids, faltas: {}, horas_extras: {}})
+                    body: JSON.stringify({
+                        tipo, fecha_inicio, fecha_fin, 
+                        empleados_ids: ids, 
+                        faltas: faltas, 
+                        horas_extras: horas_extras
+                    })
                 });
                 const data = await res.json();
                 if(data.error) return alert('Error: '+data.error);
-                let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)}</h3><table><tr><th>Empleado</th><th>Base</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr>`;
-                data.resultados.forEach(r => html += `<tr><td>${r.empleado.nombre_completo}</td><td>$${r.salario_base_usd.toFixed(2)}</td><td>$${r.total_asignaciones_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td><td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td></tr>`);
+                
+                let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)}</h3><table><tr><th>Empleado</th><th>Base</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr>`;
+                data.resultados.forEach(r => html += `<tr><td>${r.empleado.nombre_completo}</td><td>$${r.salario_base_usd.toFixed(2)}</td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.total_asignaciones_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td><td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td></tr>`);
                 html += `</table>`;
                 document.getElementById('resultado_content').innerHTML = html;
             } catch(e) { 
@@ -184,16 +239,13 @@
             const tableBody = document.getElementById('tabla_empleados');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading">Cargando empleados...</td></tr>';
             try {
-                // 🔽 Leer los valores de los filtros y pasarlos a la URL
                 const searchText = document.getElementById('search_empleado').value;
                 const filterSucursal = document.getElementById('filter_sucursal').value;
-                
                 let url = `${API_URL}/api/empleados`;
                 const params = [];
                 if (searchText) params.push(`search=${encodeURIComponent(searchText)}`);
                 if (filterSucursal) params.push(`sucursal_id=${encodeURIComponent(filterSucursal)}`);
                 if (params.length > 0) url += '?' + params.join('&');
-                // 🔽 Fin de la preparación de URL
 
                 const res = await fetch(url);
                 if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
@@ -214,22 +266,17 @@
                     ).join('');
                 }
                 
-                // Cargar opciones para el select de Sucursales (tanto para el formulario como para el filtro)
                 const resSuc = await fetch(`${API_URL}/api/sucursales`);
                 if(resSuc.ok) {
                     const sucs = await resSuc.json();
-                    
-                    // Select del formulario de agregar
-                    const selectSucForm = document.getElementById('emp_sucursal');
-                    selectSucForm.innerHTML = '<option value="">Seleccione una sucursal...</option>' + 
+                    document.getElementById('emp_sucursal').innerHTML = '<option value="">Seleccione una sucursal...</option>' + 
                         sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
                     
-                    // Select del filtro (Asegurarnos de mantener la opción "Todas" al recargar)
                     const selectSucFilter = document.getElementById('filter_sucursal');
-                    const currentFilterValue = selectSucFilter.value; // Guardamos el valor seleccionado
+                    const currentFilterValue = selectSucFilter.value;
                     selectSucFilter.innerHTML = '<option value="">Ver todas las sucursales</option>' + 
                         sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
-                    selectSucFilter.value = currentFilterValue; // Reasignamos el valor para que no se pierda al actualizar
+                    selectSucFilter.value = currentFilterValue;
                 }
             } catch(e) { 
                 tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar empleados: ${e.message}</td></tr>`;
@@ -308,10 +355,8 @@
             if(!nombre) return alert("El nombre de la sucursal no puede estar vacío.");
             try {
                 const res = await fetch(`${API_URL}/api/sucursales`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({nombre}) });
-                
                 let resp;
                 try { resp = await res.json(); } catch { resp = { error: "El servidor no respondió con JSON" }; }
-
                 const alertBox = document.getElementById('alert_suc');
                 if(res.ok) { 
                     alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; 
