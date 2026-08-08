@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nómina Agroavícola del Llano</title>
-    <!-- 🆕 Librería de alertas profesionales (SweetAlert2) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
@@ -42,8 +41,8 @@
         .badge-quincenal { background: #e3f2fd; color: #0056b3; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 5px; }
         .badge-semanal { background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 5px; }
         .lote-total-row { background-color: #e9ecef; font-weight: bold; border-top: 2px solid #0056b3; }
-        /* Estilo para etiquetas de los campos de fecha */
         .fecha-label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 0.9rem; color: #333; }
+        .param-card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; background: #fafafa; }
     </style>
 </head>
 <body>
@@ -54,6 +53,7 @@
             <button class="tab-btn active" data-target="calculadora">🧮 Calculadora</button>
             <button class="tab-btn" data-target="empleados">👤 Empleados</button>
             <button class="tab-btn" data-target="sucursales">🏢 Sucursales</button>
+            <button class="tab-btn" data-target="parametros">⚙️ Parámetros</button>
             <button class="tab-btn" data-target="historial">📋 Historial</button>
         </div>
 
@@ -94,22 +94,11 @@
                     <input placeholder="Apellidos" id="emp_apellidos"><input placeholder="Cargo" id="emp_cargo">
                     <input placeholder="Departamento" id="emp_depto"><input type="number" step="0.01" placeholder="Salario USD" id="emp_salario">
                 </div>
-                <!-- 🔽 AGREGADAS LAS ETIQUETAS PARA LAS FECHAS -->
                 <div class="form-group-3cols">
-                    <div>
-                        <label class="fecha-label">Fecha Nacimiento:</label>
-                        <input type="date" id="emp_fecha_nacimiento">
-                    </div>
-                    <div>
-                        <label class="fecha-label">Fecha Ingreso:</label>
-                        <input type="date" id="emp_fecha_ingreso">
-                    </div>
-                    <div>
-                        <label class="fecha-label">Cuenta Bancaria:</label>
-                        <input placeholder="Cuenta Bancaria" id="emp_cuenta_bancaria">
-                    </div>
+                    <div><label class="fecha-label">Fecha Nacimiento:</label><input type="date" id="emp_fecha_nacimiento"></div>
+                    <div><label class="fecha-label">Fecha Ingreso:</label><input type="date" id="emp_fecha_ingreso"></div>
+                    <div><label class="fecha-label">Cuenta Bancaria:</label><input placeholder="Cuenta Bancaria" id="emp_cuenta_bancaria"></div>
                 </div>
-                <!-- 🔽 FIN DE ETIQUETAS -->
                 <div class="form-group-3cols">
                     <select id="emp_sucursal"><option value="">Seleccione una sucursal...</option></select>
                     <select id="emp_tipo_pago"><option value="Quincenal">Pago Quincenal</option><option value="Semanal">Pago Semanal</option></select>
@@ -134,7 +123,42 @@
             <table><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="tabla_sucursales"></tbody></table>
         </div>
 
-        <!-- PESTAÑA HISTORIAL (Lotes) -->
+        <!-- 🆕 PESTAÑA PARÁMETROS -->
+        <div id="parametros" class="tab-content">
+            <h2>⚙️ Configuración de Parámetros de Nómina</h2>
+            <div id="alert_params"></div>
+            <div class="param-card">
+                <div class="form-group-3cols">
+                    <div>
+                        <label>Tasa BCV (USD -> Bs):</label>
+                        <input type="number" step="0.0001" id="param_tasa_bcv" placeholder="Ej: 755.1552">
+                    </div>
+                    <div>
+                        <label>% IVSS (Deducciones):</label>
+                        <input type="number" step="0.01" id="param_ivss" placeholder="Ej: 0.04">
+                    </div>
+                    <div>
+                        <label>% RPE (Deducciones):</label>
+                        <input type="number" step="0.001" id="param_rpe" placeholder="Ej: 0.005">
+                    </div>
+                </div>
+                <div class="form-group-3cols" style="margin-top:15px;">
+                    <div>
+                        <label>% FAOV (Deducciones):</label>
+                        <input type="number" step="0.01" id="param_faov" placeholder="Ej: 0.01">
+                    </div>
+                    <div>
+                        <label>Cestaticket (USD x Día):</label>
+                        <input type="number" step="0.01" id="param_cestaticket" placeholder="Ej: 40.00">
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button class="btn-primary" onclick="guardarParametros()" style="width:100%;">💾 Guardar Parámetros</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA HISTORIAL -->
         <div id="historial" class="tab-content">
             <h2>📋 Historial de Nóminas</h2>
             <div id="alert_hist"></div>
@@ -148,7 +172,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE DETALLE DEL LOTE -->
+    <!-- MODAL DETALLE LOTE -->
     <div id="modalDetalleLote" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -181,6 +205,7 @@
                     if (tabId === 'empleados') cargarEmpleadosAdmin();
                     else if (tabId === 'sucursales') cargarSucursales();
                     else if (tabId === 'calculadora') cargarEmpleadosCalc();
+                    else if (tabId === 'parametros') cargarParametros(); // 🆕 Cargar parámetros
                     else if (tabId === 'historial') cargarLotes();
                 });
             });
@@ -332,7 +357,7 @@
         }
 
         // =========================================
-        // 2, 3. EMPLEADOS Y SUCURSALES
+        // 2. MÓDULO EMPLEADOS
         // =========================================
         async function cargarEmpleadosAdmin() {
             const tableBody = document.getElementById('tabla_empleados');
@@ -364,7 +389,6 @@
             } catch(e) { tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar empleados: ${e.message}</td></tr>`; console.error(e); }
         }
 
-        // 🔽 FUNCIÓN DE CREAR EMPLEADO (ACTUALIZADA PARA LIMPIAR CAMPOS)
         async function crearEmpleado() {
             const data = { 
                 cedula: document.getElementById('emp_cedula').value, 
@@ -383,12 +407,9 @@
                 const res = await fetch(`${API_URL}/api/empleados`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
                 let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor respondió con HTML en lugar de JSON" }; }
                 const alertBox = document.getElementById('alert_emp');
-                
                 if(res.ok) { 
                     alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`;
                     Swal.fire('¡Éxito!', resp.mensaje, 'success');
-                    
-                    // 🔽 LIMPIAR TODOS LOS CAMPOS DESPUÉS DE GUARDAR
                     document.getElementById('emp_cedula').value = '';
                     document.getElementById('emp_nombres').value = '';
                     document.getElementById('emp_apellidos').value = '';
@@ -398,8 +419,6 @@
                     document.getElementById('emp_fecha_nacimiento').value = '';
                     document.getElementById('emp_fecha_ingreso').value = '';
                     document.getElementById('emp_cuenta_bancaria').value = '';
-                    // Nota: El select de sucursal y tipo de pago los dejamos como están para que el usuario no tenga que volver a seleccionarlos si sigue agregando empleados.
-                    
                     cargarEmpleadosAdmin(); 
                 }
                 else { 
@@ -433,6 +452,9 @@
             }
         }
 
+        // =========================================
+        // 3. MÓDULO SUCURSALES
+        // =========================================
         async function cargarSucursales() {
             const tableBody = document.getElementById('tabla_sucursales');
             tableBody.innerHTML = '<tr><td colspan="3" class="loading">Cargando sucursales...</td></tr>';
@@ -484,7 +506,61 @@
         }
 
         // =========================================
-        // 4. HISTORIAL DE LOTES Y ELIMINACIÓN
+        // 4. 🆕 MÓDULO PARÁMETROS
+        // =========================================
+        async function cargarParametros() {
+            try {
+                const res = await fetch(`${API_URL}/api/parametros`);
+                if(!res.ok) throw new Error("Error al cargar parámetros");
+                const params = await res.json();
+                
+                document.getElementById('param_tasa_bcv').value = params.tasa_bcv || 755.1552;
+                document.getElementById('param_ivss').value = params.porcentaje_ivss || 0.04;
+                document.getElementById('param_rpe').value = params.porcentaje_rpe || 0.005;
+                document.getElementById('param_faov').value = params.porcentaje_faov || 0.01;
+                document.getElementById('param_cestaticket').value = params.cestaticket_usd || 40.0;
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', 'No se pudieron cargar los parámetros configurados.', 'error');
+            }
+        }
+
+        async function guardarParametros() {
+            const parametros = [
+                { clave: 'tasa_bcv', valor: parseFloat(document.getElementById('param_tasa_bcv').value) || 0 },
+                { clave: 'porcentaje_ivss', valor: parseFloat(document.getElementById('param_ivss').value) || 0 },
+                { clave: 'porcentaje_rpe', valor: parseFloat(document.getElementById('param_rpe').value) || 0 },
+                { clave: 'porcentaje_faov', valor: parseFloat(document.getElementById('param_faov').value) || 0 },
+                { clave: 'cestaticket_usd', valor: parseFloat(document.getElementById('param_cestaticket').value) || 0 }
+            ];
+
+            let errores = 0;
+            for (const param of parametros) {
+                try {
+                    const res = await fetch(`${API_URL}/api/parametros`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(param)
+                    });
+                    if (!res.ok) {
+                        errores++;
+                    }
+                } catch (e) {
+                    errores++;
+                }
+            }
+
+            if (errores === 0) {
+                Swal.fire('¡Actualizado!', 'Todos los parámetros de nómina se han guardado correctamente.', 'success');
+                document.getElementById('alert_params').innerHTML = `<div class="alert alert-success">✅ Parámetros actualizados correctamente.</div>`;
+            } else {
+                Swal.fire('Error', 'Ocurrió un error al guardar algunos parámetros.', 'error');
+                document.getElementById('alert_params').innerHTML = `<div class="alert alert-danger">❌ Error al guardar los parámetros. Inténtalo de nuevo.</div>`;
+            }
+        }
+
+        // =========================================
+        // 5. MÓDULO HISTORIAL
         // =========================================
         async function cargarLotes() {
             const tableBody = document.getElementById('tabla_historial');
@@ -523,9 +599,6 @@
             }
         }
 
-        // =========================================
-        // 4.1 DETALLE DEL LOTE
-        // =========================================
         async function abrirModalDetalleLote(id) {
             const modal = document.getElementById('modalDetalleLote');
             const header = document.getElementById('lote_header_info');
@@ -574,9 +647,6 @@
             if (event.target == modal) { cerrarModalDetalle(); }
         }
 
-        // =========================================
-        // 4.2 ELIMINAR LOTE
-        // =========================================
         async function eliminarLote(id) {
             const result = await Swal.fire({
                 title: '⚠️ ¿Estás seguro?',
