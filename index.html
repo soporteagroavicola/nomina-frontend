@@ -89,7 +89,7 @@
             <div id="resultado_content"></div>
         </div>
 
-        <!-- PESTAÑA EMPLEADOS Y SUCURSALES (Sin cambios mayores) -->
+        <!-- PESTAÑA EMPLEADOS -->
         <div id="empleados" class="tab-content">
             <h2>Gestión de Empleados</h2>
             <div id="alert_emp"></div>
@@ -117,14 +117,54 @@
             </div>
             <table><thead><tr><th>ID</th><th>Cédula</th><th>Nombre</th><th>Cargo</th><th>Salario USD</th><th>Pago</th><th>Fec. Ingreso</th><th>Acciones</th></tr></thead><tbody id="tabla_empleados"></tbody></table>
         </div>
+
+        <!-- PESTAÑA SUCURSALES -->
         <div id="sucursales" class="tab-content">
             <h2>Gestión de Sucursales</h2>
             <div id="alert_suc"></div>
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;"><input id="suc_nombre" placeholder="Nombre de la nueva sucursal" style="width: 300px;"><button class="btn-success" onclick="crearSucursal()">➕ Agregar Sucursal</button></div>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <input id="suc_nombre" placeholder="Nombre de la nueva sucursal" style="width: 300px;">
+                <button class="btn-success" onclick="crearSucursal()">➕ Agregar Sucursal</button>
+            </div>
             <table><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="tabla_sucursales"></tbody></table>
         </div>
 
-        <!-- 🆕 PESTAÑA PASIVOS LABORALES -->
+        <!-- PESTAÑA PARÁMETROS -->
+        <div id="parametros" class="tab-content">
+            <h2>⚙️ Configuración de Parámetros de Nómina</h2>
+            <div id="alert_params"></div>
+            <div class="param-card">
+                <div class="form-group-3cols">
+                    <div>
+                        <label>Tasa BCV (USD -> Bs):</label>
+                        <input type="number" step="0.0001" id="param_tasa_bcv" placeholder="Ej: 755.1552">
+                    </div>
+                    <div>
+                        <label>% IVSS (Deducciones):</label>
+                        <input type="number" step="0.01" id="param_ivss" placeholder="Ej: 0.04">
+                    </div>
+                    <div>
+                        <label>% RPE (Deducciones):</label>
+                        <input type="number" step="0.001" id="param_rpe" placeholder="Ej: 0.005">
+                    </div>
+                </div>
+                <div class="form-group-3cols" style="margin-top:15px;">
+                    <div>
+                        <label>% FAOV (Deducciones):</label>
+                        <input type="number" step="0.01" id="param_faov" placeholder="Ej: 0.01">
+                    </div>
+                    <div>
+                        <label>Cestaticket (USD x Día):</label>
+                        <input type="number" step="0.01" id="param_cestaticket" placeholder="Ej: 40.00">
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button class="btn-primary" onclick="guardarParametros()" style="width:100%;">💾 Guardar Parámetros</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA PASIVOS LABORALES -->
         <div id="pasivos" class="tab-content">
             <h2>📄 Pasivos Laborales (Utilidades, Aguinaldo, Vacaciones)</h2>
             <div id="alert_pasivos"></div>
@@ -172,7 +212,12 @@
         <div class="modal-content">
             <div class="modal-header"><h3>📄 Detalle del Lote</h3><span class="close-btn" onclick="cerrarModalDetalle()">&times;</span></div>
             <div id="lote_header_info"></div>
-            <div id="lote_detalle_body"><table id="tabla_detalle_lote"><thead><tr><th>Empleado</th><th>Base Full</th><th>Base Incid.</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr></thead><tbody id="cuerpo_detalle_lote"></tbody></table></div>
+            <div id="lote_detalle_body" style="max-height: 500px; overflow-y: auto;">
+                <table id="tabla_detalle_lote">
+                    <thead><tr><th>Empleado</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr></thead>
+                    <tbody id="cuerpo_detalle_lote"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -291,7 +336,7 @@
         }
 
         // =========================================
-        // 4. 🆕 MÓDULO PASIVOS LABORALES
+        // 4. PASIVOS LABORALES
         // =========================================
         async function calcularPasivos() {
             const salario_mensual = parseFloat(document.getElementById('pasivos_salario').value) || 0;
@@ -325,7 +370,7 @@
         }
 
         // =========================================
-        // EMPLEADOS / SUCURSALES / PARÁMETROS / HISTORIAL (Sin cambios)
+        // EMPLEADOS / SUCURSALES / PARÁMETROS
         // =========================================
         async function cargarEmpleadosAdmin() {
             const tableBody = document.getElementById('tabla_empleados');
@@ -476,8 +521,24 @@
                         <div style="text-align:right;"><div><strong>Total Lote:</strong> $${lote.total_usd.toFixed(2)}</div><div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div></div>
                     </div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>
                 `;
-                body.innerHTML = lote.nominas.map(n => `<tr><td>${n.nombres} ${n.apellidos}</td><td>$${n.salario_base_usd.toFixed(2)}</td><td>$${n.base_incidencia_60_usd.toFixed(2)}</td><td>$${n.horas_extras_usd.toFixed(2)}</td><td>$${n.total_asignaciones_usd.toFixed(2)}</td><td>$${n.total_deducciones_usd.toFixed(2)}</td><td><strong>$${n.neto_pagar_usd.toFixed(2)}</strong></td><td><strong>Bs. ${n.neto_pagar_bs.toFixed(2)}</strong></td></tr>`).join('');
-            } catch (e) { Swal.fire('Error', 'No se pudo cargar el detalle del lote: ' + e.message, 'error'); }
+                // 🛠️ CORRECCIÓN EN EL FRONTEND: Validación extra de datos antes de mostrar
+                body.innerHTML = lote.nominas.map(n => `
+                    <tr>
+                        <td>${n.nombres} ${n.apellidos}</td>
+                        <td>$${(n.salario_base_usd || 0).toFixed(2)}</td>
+                        <td><small>$${(n.base_incidencia_60_usd || 0).toFixed(2)}</small></td>
+                        <td>$${(n.horas_extras_usd || 0).toFixed(2)}</td>
+                        <td>$${(n.total_asignaciones_usd || 0).toFixed(2)}</td>
+                        <td>$${(n.total_deducciones_usd || 0).toFixed(2)}</td>
+                        <td><strong>$${(n.neto_pagar_usd || 0).toFixed(2)}</strong></td>
+                        <td><strong>Bs. ${(n.neto_pagar_bs || 0).toFixed(2)}</strong></td>
+                    </tr>
+                `).join('');
+            } catch (e) { 
+                console.error(e);
+                Swal.fire('Error', 'No se pudo cargar el detalle del lote. Por favor, recarga la página.', 'error');
+                modal.style.display = 'none'; // Cerramos el modal si falla
+            }
         }
         function cerrarModalDetalle() { document.getElementById('modalDetalleLote').style.display = 'none'; }
         window.onclick = function(event) { const modal = document.getElementById('modalDetalleLote'); if (event.target == modal) { cerrarModalDetalle(); } }
