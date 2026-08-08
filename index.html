@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nómina Agroavícola del Llano</title>
+    <!-- 🆕 Librería de alertas profesionales (SweetAlert2) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
         .tab-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -119,7 +121,7 @@
             <table><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="tabla_sucursales"></tbody></table>
         </div>
 
-        <!-- 🆕 PESTAÑA HISTORIAL (AHORA MUESTRA LOTES) -->
+        <!-- PESTAÑA HISTORIAL (Lotes) -->
         <div id="historial" class="tab-content">
             <h2>📋 Historial de Nóminas</h2>
             <div id="alert_hist"></div>
@@ -133,7 +135,7 @@
         </div>
     </div>
 
-    <!-- 🆕 MODAL DE DETALLE DEL LOTE -->
+    <!-- MODAL DE DETALLE DEL LOTE -->
     <div id="modalDetalleLote" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -267,7 +269,10 @@
             const fecha_fin = document.getElementById('fecha_fin').value;
             const descripcion = document.getElementById('calc_descripcion').value;
             const ids = Array.from(document.querySelectorAll('.emp-check:checked')).map(c => parseInt(c.value));
-            if(!ids.length) return alert('Selecciona al menos un empleado');
+            if(!ids.length) {
+                Swal.fire('Atención', 'Selecciona al menos un empleado para calcular.', 'warning');
+                return;
+            }
             
             const faltas = {}; const horas_extras = {};
             const rows = document.querySelectorAll('#cuerpo_detalle_nomina tr');
@@ -292,7 +297,10 @@
                     })
                 });
                 const data = await res.json();
-                if(data.error) return alert('Error: '+data.error);
+                if(data.error) {
+                    Swal.fire('Error', data.error, 'error');
+                    return;
+                }
                 
                 let total_usd = 0; let total_bs = 0;
                 data.resultados.forEach(r => { total_usd += r.neto_pagar_usd; total_bs += r.neto_pagar_bs; });
@@ -305,13 +313,13 @@
                 html += `</table>`;
                 
                 document.getElementById('resultado_content').innerHTML = html;
-                alert(`✅ Nómina guardada en el Historial como Lote #${data.lote_id}!`);
+                Swal.fire('¡Éxito!', `Nómina guardada en el Historial como Lote #${data.lote_id}`, 'success');
                 cargarLotes();
-            } catch(e) { console.error(e); alert('Error al calcular la nómina.'); }
+            } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
 
         // =========================================
-        // 2, 3. EMPLEADOS Y SUCURSALES (Sin cambios mayores)
+        // 2, 3. EMPLEADOS Y SUCURSALES
         // =========================================
         async function cargarEmpleadosAdmin() {
             const tableBody = document.getElementById('tabla_empleados');
@@ -349,18 +357,30 @@
                 const res = await fetch(`${API_URL}/api/empleados`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
                 let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor respondió con HTML en lugar de JSON" }; }
                 const alertBox = document.getElementById('alert_emp');
-                if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; cargarEmpleadosAdmin(); }
-                else { alertBox.innerHTML = `<div class="alert alert-danger">Error: ${resp.error}</div>`; }
-            } catch (error) { document.getElementById('alert_emp').innerHTML = `<div class="alert alert-danger">Error de red: ${error.message}</div>`; }
+                if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; cargarEmpleadosAdmin(); Swal.fire('¡Éxito!', resp.mensaje, 'success'); }
+                else { alertBox.innerHTML = `<div class="alert alert-danger">Error: ${resp.error}</div>`; Swal.fire('Error', resp.error, 'error'); }
+            } catch (error) { document.getElementById('alert_emp').innerHTML = `<div class="alert alert-danger">Error de red: ${error.message}</div>`; Swal.fire('Error de red', error.message, 'error'); }
         }
 
         async function eliminarEmpleado(id) {
-            if(!confirm('¿Seguro que quieres eliminar este empleado?')) return;
-            try {
-                const res = await fetch(`${API_URL}/api/empleados/${id}`, { method: 'DELETE' });
-                const resp = await res.json();
-                if(res.ok) { cargarEmpleadosAdmin(); } else { alert('Error: '+resp.error); }
-            } catch (e) { alert("Error de red al eliminar."); }
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Este empleado será marcado como inactivo.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`${API_URL}/api/empleados/${id}`, { method: 'DELETE' });
+                    const resp = await res.json();
+                    if(res.ok) { cargarEmpleadosAdmin(); Swal.fire('Eliminado', 'El empleado ha sido eliminado.', 'success'); }
+                    else { Swal.fire('Error', resp.error, 'error'); }
+                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+            }
         }
 
         async function cargarSucursales() {
@@ -379,27 +399,42 @@
 
         async function crearSucursal() {
             const nombre = document.getElementById('suc_nombre').value;
-            if(!nombre) return alert("El nombre de la sucursal no puede estar vacío.");
+            if(!nombre) {
+                Swal.fire('Atención', 'El nombre de la sucursal no puede estar vacío.', 'warning');
+                return;
+            }
             try {
                 const res = await fetch(`${API_URL}/api/sucursales`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({nombre}) });
                 let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor no respondió con JSON" }; }
                 const alertBox = document.getElementById('alert_suc');
-                if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; document.getElementById('suc_nombre').value = ''; cargarSucursales(); } 
-                else { alertBox.innerHTML = `<div class="alert alert-danger">⚠️ Error del servidor: ${resp.error || 'Error desconocido'}</div>`; }
-            } catch (error) { document.getElementById('alert_suc').innerHTML = `<div class="alert alert-danger">❌ Error de red: ${error.message}</div>`; }
+                if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; document.getElementById('suc_nombre').value = ''; cargarSucursales(); Swal.fire('¡Éxito!', resp.mensaje, 'success'); } 
+                else { alertBox.innerHTML = `<div class="alert alert-danger">⚠️ Error del servidor: ${resp.error || 'Error desconocido'}</div>`; Swal.fire('Error del servidor', resp.error || 'Error desconocido', 'error'); }
+            } catch (error) { document.getElementById('alert_suc').innerHTML = `<div class="alert alert-danger">❌ Error de red: ${error.message}</div>`; Swal.fire('Error de red', error.message, 'error'); }
         }
 
         async function eliminarSucursal(id) {
-            if(!confirm('¿Seguro que quieres eliminar esta sucursal? Si tiene empleados, elimínalos primero.')) return;
-            try {
-                const res = await fetch(`${API_URL}/api/sucursales/${id}`, { method: 'DELETE' });
-                const resp = await res.json();
-                if(res.ok) { cargarSucursales(); } else { alert('Error: '+resp.error); }
-            } catch (e) { alert("Error de red al eliminar."); }
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción eliminará la sucursal. Si tiene empleados, elimínalos primero.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`${API_URL}/api/sucursales/${id}`, { method: 'DELETE' });
+                    const resp = await res.json();
+                    if(res.ok) { cargarSucursales(); Swal.fire('Eliminado', 'Sucursal eliminada.', 'success'); }
+                    else { Swal.fire('Error', resp.error, 'error'); }
+                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+            }
         }
 
         // =========================================
-        // 4. 🆕 MÓDULO HISTORIAL DE LOTES
+        // 4. HISTORIAL DE LOTES Y ELIMINACIÓN
         // =========================================
         async function cargarLotes() {
             const tableBody = document.getElementById('tabla_historial');
@@ -439,7 +474,7 @@
         }
 
         // =========================================
-        // 4.1 🆕 DETALLE DEL LOTE (MODAL)
+        // 4.1 DETALLE DEL LOTE
         // =========================================
         async function abrirModalDetalleLote(id) {
             const modal = document.getElementById('modalDetalleLote');
@@ -478,7 +513,7 @@
                     </tr>
                 `).join('');
 
-            } catch (e) { alert("Error al cargar el detalle: " + e.message); }
+            } catch (e) { Swal.fire('Error', 'No se pudo cargar el detalle del lote: ' + e.message, 'error'); }
         }
 
         function cerrarModalDetalle() {
@@ -490,35 +525,35 @@
         }
 
         // =========================================
-        // 4.2 ELIMINAR LOTE (Borrar evidencia completa)
+        // 4.2 🆕 ELIMINAR LOTE (CORREGIDO Y ESTILIZADO)
         // =========================================
         async function eliminarLote(id) {
-            if(!confirm('⚠️ ¿Estás seguro de que quieres ELIMINAR este LOTE de nómina COMPLETO (todos sus registros)? Esta acción no se puede deshacer.')) return;
-            try {
-                // Primero, obtenemos los id_nomina del lote
-                const resDetalle = await fetch(`${API_URL}/api/lotes/${id}`);
-                if(!resDetalle.ok) throw new Error("Error al obtener detalles para eliminar");
-                const lote = await resDetalle.json();
-                
-                // Eliminamos cada nómina del lote (CUIDADO con el DELETE en cascada) - 
-                // Para simplificar, asumimos que el backend eliminará las nominas asociadas al lote.
-                // Modificamos el backend para que el DELETE del lote borre sus nominas en cascada.
-                // PERO, como no tenemos tiempo de modificar el backend para cascada, haremos un ciclo:
-                for(const n of lote.nominas) {
-                    await fetch(`${API_URL}/api/nominas/${n.id_nomina}`, { method: 'DELETE' });
+            const result = await Swal.fire({
+                title: '⚠️ ¿Estás seguro?',
+                text: "Esta acción eliminará TODO el lote de nómina y todos sus registros asociados. No se puede deshacer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar lote',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`${API_URL}/api/lotes/${id}`, { method: 'DELETE' });
+                    const resp = await res.json();
+
+                    if(res.ok) {
+                        Swal.fire('¡Eliminado!', 'El lote de nómina y todos sus registros han sido eliminados.', 'success');
+                        cargarLotes();
+                    } else {
+                        Swal.fire('Error', resp.error || 'No se pudo eliminar el lote.', 'error');
+                    }
+                } catch (e) {
+                    Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
                 }
-                
-                // Finalmente eliminamos el lote
-                const resLote = await fetch(`${API_URL}/api/lotes/${id}`, { method: 'DELETE' });
-                const resp = await resLote.json(); // Asumimos que implementamos el DELETE de lote
-                
-                // NOTA: Como no hemos implementado el endpoint DELETE /api/lotes/<id> en el backend anterior,
-                // Esta acción fallará. Por seguridad, mejor comentamos el DELETE del lote y solo hacemos el ciclo.
-                // Si el usuario quiere una función de eliminar lote, hay que crearla en el backend.
-                
-                alert('🗑️ Lote eliminado exitosamente (se borraron todos los registros de nómina asociados).');
-                cargarLotes();
-            } catch (e) { alert("Error de red al eliminar el lote: " + e.message); }
+            }
         }
     </script>
 </body>
