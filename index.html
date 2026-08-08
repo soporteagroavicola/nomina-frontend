@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nómina Agroavícola del Llano</title>
-    <!-- El CSS y la estructura completa es exactamente la misma que tenías antes -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
@@ -58,6 +57,7 @@
             <button class="tab-btn" data-target="pasivos">📄 Pasivos Laborales</button>
             <button class="tab-btn" data-target="historial">📋 Historial</button>
         </div>
+        <!-- Contenido de las pestañas (igual que antes) -->
         <div id="calculadora" class="tab-content active">
             <h2>Calcular Nómina</h2>
             <div class="form-group">
@@ -86,7 +86,6 @@
             <br><button class="btn-primary" onclick="calcularNomina()">📊 Calcular Nómina</button>
             <div id="resultado_content"></div>
         </div>
-        <!-- Sección Empleados -->
         <div id="empleados" class="tab-content">
             <h2>Gestión de Empleados</h2>
             <div id="alert_emp"></div>
@@ -112,7 +111,6 @@
             </div>
             <table><thead><tr><th>ID</th><th>Cédula</th><th>Nombre</th><th>Cargo</th><th>Salario USD</th><th>Pago</th><th>Fec. Ingreso</th><th>Acciones</th></tr></thead><tbody id="tabla_empleados"></tbody></table>
         </div>
-        <!-- Sección Sucursales -->
         <div id="sucursales" class="tab-content">
             <h2>Gestión de Sucursales</h2>
             <div id="alert_suc"></div>
@@ -122,7 +120,6 @@
             </div>
             <table><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="tabla_sucursales"></tbody></table>
         </div>
-        <!-- Sección Parámetros -->
         <div id="parametros" class="tab-content">
             <h2>⚙️ Configuración de Parámetros de Nómina</h2>
             <div id="alert_params"></div>
@@ -139,7 +136,6 @@
                 </div>
             </div>
         </div>
-        <!-- Sección Pasivos -->
         <div id="pasivos" class="tab-content">
             <h2>📄 Pasivos Laborales (Utilidades, Aguinaldo, Vacaciones)</h2>
             <div id="alert_pasivos"></div>
@@ -159,7 +155,6 @@
                 <div id="resultado_pasivos" style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;"></div>
             </div>
         </div>
-        <!-- Sección Historial -->
         <div id="historial" class="tab-content">
             <h2>📋 Historial de Nóminas</h2>
             <div id="alert_hist"></div>
@@ -168,7 +163,6 @@
         </div>
     </div>
 
-    <!-- MODAL DETALLE LOTE -->
     <div id="modalDetalleLote" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3>📄 Detalle del Lote</h3><span class="close-btn" onclick="cerrarModalDetalle()">&times;</span></div>
@@ -185,21 +179,38 @@
     <script>
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
 
-        // 🛠️ VERIFICACIÓN DE AUTENTICACIÓN AL CARGAR LA PÁGINA
+        // 🛠️ FUNCIÓN GLOBAL PARA MANEJAR ERRORES 401 (Sesión expirada)
+        async function secureFetch(url, options = {}) {
+            // Agregar las credenciales y headers por defecto
+            options.credentials = 'include';
+            options.headers = options.headers || {};
+            options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
+
+            const res = await fetch(url, options);
+            
+            // Si el servidor responde con 401 (No autorizado), redirigir al Login
+            if (res.status === 401) {
+                // Cerrar cualquier modal abierto
+                cerrarModalDetalle();
+                // Redirigir al login
+                window.location.href = 'login.html';
+                return null; // Detener la ejecución
+            }
+            return res;
+        }
+
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                const res = await fetch(`${API_URL}/api/check_auth`, {
-                    credentials: 'include' // Envía las cookies de sesión
-                });
+                const res = await secureFetch(`${API_URL}/api/check_auth`);
+                if (!res) return; // Ya fue redirigido por secureFetch
                 const data = await res.json();
                 if (!data.authenticated) {
-                    window.location.href = 'login.html'; // Redirige al login si no está logueado
+                    window.location.href = 'login.html';
                 }
             } catch (error) {
                 window.location.href = 'login.html';
             }
             
-            // Inicializar la interfaz normal
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-target');
@@ -223,7 +234,8 @@
         // =========================================
         async function cargarSucursalesCalc() {
             try {
-                const res = await fetch(`${API_URL}/api/sucursales`, { credentials: 'include' });
+                const res = await secureFetch(`${API_URL}/api/sucursales`);
+                if (!res) return;
                 if(!res.ok) throw new Error("Error al cargar sucursales");
                 const sucs = await res.json();
                 const select = document.getElementById('calc_sucursal');
@@ -242,7 +254,8 @@
                 if (sucursal_id) params.push(`sucursal_id=${encodeURIComponent(sucursal_id)}`);
                 if (tipo_pago) params.push(`tipo_pago=${encodeURIComponent(tipo_pago)}`);
                 if (params.length > 0) url += '?' + params.join('&');
-                const res = await fetch(url, { credentials: 'include' });
+                const res = await secureFetch(url);
+                if (!res) return;
                 if(!res.ok) throw new Error("Error al obtener empleados");
                 let data; const contentType = res.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) data = await res.json();
@@ -291,11 +304,12 @@
                 }
             });
             try {
-                const res = await fetch(`${API_URL}/api/calcular_nomina`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    credentials: 'include', // 🛠️ ENVÍO DE COOKIE
+                const res = await secureFetch(`${API_URL}/api/calcular_nomina`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ tipo, fecha_inicio, fecha_fin, descripcion, empleados_ids: ids, faltas, horas_extras, aplicar_deducciones })
                 });
+                if (!res) return;
                 const data = await res.json();
                 if(data.error) { Swal.fire('Error', data.error, 'error'); return; }
                 let total_usd = 0; let total_bs = 0;
@@ -310,7 +324,7 @@
         }
 
         // =========================================
-        // PASIVOS LABORALES (con credenciales)
+        // PASIVOS LABORALES
         // =========================================
         async function calcularPasivos() {
             const salario_mensual = parseFloat(document.getElementById('pasivos_salario').value) || 0;
@@ -318,11 +332,11 @@
             const usar_base_60 = document.getElementById('pasivos_60').checked;
             if(salario_mensual <= 0) { Swal.fire('Atención', 'Ingresa un salario mensual base válido en USD.', 'warning'); return; }
             try {
-                const res = await fetch(`${API_URL}/api/calcular_pasivos`, {
+                const res = await secureFetch(`${API_URL}/api/calcular_pasivos`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
-                    credentials: 'include',
                     body: JSON.stringify({ salario_mensual, dias, usar_base_60 })
                 });
+                if (!res) return;
                 const data = await res.json();
                 if(data.error) { Swal.fire('Error', data.error, 'error'); return; }
                 let html = `<h4>Resultado del Cálculo</h4><div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;"><div><strong>Días calculados:</strong> ${data.dias}</div><div><strong>Base utilizada:</strong> ${data.base_usada}</div><div><strong>Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(2)}</div></div><div style="margin-top:20px; font-size: 1.3em; padding: 20px; background: #e9f7ef; border-radius: 8px; text-align: center;"><div><strong>Total a Pagar en USD:</strong> <span style="color:#0056b3;">$${data.total_usd.toFixed(2)}</span></div><div><strong>Total a Pagar en Bs (a tasa BCV):</strong> <span style="color:#0056b3;">Bs. ${data.total_bs.toFixed(2)}</span></div></div>`;
@@ -332,7 +346,7 @@
         }
 
         // =========================================
-        // EMPLEADOS, SUCURSALES, PARÁMETROS E HISTORIAL (con credenciales)
+        // EMPLEADOS, SUCURSALES, PARÁMETROS E HISTORIAL
         // =========================================
         async function cargarEmpleadosAdmin() {
             const tableBody = document.getElementById('tabla_empleados');
@@ -344,13 +358,14 @@
                 if (searchText) params.push(`search=${encodeURIComponent(searchText)}`);
                 if (filterSucursal) params.push(`sucursal_id=${encodeURIComponent(filterSucursal)}`);
                 if (params.length > 0) url += '?' + params.join('&');
-                const res = await fetch(url, { credentials: 'include' });
+                const res = await secureFetch(url);
+                if (!res) return;
                 if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const empleados = await res.json();
                 if(empleados.length === 0) tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No se encontraron empleados con esos filtros.</td></tr>';
                 else tableBody.innerHTML = empleados.map(e => `<tr><td>${e.id_empleado}</td><td>${e.cedula}</td><td>${e.nombres} ${e.apellidos}</td><td>${e.cargo}</td><td>$${e.salario_mensual_usd}</td><td>${e.tipo_pago}</td><td>${e.fecha_ingreso || '-'}</td><td><button class="btn-danger" onclick="eliminarEmpleado(${e.id_empleado})">🗑️ Eliminar</button></td></tr>`).join('');
-                const resSuc = await fetch(`${API_URL}/api/sucursales`, { credentials: 'include' });
-                if(resSuc.ok) {
+                const resSuc = await secureFetch(`${API_URL}/api/sucursales`);
+                if (resSuc && resSuc.ok) {
                     const sucs = await resSuc.json();
                     document.getElementById('emp_sucursal').innerHTML = '<option value="">Seleccione una sucursal...</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
                     const selectSucFilter = document.getElementById('filter_sucursal'); const cVal = selectSucFilter.value;
@@ -362,7 +377,8 @@
         async function crearEmpleado() {
             const data = { cedula: document.getElementById('emp_cedula').value, nombres: document.getElementById('emp_nombres').value, apellidos: document.getElementById('emp_apellidos').value, cargo: document.getElementById('emp_cargo').value, departamento: document.getElementById('emp_depto').value, salario_mensual_usd: parseFloat(document.getElementById('emp_salario').value) || 0, sucursal_id: parseInt(document.getElementById('emp_sucursal').value) || null, fecha_nacimiento: document.getElementById('emp_fecha_nacimiento').value || null, fecha_ingreso: document.getElementById('emp_fecha_ingreso').value || null, cuenta_bancaria: document.getElementById('emp_cuenta_bancaria').value || '', tipo_pago: document.getElementById('emp_tipo_pago').value };
             try {
-                const res = await fetch(`${API_URL}/api/empleados`, { method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(data) });
+                const res = await secureFetch(`${API_URL}/api/empleados`, { method: 'POST', body: JSON.stringify(data) });
+                if (!res) return;
                 let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor respondió con HTML" }; }
                 const alertBox = document.getElementById('alert_emp');
                 if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; Swal.fire('¡Éxito!', resp.mensaje, 'success');
@@ -377,7 +393,8 @@
             const result = await Swal.fire({ title: '¿Estás seguro?', text: "El empleado será inactivo.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
             if (result.isConfirmed) {
                 try {
-                    const res = await fetch(`${API_URL}/api/empleados/${id}`, { method: 'DELETE', credentials: 'include' });
+                    const res = await secureFetch(`${API_URL}/api/empleados/${id}`, { method: 'DELETE' });
+                    if (!res) return;
                     const resp = await res.json();
                     if(res.ok) { cargarEmpleadosAdmin(); Swal.fire('Eliminado', 'El empleado ha sido eliminado.', 'success'); } else { Swal.fire('Error', resp.error, 'error'); }
                 } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
@@ -387,7 +404,8 @@
             const tableBody = document.getElementById('tabla_sucursales');
             tableBody.innerHTML = '<tr><td colspan="3" class="loading">Cargando sucursales...</td></tr>';
             try {
-                const res = await fetch(`${API_URL}/api/sucursales`, { credentials: 'include' });
+                const res = await secureFetch(`${API_URL}/api/sucursales`);
+                if (!res) return;
                 if(!res.ok) throw new Error(`Error del servidor: ${res.status}`);
                 let data; const contentType = res.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) data = await res.json();
@@ -400,7 +418,8 @@
             const nombre = document.getElementById('suc_nombre').value;
             if(!nombre) { Swal.fire('Atención', 'El nombre no puede estar vacío.', 'warning'); return; }
             try {
-                const res = await fetch(`${API_URL}/api/sucursales`, { method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify({nombre}) });
+                const res = await secureFetch(`${API_URL}/api/sucursales`, { method: 'POST', body: JSON.stringify({nombre}) });
+                if (!res) return;
                 let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor no respondió con JSON" }; }
                 const alertBox = document.getElementById('alert_suc');
                 if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; document.getElementById('suc_nombre').value = ''; cargarSucursales(); Swal.fire('¡Éxito!', resp.mensaje, 'success'); } 
@@ -411,7 +430,8 @@
             const result = await Swal.fire({ title: '¿Estás seguro?', text: "Esta acción eliminará la sucursal.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
             if (result.isConfirmed) {
                 try {
-                    const res = await fetch(`${API_URL}/api/sucursales/${id}`, { method: 'DELETE', credentials: 'include' });
+                    const res = await secureFetch(`${API_URL}/api/sucursales/${id}`, { method: 'DELETE' });
+                    if (!res) return;
                     const resp = await res.json();
                     if(res.ok) { cargarSucursales(); Swal.fire('Eliminado', 'Sucursal eliminada.', 'success'); } else { Swal.fire('Error', resp.error, 'error'); }
                 } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
@@ -419,7 +439,8 @@
         }
         async function cargarParametros() {
             try {
-                const res = await fetch(`${API_URL}/api/parametros`, { credentials: 'include' });
+                const res = await secureFetch(`${API_URL}/api/parametros`);
+                if (!res) return;
                 if(!res.ok) throw new Error("Error al cargar parámetros");
                 const params = await res.json();
                 document.getElementById('param_tasa_bcv').value = params.tasa_bcv || 755.1552;
@@ -440,7 +461,8 @@
             let errores = 0;
             for (const param of parametros) {
                 try {
-                    const res = await fetch(`${API_URL}/api/parametros`, { method: 'PUT', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(param) });
+                    const res = await secureFetch(`${API_URL}/api/parametros`, { method: 'PUT', body: JSON.stringify(param) });
+                    if (!res) return;
                     if (!res.ok) errores++;
                 } catch (e) { errores++; }
             }
@@ -459,7 +481,8 @@
                 const searchText = document.getElementById('search_historial').value;
                 let url = `${API_URL}/api/lotes`;
                 if (searchText) url += `?search=${encodeURIComponent(searchText)}`;
-                const res = await fetch(url, { credentials: 'include' });
+                const res = await secureFetch(url);
+                if (!res) return;
                 if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const lotes = await res.json();
                 if(lotes.length === 0) tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No hay lotes registrados.</td></tr>';
@@ -472,7 +495,8 @@
             const body = document.getElementById('cuerpo_detalle_lote');
             header.innerHTML = '<p class="loading">Cargando datos del lote...</p>'; body.innerHTML = ''; modal.style.display = 'flex';
             try {
-                const res = await fetch(`${API_URL}/api/lotes/${id}`, { credentials: 'include' });
+                const res = await secureFetch(`${API_URL}/api/lotes/${id}`);
+                if (!res) return;
                 if(!res.ok) throw new Error("Error al obtener el detalle del lote");
                 const lote = await res.json();
                 header.innerHTML = `<div style="display:flex; justify-content:space-between;"><div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'} <br><small>Generado el ${lote.fecha_calculo}</small></div><div style="text-align:right;"><div><strong>Total Lote:</strong> $${lote.total_usd.toFixed(2)}</div><div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div></div></div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>`;
@@ -485,7 +509,8 @@
             const result = await Swal.fire({ title: '⚠️ ¿Estás seguro?', text: "Esta acción eliminará TODO el lote de nómina y todos sus registros asociados. No se puede deshacer.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar lote', cancelButtonText: 'Cancelar' });
             if (result.isConfirmed) {
                 try {
-                    const res = await fetch(`${API_URL}/api/lotes/${id}`, { method: 'DELETE', credentials: 'include' });
+                    const res = await secureFetch(`${API_URL}/api/lotes/${id}`, { method: 'DELETE' });
+                    if (!res) return;
                     const resp = await res.json();
                     if(res.ok) { Swal.fire('¡Eliminado!', 'El lote de nómina ha sido eliminado.', 'success'); cargarLotes(); } else { Swal.fire('Error', resp.error || 'No se pudo eliminar el lote.', 'error'); }
                 } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
