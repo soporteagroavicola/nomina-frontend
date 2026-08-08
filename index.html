@@ -38,7 +38,7 @@
         .filters-container { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
         .filters-container input, .filters-container select { width: auto; min-width: 200px; padding: 8px; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 10px; width: 700px; max-width: 95%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
+        .modal-content { background: white; padding: 25px; border-radius: 10px; width: 900px; max-width: 95%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 15px; }
         .modal-header h3 { margin: 0; }
         .close-btn { font-size: 24px; font-weight: bold; cursor: pointer; }
@@ -215,7 +215,7 @@
             <div id="lote_header_info"></div>
             <div id="lote_detalle_body" style="max-height: 500px; overflow-y: auto;">
                 <table id="tabla_detalle_lote">
-                    <thead><tr><th>Empleado</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr></thead>
+                    <thead><tr><th>Empleado</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th><th>Acciones</th></tr></thead>
                     <tbody id="cuerpo_detalle_lote"></tbody>
                 </table>
             </div>
@@ -292,19 +292,16 @@
             }
         }
 
-        // 🆕 CORREGIDO: Verifica si res.ok antes de parsear el JSON
         async function cargarUsuarios() {
             const tableBody = document.getElementById('tabla_usuarios');
             tableBody.innerHTML = '<tr><td colspan="2" class="loading">Cargando usuarios...</td></tr>';
             try {
                 const res = await secureFetch(`${API_URL}/api/usuarios`);
                 if (!res) return;
-                
                 if (!res.ok) {
                     const errorData = await res.json();
                     throw new Error(errorData.error || 'Error al cargar usuarios');
                 }
-
                 const usuarios = await res.json();
                 tableBody.innerHTML = usuarios.map(u => `<tr><td>${u.id}</td><td><strong>${u.username}</strong></td></tr>`).join('');
             } catch (e) {
@@ -357,9 +354,6 @@
             } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
 
-        // =========================================
-        // 1. CALCULADORA DE NÓMINA
-        // =========================================
         async function cargarSucursalesCalc() {
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
@@ -469,7 +463,6 @@
             } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
 
-        // El resto de funciones (Empleados, Sucursales, Parámetros, Historial) se mantienen igual.
         async function cargarEmpleadosAdmin() {
             const tableBody = document.getElementById('tabla_empleados');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading">Cargando empleados...</td></tr>';
@@ -496,6 +489,7 @@
                 }
             } catch(e) { tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar empleados: ${e.message}</td></tr>`; console.error(e); }
         }
+
         async function crearEmpleado() {
             const data = { cedula: document.getElementById('emp_cedula').value, nombres: document.getElementById('emp_nombres').value, apellidos: document.getElementById('emp_apellidos').value, cargo: document.getElementById('emp_cargo').value, departamento: document.getElementById('emp_depto').value, salario_mensual_usd: parseFloat(document.getElementById('emp_salario').value) || 0, sucursal_id: parseInt(document.getElementById('emp_sucursal').value) || null, fecha_nacimiento: document.getElementById('emp_fecha_nacimiento').value || null, fecha_ingreso: document.getElementById('emp_fecha_ingreso').value || null, cuenta_bancaria: document.getElementById('emp_cuenta_bancaria').value || '', tipo_pago: document.getElementById('emp_tipo_pago').value };
             try {
@@ -511,6 +505,7 @@
                 } else { alertBox.innerHTML = `<div class="alert alert-danger">Error: ${resp.error}</div>`; Swal.fire('Error', resp.error, 'error'); }
             } catch (error) { document.getElementById('alert_emp').innerHTML = `<div class="alert alert-danger">Error de red: ${error.message}</div>`; Swal.fire('Error de red', error.message, 'error'); }
         }
+
         async function eliminarEmpleado(id) {
             const result = await Swal.fire({ title: '¿Estás seguro?', text: "El empleado será inactivo.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
             if (result.isConfirmed) {
@@ -522,6 +517,7 @@
                 } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
             }
         }
+
         async function cargarSucursales() {
             const tableBody = document.getElementById('tabla_sucursales');
             tableBody.innerHTML = '<tr><td colspan="3" class="loading">Cargando sucursales...</td></tr>';
@@ -536,6 +532,7 @@
                 else tableBody.innerHTML = data.map(s => `<tr><td>${s.id_sucursal}</td><td>${s.nombre}</td><td><button class="btn-danger" onclick="eliminarSucursal(${s.id_sucursal})">🗑️ Eliminar</button></td></tr>`).join('');
             } catch(e) { tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`; console.error(e); }
         }
+
         async function crearSucursal() {
             const nombre = document.getElementById('suc_nombre').value;
             if(!nombre) { Swal.fire('Atención', 'El nombre no puede estar vacío.', 'warning'); return; }
@@ -548,6 +545,7 @@
                 else { alertBox.innerHTML = `<div class="alert alert-danger">⚠️ Error: ${resp.error || 'Error desconocido'}</div>`; Swal.fire('Error', resp.error || 'Error desconocido', 'error'); }
             } catch (error) { document.getElementById('alert_suc').innerHTML = `<div class="alert alert-danger">❌ Error de red: ${error.message}</div>`; Swal.fire('Error de red', error.message, 'error'); }
         }
+
         async function eliminarSucursal(id) {
             const result = await Swal.fire({ title: '¿Estás seguro?', text: "Esta acción eliminará la sucursal.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
             if (result.isConfirmed) {
@@ -559,6 +557,7 @@
                 } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
             }
         }
+
         async function cargarParametros() {
             try {
                 const res = await secureFetch(`${API_URL}/api/parametros`);
@@ -572,6 +571,7 @@
                 document.getElementById('param_cestaticket').value = params.cestaticket_usd || 40.0;
             } catch (e) { console.error(e); Swal.fire('Error', 'No se pudieron cargar los parámetros.', 'error'); }
         }
+
         async function guardarParametros() {
             const parametros = [
                 { clave: 'tasa_bcv', valor: parseFloat(document.getElementById('param_tasa_bcv').value) || 0 },
@@ -596,6 +596,7 @@
                 document.getElementById('alert_params').innerHTML = `<div class="alert alert-danger">❌ Error al guardar.</div>`;
             }
         }
+
         async function cargarLotes() {
             const tableBody = document.getElementById('tabla_historial');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading">Cargando lotes...</td></tr>';
@@ -611,6 +612,7 @@
                 else tableBody.innerHTML = lotes.map(l => `<tr><td><strong>#${l.id_lote}</strong></td><td><strong>${l.descripcion || 'Sin descripción'}</strong></td><td>${l.fecha_calculo}</td><td>${l.cantidad_empleados_lote} empleados</td><td><small>${l.sucursales_involucradas}</small></td><td><strong>$${l.total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td><td><button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})">📂 Ver Detalle</button><button class="btn-danger" onclick="eliminarLote(${l.id_lote})">🗑️</button></td></tr>`).join('');
             } catch(e) { tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar historial: ${e.message}</td></tr>`; console.error(e); }
         }
+
         async function abrirModalDetalleLote(id) {
             const modal = document.getElementById('modalDetalleLote');
             const header = document.getElementById('lote_header_info');
@@ -622,9 +624,31 @@
                 if(!res.ok) throw new Error("Error al obtener el detalle del lote");
                 const lote = await res.json();
                 header.innerHTML = `<div style="display:flex; justify-content:space-between;"><div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'} <br><small>Generado el ${lote.fecha_calculo}</small></div><div style="text-align:right;"><div><strong>Total Lote:</strong> $${lote.total_usd.toFixed(2)}</div><div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div></div></div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>`;
-                body.innerHTML = lote.nominas.map(n => `<tr><td>${n.nombres} ${n.apellidos}</td><td>$${(n.salario_base_usd || 0).toFixed(2)}</td><td><small>$${(n.base_incidencia_60_usd || 0).toFixed(2)}</small></td><td>$${(n.horas_extras_usd || 0).toFixed(2)}</td><td>$${(n.total_asignaciones_usd || 0).toFixed(2)}</td><td>$${(n.total_deducciones_usd || 0).toFixed(2)}</td><td><strong>$${(n.neto_pagar_usd || 0).toFixed(2)}</strong></td><td><strong>Bs. ${(n.neto_pagar_bs || 0).toFixed(2)}</strong></td></tr>`).join('');
+                
+                // 🆕 NUEVA TABLA CON BOTÓN DE RECIBO PDF
+                body.innerHTML = lote.nominas.map(n => `
+                    <tr>
+                        <td>${n.nombres} ${n.apellidos}</td>
+                        <td>$${(n.salario_base_usd || 0).toFixed(2)}</td>
+                        <td><small>$${(n.base_incidencia_60_usd || 0).toFixed(2)}</small></td>
+                        <td>$${(n.horas_extras_usd || 0).toFixed(2)}</td>
+                        <td>$${(n.total_asignaciones_usd || 0).toFixed(2)}</td>
+                        <td>$${(n.total_deducciones_usd || 0).toFixed(2)}</td>
+                        <td><strong>$${(n.neto_pagar_usd || 0).toFixed(2)}</strong></td>
+                        <td><strong>Bs. ${(n.neto_pagar_bs || 0).toFixed(2)}</strong></td>
+                        <td>
+                            <button class="btn-warning" onclick="generarRecibo(${n.id_nomina})" style="font-size: 12px; padding: 4px 10px;">📄 Recibo</button>
+                        </td>
+                    </tr>
+                `).join('');
             } catch (e) { console.error(e); Swal.fire('Error', 'No se pudo cargar el detalle del lote.', 'error'); modal.style.display = 'none'; }
         }
+
+        // 🆕 Función para generar el PDF del Recibo
+        function generarRecibo(id) {
+            window.open(`${API_URL}/api/generar_recibo/${id}`, '_blank');
+        }
+
         function cerrarModalDetalle() { document.getElementById('modalDetalleLote').style.display = 'none'; }
         window.onclick = function(event) { const modal = document.getElementById('modalDetalleLote'); if (event.target == modal) { cerrarModalDetalle(); } }
         async function eliminarLote(id) {
