@@ -7,8 +7,42 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
+        .header-title { text-align: center; color: #2c3e50; margin-bottom: 15px; font-size: 28px; }
+        /* 🆕 Barra superior de usuario */
+        .top-navbar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 10px 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-profile span {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .btn-logout {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        .btn-logout:hover { background: #c82333; }
+
         .tab-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .tabs { border-bottom: 2px solid #ddd; display: flex; gap: 10px; margin-bottom: 20px; }
+        .tabs { border-bottom: 2px solid #ddd; display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .tab-btn { padding: 10px 20px; border: none; background: #e9ecef; cursor: pointer; border-radius: 5px 5px 0 0; font-weight: bold; transition: 0.2s; }
         .tab-btn:hover { background: #dde0e3; }
         .tab-btn.active { background: #007bff; color: white; }
@@ -27,7 +61,6 @@
         .alert { padding: 10px; border-radius: 5px; margin: 10px 0; }
         .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
         .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
-        .header-title { text-align: center; color: #2c3e50; margin-bottom: 25px; font-size: 28px; }
         .loading { color: #666; font-style: italic; margin: 10px 0; }
         .input-detalle { width: 80px; text-align: center; }
         .filters-container { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
@@ -48,6 +81,15 @@
 </head>
 <body>
     <h1 class="header-title">🏭 Nómina Agroavícola del Llano</h1>
+
+    <!-- 🆕 BARRA DE USUARIO -->
+    <div class="top-navbar">
+        <div class="user-profile">
+            <span id="username_display">👤 Cargando...</span>
+            <button class="btn-logout" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+        </div>
+    </div>
+
     <div id="app" class="tab-container">
         <div class="tabs">
             <button class="tab-btn active" data-target="calculadora">🧮 Calculadora</button>
@@ -56,8 +98,10 @@
             <button class="tab-btn" data-target="parametros">⚙️ Parámetros</button>
             <button class="tab-btn" data-target="pasivos">📄 Pasivos Laborales</button>
             <button class="tab-btn" data-target="historial">📋 Historial</button>
+            <!-- 🆕 NUEVA PESTAÑA SEGURIDAD -->
+            <button class="tab-btn" data-target="seguridad">🔐 Usuarios</button>
         </div>
-        <!-- Contenido de las pestañas (igual que antes) -->
+
         <div id="calculadora" class="tab-content active">
             <h2>Calcular Nómina</h2>
             <div class="form-group">
@@ -86,6 +130,7 @@
             <br><button class="btn-primary" onclick="calcularNomina()">📊 Calcular Nómina</button>
             <div id="resultado_content"></div>
         </div>
+
         <div id="empleados" class="tab-content">
             <h2>Gestión de Empleados</h2>
             <div id="alert_emp"></div>
@@ -111,6 +156,7 @@
             </div>
             <table><thead><tr><th>ID</th><th>Cédula</th><th>Nombre</th><th>Cargo</th><th>Salario USD</th><th>Pago</th><th>Fec. Ingreso</th><th>Acciones</th></tr></thead><tbody id="tabla_empleados"></tbody></table>
         </div>
+
         <div id="sucursales" class="tab-content">
             <h2>Gestión de Sucursales</h2>
             <div id="alert_suc"></div>
@@ -120,6 +166,7 @@
             </div>
             <table><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="tabla_sucursales"></tbody></table>
         </div>
+
         <div id="parametros" class="tab-content">
             <h2>⚙️ Configuración de Parámetros de Nómina</h2>
             <div id="alert_params"></div>
@@ -136,6 +183,7 @@
                 </div>
             </div>
         </div>
+
         <div id="pasivos" class="tab-content">
             <h2>📄 Pasivos Laborales (Utilidades, Aguinaldo, Vacaciones)</h2>
             <div id="alert_pasivos"></div>
@@ -155,11 +203,46 @@
                 <div id="resultado_pasivos" style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;"></div>
             </div>
         </div>
+
         <div id="historial" class="tab-content">
             <h2>📋 Historial de Nóminas</h2>
             <div id="alert_hist"></div>
             <div class="filters-container"><input type="text" id="search_historial" placeholder="🔍 Buscar por descripción o ID..." oninput="cargarLotes()"></div>
             <table><thead><tr><th>ID Lote</th><th>Descripción</th><th>Fecha Cálculo</th><th>Empleados</th><th>Sucursales</th><th>Total USD</th><th>Total Bs</th><th>Acciones</th></tr></thead><tbody id="tabla_historial"></tbody></table>
+        </div>
+
+        <!-- 🆕 PESTAÑA DE SEGURIDAD Y USUARIOS -->
+        <div id="seguridad" class="tab-content">
+            <h2>🔐 Gestión de Usuarios y Seguridad</h2>
+            <div id="alert_seg"></div>
+            
+            <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+                <!-- Sección Cambiar Contraseña -->
+                <div class="param-card">
+                    <h4 style="margin-top:0;">✏️ Cambiar mi Contraseña</h4>
+                    <div class="form-group-3cols">
+                        <div><label>Contraseña Actual:</label><input type="password" id="seg_old_pass" placeholder="Ingresa tu contraseña actual"></div>
+                        <div><label>Nueva Contraseña:</label><input type="password" id="seg_new_pass" placeholder="Ingresa tu nueva contraseña"></div>
+                        <div style="display: flex; align-items: flex-end;"><button class="btn-primary" onclick="cambiarPassword()" style="width:100%;">🔑 Cambiar Contraseña</button></div>
+                    </div>
+                </div>
+
+                <!-- Sección Crear Usuario -->
+                <div class="param-card">
+                    <h4 style="margin-top:0;">➕ Crear Nuevo Usuario</h4>
+                    <div class="form-group-3cols">
+                        <div><label>Nombre de Usuario:</label><input type="text" id="seg_new_user" placeholder="Ej: supervisor"></div>
+                        <div><label>Contraseña:</label><input type="password" id="seg_new_pass_user" placeholder="Contraseña para el nuevo usuario"></div>
+                        <div style="display: flex; align-items: flex-end;"><button class="btn-success" onclick="crearUsuario()" style="width:100%;">👤 Crear Usuario</button></div>
+                    </div>
+                </div>
+
+                <!-- Tabla de usuarios -->
+                <div>
+                    <h4 style="margin-top:0;">👥 Lista de Usuarios del Sistema</h4>
+                    <table><thead><tr><th>ID</th><th>Usuario</th></tr></thead><tbody id="tabla_usuarios"></tbody></table>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -179,22 +262,15 @@
     <script>
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
 
-        // 🛠️ FUNCIÓN GLOBAL PARA MANEJAR ERRORES 401 (Sesión expirada)
         async function secureFetch(url, options = {}) {
-            // Agregar las credenciales y headers por defecto
             options.credentials = 'include';
             options.headers = options.headers || {};
             options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
-
             const res = await fetch(url, options);
-            
-            // Si el servidor responde con 401 (No autorizado), redirigir al Login
             if (res.status === 401) {
-                // Cerrar cualquier modal abierto
                 cerrarModalDetalle();
-                // Redirigir al login
                 window.location.href = 'login.html';
-                return null; // Detener la ejecución
+                return null;
             }
             return res;
         }
@@ -202,10 +278,12 @@
         document.addEventListener('DOMContentLoaded', async function() {
             try {
                 const res = await secureFetch(`${API_URL}/api/check_auth`);
-                if (!res) return; // Ya fue redirigido por secureFetch
+                if (!res) return;
                 const data = await res.json();
                 if (!data.authenticated) {
                     window.location.href = 'login.html';
+                } else {
+                    document.getElementById('username_display').textContent = `👤 ${data.username}`;
                 }
             } catch (error) {
                 window.location.href = 'login.html';
@@ -222,12 +300,96 @@
                     else if (tabId === 'calculadora') cargarEmpleadosCalc();
                     else if (tabId === 'parametros') cargarParametros();
                     else if (tabId === 'historial') cargarLotes();
+                    else if (tabId === 'seguridad') cargarUsuarios();
                 });
             });
             document.getElementById('calc_sucursal').addEventListener('change', function() { cargarEmpleadosCalc(this.value, document.getElementById('calc_tipo_pago').value); });
             document.getElementById('calc_tipo_pago').addEventListener('change', function() { cargarEmpleadosCalc(document.getElementById('calc_sucursal').value, this.value); });
             cargarSucursalesCalc(); cargarEmpleadosCalc('', '');
         });
+
+        // 🆕 CERRAR SESIÓN
+        async function cerrarSesion() {
+            const confirmLogout = await Swal.fire({
+                title: '¿Cerrar sesión?',
+                text: "Se cerrará tu sesión actual.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, cerrar',
+                cancelButtonText: 'Cancelar'
+            });
+            if (confirmLogout.isConfirmed) {
+                const res = await secureFetch(`${API_URL}/api/logout`, { method: 'POST' });
+                if (res) {
+                    window.location.href = 'login.html';
+                } else {
+                    window.location.href = 'login.html';
+                }
+            }
+        }
+
+        // 🆕 GESTIÓN DE USUARIOS (Cargar, Crear, Cambiar pass)
+        async function cargarUsuarios() {
+            const tableBody = document.getElementById('tabla_usuarios');
+            tableBody.innerHTML = '<tr><td colspan="2" class="loading">Cargando usuarios...</td></tr>';
+            try {
+                const res = await secureFetch(`${API_URL}/api/usuarios`);
+                if (!res) return;
+                const usuarios = await res.json();
+                tableBody.innerHTML = usuarios.map(u => `<tr><td>${u.id}</td><td><strong>${u.username}</strong></td></tr>`).join('');
+            } catch (e) {
+                tableBody.innerHTML = `<tr><td colspan="2" style="color:red;text-align:center;">Error al cargar usuarios.</td></tr>`;
+                console.error(e);
+            }
+        }
+
+        async function crearUsuario() {
+            const username = document.getElementById('seg_new_user').value.trim();
+            const password = document.getElementById('seg_new_pass_user').value.trim();
+            if(!username || !password) return Swal.fire('Atención', 'El usuario y la contraseña son obligatorios.', 'warning');
+            
+            try {
+                const res = await secureFetch(`${API_URL}/api/usuarios`, {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if(res.ok) {
+                    Swal.fire('¡Éxito!', data.mensaje, 'success');
+                    document.getElementById('seg_new_user').value = '';
+                    document.getElementById('seg_new_pass_user').value = '';
+                    cargarUsuarios();
+                } else {
+                    Swal.fire('Error', data.error, 'error');
+                }
+            } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+        }
+
+        async function cambiarPassword() {
+            const old_pass = document.getElementById('seg_old_pass').value.trim();
+            const new_pass = document.getElementById('seg_new_pass').value.trim();
+            if(!old_pass || !new_pass) return Swal.fire('Atención', 'Debes llenar la contraseña actual y la nueva.', 'warning');
+            if(new_pass.length < 6) return Swal.fire('Atención', 'La nueva contraseña debe tener al menos 6 caracteres.', 'warning');
+
+            try {
+                const res = await secureFetch(`${API_URL}/api/usuarios/password`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ old_password: old_pass, new_password: new_pass })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if(res.ok) {
+                    Swal.fire('¡Actualizado!', data.mensaje, 'success');
+                    document.getElementById('seg_old_pass').value = '';
+                    document.getElementById('seg_new_pass').value = '';
+                } else {
+                    Swal.fire('Error', data.error, 'error');
+                }
+            } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+        }
 
         // =========================================
         // 1. CALCULADORA DE NÓMINA
@@ -306,7 +468,6 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/calcular_nomina`, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ tipo, fecha_inicio, fecha_fin, descripcion, empleados_ids: ids, faltas, horas_extras, aplicar_deducciones })
                 });
                 if (!res) return;
@@ -323,9 +484,6 @@
             } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
 
-        // =========================================
-        // PASIVOS LABORALES
-        // =========================================
         async function calcularPasivos() {
             const salario_mensual = parseFloat(document.getElementById('pasivos_salario').value) || 0;
             const dias = parseInt(document.getElementById('pasivos_dias').value) || 30;
@@ -333,7 +491,7 @@
             if(salario_mensual <= 0) { Swal.fire('Atención', 'Ingresa un salario mensual base válido en USD.', 'warning'); return; }
             try {
                 const res = await secureFetch(`${API_URL}/api/calcular_pasivos`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    method: 'POST',
                     body: JSON.stringify({ salario_mensual, dias, usar_base_60 })
                 });
                 if (!res) return;
@@ -345,9 +503,6 @@
             } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
 
-        // =========================================
-        // EMPLEADOS, SUCURSALES, PARÁMETROS E HISTORIAL
-        // =========================================
         async function cargarEmpleadosAdmin() {
             const tableBody = document.getElementById('tabla_empleados');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading">Cargando empleados...</td></tr>';
