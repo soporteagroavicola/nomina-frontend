@@ -8,39 +8,11 @@
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
         .header-title { text-align: center; color: #2c3e50; margin-bottom: 15px; font-size: 28px; }
-        /* 🆕 Barra superior de usuario */
-        .top-navbar {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 10px 25px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .user-profile span {
-            font-weight: bold;
-            color: #007bff;
-        }
-        .btn-logout {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 6px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            transition: 0.2s;
-        }
+        .top-navbar { display: flex; justify-content: flex-end; align-items: center; padding: 10px 25px; background: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .user-profile { display: flex; align-items: center; gap: 15px; }
+        .user-profile span { font-weight: bold; color: #007bff; }
+        .btn-logout { background: #dc3545; color: white; border: none; padding: 6px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
         .btn-logout:hover { background: #c82333; }
-
         .tab-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .tabs { border-bottom: 2px solid #ddd; display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .tab-btn { padding: 10px 20px; border: none; background: #e9ecef; cursor: pointer; border-radius: 5px 5px 0 0; font-weight: bold; transition: 0.2s; }
@@ -82,7 +54,6 @@
 <body>
     <h1 class="header-title">🏭 Nómina Agroavícola del Llano</h1>
 
-    <!-- 🆕 BARRA DE USUARIO -->
     <div class="top-navbar">
         <div class="user-profile">
             <span id="username_display">👤 Cargando...</span>
@@ -98,7 +69,6 @@
             <button class="tab-btn" data-target="parametros">⚙️ Parámetros</button>
             <button class="tab-btn" data-target="pasivos">📄 Pasivos Laborales</button>
             <button class="tab-btn" data-target="historial">📋 Historial</button>
-            <!-- 🆕 NUEVA PESTAÑA SEGURIDAD -->
             <button class="tab-btn" data-target="seguridad">🔐 Usuarios</button>
         </div>
 
@@ -211,13 +181,10 @@
             <table><thead><tr><th>ID Lote</th><th>Descripción</th><th>Fecha Cálculo</th><th>Empleados</th><th>Sucursales</th><th>Total USD</th><th>Total Bs</th><th>Acciones</th></tr></thead><tbody id="tabla_historial"></tbody></table>
         </div>
 
-        <!-- 🆕 PESTAÑA DE SEGURIDAD Y USUARIOS -->
         <div id="seguridad" class="tab-content">
             <h2>🔐 Gestión de Usuarios y Seguridad</h2>
             <div id="alert_seg"></div>
-            
             <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
-                <!-- Sección Cambiar Contraseña -->
                 <div class="param-card">
                     <h4 style="margin-top:0;">✏️ Cambiar mi Contraseña</h4>
                     <div class="form-group-3cols">
@@ -226,8 +193,6 @@
                         <div style="display: flex; align-items: flex-end;"><button class="btn-primary" onclick="cambiarPassword()" style="width:100%;">🔑 Cambiar Contraseña</button></div>
                     </div>
                 </div>
-
-                <!-- Sección Crear Usuario -->
                 <div class="param-card">
                     <h4 style="margin-top:0;">➕ Crear Nuevo Usuario</h4>
                     <div class="form-group-3cols">
@@ -236,8 +201,6 @@
                         <div style="display: flex; align-items: flex-end;"><button class="btn-success" onclick="crearUsuario()" style="width:100%;">👤 Crear Usuario</button></div>
                     </div>
                 </div>
-
-                <!-- Tabla de usuarios -->
                 <div>
                     <h4 style="margin-top:0;">👥 Lista de Usuarios del Sistema</h4>
                     <table><thead><tr><th>ID</th><th>Usuario</th></tr></thead><tbody id="tabla_usuarios"></tbody></table>
@@ -308,7 +271,6 @@
             cargarSucursalesCalc(); cargarEmpleadosCalc('', '');
         });
 
-        // 🆕 CERRAR SESIÓN
         async function cerrarSesion() {
             const confirmLogout = await Swal.fire({
                 title: '¿Cerrar sesión?',
@@ -330,17 +292,23 @@
             }
         }
 
-        // 🆕 GESTIÓN DE USUARIOS (Cargar, Crear, Cambiar pass)
+        // 🆕 CORREGIDO: Verifica si res.ok antes de parsear el JSON
         async function cargarUsuarios() {
             const tableBody = document.getElementById('tabla_usuarios');
             tableBody.innerHTML = '<tr><td colspan="2" class="loading">Cargando usuarios...</td></tr>';
             try {
                 const res = await secureFetch(`${API_URL}/api/usuarios`);
                 if (!res) return;
+                
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error || 'Error al cargar usuarios');
+                }
+
                 const usuarios = await res.json();
                 tableBody.innerHTML = usuarios.map(u => `<tr><td>${u.id}</td><td><strong>${u.username}</strong></td></tr>`).join('');
             } catch (e) {
-                tableBody.innerHTML = `<tr><td colspan="2" style="color:red;text-align:center;">Error al cargar usuarios.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="2" style="color:red;text-align:center;">${e.message}</td></tr>`;
                 console.error(e);
             }
         }
@@ -349,7 +317,6 @@
             const username = document.getElementById('seg_new_user').value.trim();
             const password = document.getElementById('seg_new_pass_user').value.trim();
             if(!username || !password) return Swal.fire('Atención', 'El usuario y la contraseña son obligatorios.', 'warning');
-            
             try {
                 const res = await secureFetch(`${API_URL}/api/usuarios`, {
                     method: 'POST',
@@ -373,7 +340,6 @@
             const new_pass = document.getElementById('seg_new_pass').value.trim();
             if(!old_pass || !new_pass) return Swal.fire('Atención', 'Debes llenar la contraseña actual y la nueva.', 'warning');
             if(new_pass.length < 6) return Swal.fire('Atención', 'La nueva contraseña debe tener al menos 6 caracteres.', 'warning');
-
             try {
                 const res = await secureFetch(`${API_URL}/api/usuarios/password`, {
                     method: 'PUT',
@@ -503,6 +469,7 @@
             } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
 
+        // El resto de funciones (Empleados, Sucursales, Parámetros, Historial) se mantienen igual.
         async function cargarEmpleadosAdmin() {
             const tableBody = document.getElementById('tabla_empleados');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading">Cargando empleados...</td></tr>';
