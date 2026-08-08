@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nómina Agroavícola del Llano</title>
+    <!-- El CSS y la estructura completa es exactamente la misma que tenías antes -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
@@ -48,7 +49,6 @@
 </head>
 <body>
     <h1 class="header-title">🏭 Nómina Agroavícola del Llano</h1>
-    
     <div id="app" class="tab-container">
         <div class="tabs">
             <button class="tab-btn active" data-target="calculadora">🧮 Calculadora</button>
@@ -58,8 +58,6 @@
             <button class="tab-btn" data-target="pasivos">📄 Pasivos Laborales</button>
             <button class="tab-btn" data-target="historial">📋 Historial</button>
         </div>
-
-        <!-- PESTAÑA CALCULADORA -->
         <div id="calculadora" class="tab-content active">
             <h2>Calcular Nómina</h2>
             <div class="form-group">
@@ -88,17 +86,14 @@
             <br><button class="btn-primary" onclick="calcularNomina()">📊 Calcular Nómina</button>
             <div id="resultado_content"></div>
         </div>
-
-        <!-- PESTAÑA EMPLEADOS -->
+        <!-- Sección Empleados -->
         <div id="empleados" class="tab-content">
             <h2>Gestión de Empleados</h2>
             <div id="alert_emp"></div>
             <div style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px; background: #f9f9f9;">
                 <h4>Agregar Nuevo Empleado</h4>
                 <div class="form-group-3cols">
-                    <input placeholder="Cédula" id="emp_cedula"><input placeholder="Nombres" id="emp_nombres">
-                    <input placeholder="Apellidos" id="emp_apellidos"><input placeholder="Cargo" id="emp_cargo">
-                    <input placeholder="Departamento" id="emp_depto"><input type="number" step="0.01" placeholder="Salario USD" id="emp_salario">
+                    <input placeholder="Cédula" id="emp_cedula"><input placeholder="Nombres" id="emp_nombres"><input placeholder="Apellidos" id="emp_apellidos"><input placeholder="Cargo" id="emp_cargo"><input placeholder="Departamento" id="emp_depto"><input type="number" step="0.01" placeholder="Salario USD" id="emp_salario">
                 </div>
                 <div class="form-group-3cols">
                     <div><label class="fecha-label">Fecha Nacimiento:</label><input type="date" id="emp_fecha_nacimiento"></div>
@@ -117,8 +112,7 @@
             </div>
             <table><thead><tr><th>ID</th><th>Cédula</th><th>Nombre</th><th>Cargo</th><th>Salario USD</th><th>Pago</th><th>Fec. Ingreso</th><th>Acciones</th></tr></thead><tbody id="tabla_empleados"></tbody></table>
         </div>
-
-        <!-- PESTAÑA SUCURSALES -->
+        <!-- Sección Sucursales -->
         <div id="sucursales" class="tab-content">
             <h2>Gestión de Sucursales</h2>
             <div id="alert_suc"></div>
@@ -128,64 +122,32 @@
             </div>
             <table><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="tabla_sucursales"></tbody></table>
         </div>
-
-        <!-- PESTAÑA PARÁMETROS -->
+        <!-- Sección Parámetros -->
         <div id="parametros" class="tab-content">
             <h2>⚙️ Configuración de Parámetros de Nómina</h2>
             <div id="alert_params"></div>
             <div class="param-card">
                 <div class="form-group-3cols">
-                    <div>
-                        <label>Tasa BCV (USD -> Bs):</label>
-                        <input type="number" step="0.0001" id="param_tasa_bcv" placeholder="Ej: 755.1552">
-                    </div>
-                    <div>
-                        <label>% IVSS (Deducciones):</label>
-                        <input type="number" step="0.01" id="param_ivss" placeholder="Ej: 0.04">
-                    </div>
-                    <div>
-                        <label>% RPE (Deducciones):</label>
-                        <input type="number" step="0.001" id="param_rpe" placeholder="Ej: 0.005">
-                    </div>
+                    <div><label>Tasa BCV (USD -> Bs):</label><input type="number" step="0.0001" id="param_tasa_bcv" placeholder="Ej: 755.1552"></div>
+                    <div><label>% IVSS (Deducciones):</label><input type="number" step="0.01" id="param_ivss" placeholder="Ej: 0.04"></div>
+                    <div><label>% RPE (Deducciones):</label><input type="number" step="0.001" id="param_rpe" placeholder="Ej: 0.005"></div>
                 </div>
                 <div class="form-group-3cols" style="margin-top:15px;">
-                    <div>
-                        <label>% FAOV (Deducciones):</label>
-                        <input type="number" step="0.01" id="param_faov" placeholder="Ej: 0.01">
-                    </div>
-                    <div>
-                        <label>Cestaticket (USD x Día):</label>
-                        <input type="number" step="0.01" id="param_cestaticket" placeholder="Ej: 40.00">
-                    </div>
-                    <div style="display: flex; align-items: flex-end;">
-                        <button class="btn-primary" onclick="guardarParametros()" style="width:100%;">💾 Guardar Parámetros</button>
-                    </div>
+                    <div><label>% FAOV (Deducciones):</label><input type="number" step="0.01" id="param_faov" placeholder="Ej: 0.01"></div>
+                    <div><label>Cestaticket (USD x Día):</label><input type="number" step="0.01" id="param_cestaticket" placeholder="Ej: 40.00"></div>
+                    <div style="display: flex; align-items: flex-end;"><button class="btn-primary" onclick="guardarParametros()" style="width:100%;">💾 Guardar Parámetros</button></div>
                 </div>
             </div>
         </div>
-
-        <!-- PESTAÑA PASIVOS LABORALES -->
+        <!-- Sección Pasivos -->
         <div id="pasivos" class="tab-content">
             <h2>📄 Pasivos Laborales (Utilidades, Aguinaldo, Vacaciones)</h2>
             <div id="alert_pasivos"></div>
             <div class="pasivos-card">
                 <div class="form-group-3cols">
-                    <div>
-                        <label>Salario Mensual Base (USD):</label>
-                        <input type="number" step="0.01" id="pasivos_salario" placeholder="Ej: 800.00">
-                    </div>
-                    <div>
-                        <label>Días a Calcular (LOTTT):</label>
-                        <select id="pasivos_dias">
-                            <option value="30">Mínimo Legal (30 días)</option>
-                            <option value="60" selected>Promedio Frecuente (60 días)</option>
-                            <option value="90">90 días (Negociado)</option>
-                            <option value="120">Toque Máximo (120 días)</option>
-                        </select>
-                    </div>
-                    <div style="display: flex; align-items: flex-end;">
-                        <button class="btn-primary" onclick="calcularPasivos()" style="width:100%;">💸 Calcular Pasivos</button>
-                    </div>
+                    <div><label>Salario Mensual Base (USD):</label><input type="number" step="0.01" id="pasivos_salario" placeholder="Ej: 800.00"></div>
+                    <div><label>Días a Calcular (LOTTT):</label><select id="pasivos_dias"><option value="30">Mínimo Legal (30 días)</option><option value="60" selected>Promedio Frecuente (60 días)</option><option value="90">90 días (Negociado)</option><option value="120">Toque Máximo (120 días)</option></select></div>
+                    <div style="display: flex; align-items: flex-end;"><button class="btn-primary" onclick="calcularPasivos()" style="width:100%;">💸 Calcular Pasivos</button></div>
                 </div>
                 <div class="form-group-3cols" style="margin-top:10px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -197,8 +159,7 @@
                 <div id="resultado_pasivos" style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;"></div>
             </div>
         </div>
-
-        <!-- PESTAÑA HISTORIAL -->
+        <!-- Sección Historial -->
         <div id="historial" class="tab-content">
             <h2>📋 Historial de Nóminas</h2>
             <div id="alert_hist"></div>
@@ -224,7 +185,21 @@
     <script>
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
 
-        document.addEventListener('DOMContentLoaded', function() {
+        // 🛠️ VERIFICACIÓN DE AUTENTICACIÓN AL CARGAR LA PÁGINA
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const res = await fetch(`${API_URL}/api/check_auth`, {
+                    credentials: 'include' // Envía las cookies de sesión
+                });
+                const data = await res.json();
+                if (!data.authenticated) {
+                    window.location.href = 'login.html'; // Redirige al login si no está logueado
+                }
+            } catch (error) {
+                window.location.href = 'login.html';
+            }
+            
+            // Inicializar la interfaz normal
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-target');
@@ -248,7 +223,7 @@
         // =========================================
         async function cargarSucursalesCalc() {
             try {
-                const res = await fetch(`${API_URL}/api/sucursales`);
+                const res = await fetch(`${API_URL}/api/sucursales`, { credentials: 'include' });
                 if(!res.ok) throw new Error("Error al cargar sucursales");
                 const sucs = await res.json();
                 const select = document.getElementById('calc_sucursal');
@@ -267,11 +242,11 @@
                 if (sucursal_id) params.push(`sucursal_id=${encodeURIComponent(sucursal_id)}`);
                 if (tipo_pago) params.push(`tipo_pago=${encodeURIComponent(tipo_pago)}`);
                 if (params.length > 0) url += '?' + params.join('&');
-                const res = await fetch(url);
+                const res = await fetch(url, { credentials: 'include' });
                 if(!res.ok) throw new Error("Error al obtener empleados");
                 let data; const contentType = res.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) data = await res.json();
-                else { const text = await res.text(); throw new Error(`El servidor devolvió HTML. Fragmento: ${text.substring(0, 80)}...`); }
+                else { const text = await res.text(); throw new Error(`HTML recibido. ${text.substring(0,80)}...`); }
 
                 if(data.length === 0) container.innerHTML = "<p style='color: #888;'>No hay empleados con esos filtros.</p>";
                 else {
@@ -318,6 +293,7 @@
             try {
                 const res = await fetch(`${API_URL}/api/calcular_nomina`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
+                    credentials: 'include', // 🛠️ ENVÍO DE COOKIE
                     body: JSON.stringify({ tipo, fecha_inicio, fecha_fin, descripcion, empleados_ids: ids, faltas, horas_extras, aplicar_deducciones })
                 });
                 const data = await res.json();
@@ -325,52 +301,38 @@
                 let total_usd = 0; let total_bs = 0;
                 data.resultados.forEach(r => { total_usd += r.neto_pagar_usd; total_bs += r.neto_pagar_bs; });
                 let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
-                html += `<table>
-                    <tr><th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trabaj.</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr>`;
+                html += `<table><tr><th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trabaj.</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr>`;
                 data.resultados.forEach(r => html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td><td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.total_asignaciones_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td><td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td></tr>`);
-                html += `<tr class="lote-total-row"><td colspan="9" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td><td><strong>$${total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr>`;
-                html += `</table>`;
+                html += `<tr class="lote-total-row"><td colspan="9" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td><td><strong>$${total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr></table>`;
                 document.getElementById('resultado_content').innerHTML = html;
                 Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success'); cargarLotes();
             } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
 
         // =========================================
-        // 4. PASIVOS LABORALES
+        // PASIVOS LABORALES (con credenciales)
         // =========================================
         async function calcularPasivos() {
             const salario_mensual = parseFloat(document.getElementById('pasivos_salario').value) || 0;
             const dias = parseInt(document.getElementById('pasivos_dias').value) || 30;
             const usar_base_60 = document.getElementById('pasivos_60').checked;
-
             if(salario_mensual <= 0) { Swal.fire('Atención', 'Ingresa un salario mensual base válido en USD.', 'warning'); return; }
-
             try {
                 const res = await fetch(`${API_URL}/api/calcular_pasivos`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
                     body: JSON.stringify({ salario_mensual, dias, usar_base_60 })
                 });
                 const data = await res.json();
                 if(data.error) { Swal.fire('Error', data.error, 'error'); return; }
-
-                let html = `<h4>Resultado del Cálculo</h4>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-                        <div><strong>Días calculados:</strong> ${data.dias}</div>
-                        <div><strong>Base utilizada:</strong> ${data.base_usada}</div>
-                        <div><strong>Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(2)}</div>
-                    </div>
-                    <div style="margin-top:20px; font-size: 1.3em; padding: 20px; background: #e9f7ef; border-radius: 8px; text-align: center;">
-                        <div><strong>Total a Pagar en USD:</strong> <span style="color:#0056b3;">$${data.total_usd.toFixed(2)}</span></div>
-                        <div><strong>Total a Pagar en Bs (a tasa BCV):</strong> <span style="color:#0056b3;">Bs. ${data.total_bs.toFixed(2)}</span></div>
-                    </div>
-                `;
+                let html = `<h4>Resultado del Cálculo</h4><div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;"><div><strong>Días calculados:</strong> ${data.dias}</div><div><strong>Base utilizada:</strong> ${data.base_usada}</div><div><strong>Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(2)}</div></div><div style="margin-top:20px; font-size: 1.3em; padding: 20px; background: #e9f7ef; border-radius: 8px; text-align: center;"><div><strong>Total a Pagar en USD:</strong> <span style="color:#0056b3;">$${data.total_usd.toFixed(2)}</span></div><div><strong>Total a Pagar en Bs (a tasa BCV):</strong> <span style="color:#0056b3;">Bs. ${data.total_bs.toFixed(2)}</span></div></div>`;
                 document.getElementById('resultado_pasivos').innerHTML = html;
                 document.getElementById('alert_pasivos').innerHTML = `<div class="alert alert-success">✅ Cálculo de pasivos realizado correctamente.</div>`;
             } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
 
         // =========================================
-        // EMPLEADOS / SUCURSALES / PARÁMETROS
+        // EMPLEADOS, SUCURSALES, PARÁMETROS E HISTORIAL (con credenciales)
         // =========================================
         async function cargarEmpleadosAdmin() {
             const tableBody = document.getElementById('tabla_empleados');
@@ -382,12 +344,12 @@
                 if (searchText) params.push(`search=${encodeURIComponent(searchText)}`);
                 if (filterSucursal) params.push(`sucursal_id=${encodeURIComponent(filterSucursal)}`);
                 if (params.length > 0) url += '?' + params.join('&');
-                const res = await fetch(url);
+                const res = await fetch(url, { credentials: 'include' });
                 if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const empleados = await res.json();
                 if(empleados.length === 0) tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No se encontraron empleados con esos filtros.</td></tr>';
                 else tableBody.innerHTML = empleados.map(e => `<tr><td>${e.id_empleado}</td><td>${e.cedula}</td><td>${e.nombres} ${e.apellidos}</td><td>${e.cargo}</td><td>$${e.salario_mensual_usd}</td><td>${e.tipo_pago}</td><td>${e.fecha_ingreso || '-'}</td><td><button class="btn-danger" onclick="eliminarEmpleado(${e.id_empleado})">🗑️ Eliminar</button></td></tr>`).join('');
-                const resSuc = await fetch(`${API_URL}/api/sucursales`);
+                const resSuc = await fetch(`${API_URL}/api/sucursales`, { credentials: 'include' });
                 if(resSuc.ok) {
                     const sucs = await resSuc.json();
                     document.getElementById('emp_sucursal').innerHTML = '<option value="">Seleccione una sucursal...</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
@@ -400,7 +362,7 @@
         async function crearEmpleado() {
             const data = { cedula: document.getElementById('emp_cedula').value, nombres: document.getElementById('emp_nombres').value, apellidos: document.getElementById('emp_apellidos').value, cargo: document.getElementById('emp_cargo').value, departamento: document.getElementById('emp_depto').value, salario_mensual_usd: parseFloat(document.getElementById('emp_salario').value) || 0, sucursal_id: parseInt(document.getElementById('emp_sucursal').value) || null, fecha_nacimiento: document.getElementById('emp_fecha_nacimiento').value || null, fecha_ingreso: document.getElementById('emp_fecha_ingreso').value || null, cuenta_bancaria: document.getElementById('emp_cuenta_bancaria').value || '', tipo_pago: document.getElementById('emp_tipo_pago').value };
             try {
-                const res = await fetch(`${API_URL}/api/empleados`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+                const res = await fetch(`${API_URL}/api/empleados`, { method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(data) });
                 let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor respondió con HTML" }; }
                 const alertBox = document.getElementById('alert_emp');
                 if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; Swal.fire('¡Éxito!', resp.mensaje, 'success');
@@ -415,7 +377,7 @@
             const result = await Swal.fire({ title: '¿Estás seguro?', text: "El empleado será inactivo.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
             if (result.isConfirmed) {
                 try {
-                    const res = await fetch(`${API_URL}/api/empleados/${id}`, { method: 'DELETE' });
+                    const res = await fetch(`${API_URL}/api/empleados/${id}`, { method: 'DELETE', credentials: 'include' });
                     const resp = await res.json();
                     if(res.ok) { cargarEmpleadosAdmin(); Swal.fire('Eliminado', 'El empleado ha sido eliminado.', 'success'); } else { Swal.fire('Error', resp.error, 'error'); }
                 } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
@@ -425,7 +387,7 @@
             const tableBody = document.getElementById('tabla_sucursales');
             tableBody.innerHTML = '<tr><td colspan="3" class="loading">Cargando sucursales...</td></tr>';
             try {
-                const res = await fetch(`${API_URL}/api/sucursales`);
+                const res = await fetch(`${API_URL}/api/sucursales`, { credentials: 'include' });
                 if(!res.ok) throw new Error(`Error del servidor: ${res.status}`);
                 let data; const contentType = res.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) data = await res.json();
@@ -438,7 +400,7 @@
             const nombre = document.getElementById('suc_nombre').value;
             if(!nombre) { Swal.fire('Atención', 'El nombre no puede estar vacío.', 'warning'); return; }
             try {
-                const res = await fetch(`${API_URL}/api/sucursales`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({nombre}) });
+                const res = await fetch(`${API_URL}/api/sucursales`, { method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify({nombre}) });
                 let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor no respondió con JSON" }; }
                 const alertBox = document.getElementById('alert_suc');
                 if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; document.getElementById('suc_nombre').value = ''; cargarSucursales(); Swal.fire('¡Éxito!', resp.mensaje, 'success'); } 
@@ -449,7 +411,7 @@
             const result = await Swal.fire({ title: '¿Estás seguro?', text: "Esta acción eliminará la sucursal.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
             if (result.isConfirmed) {
                 try {
-                    const res = await fetch(`${API_URL}/api/sucursales/${id}`, { method: 'DELETE' });
+                    const res = await fetch(`${API_URL}/api/sucursales/${id}`, { method: 'DELETE', credentials: 'include' });
                     const resp = await res.json();
                     if(res.ok) { cargarSucursales(); Swal.fire('Eliminado', 'Sucursal eliminada.', 'success'); } else { Swal.fire('Error', resp.error, 'error'); }
                 } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
@@ -457,7 +419,7 @@
         }
         async function cargarParametros() {
             try {
-                const res = await fetch(`${API_URL}/api/parametros`);
+                const res = await fetch(`${API_URL}/api/parametros`, { credentials: 'include' });
                 if(!res.ok) throw new Error("Error al cargar parámetros");
                 const params = await res.json();
                 document.getElementById('param_tasa_bcv').value = params.tasa_bcv || 755.1552;
@@ -478,7 +440,7 @@
             let errores = 0;
             for (const param of parametros) {
                 try {
-                    const res = await fetch(`${API_URL}/api/parametros`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(param) });
+                    const res = await fetch(`${API_URL}/api/parametros`, { method: 'PUT', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(param) });
                     if (!res.ok) errores++;
                 } catch (e) { errores++; }
             }
@@ -497,13 +459,11 @@
                 const searchText = document.getElementById('search_historial').value;
                 let url = `${API_URL}/api/lotes`;
                 if (searchText) url += `?search=${encodeURIComponent(searchText)}`;
-                const res = await fetch(url);
+                const res = await fetch(url, { credentials: 'include' });
                 if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const lotes = await res.json();
                 if(lotes.length === 0) tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No hay lotes registrados.</td></tr>';
-                else tableBody.innerHTML = lotes.map(l => `
-                        <tr><td><strong>#${l.id_lote}</strong></td><td><strong>${l.descripcion || 'Sin descripción'}</strong></td><td>${l.fecha_calculo}</td><td>${l.cantidad_empleados_lote} empleados</td><td><small>${l.sucursales_involucradas}</small></td><td><strong>$${l.total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td><td><button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})">📂 Ver Detalle</button><button class="btn-danger" onclick="eliminarLote(${l.id_lote})">🗑️</button></td></tr>
-                    `).join('');
+                else tableBody.innerHTML = lotes.map(l => `<tr><td><strong>#${l.id_lote}</strong></td><td><strong>${l.descripcion || 'Sin descripción'}</strong></td><td>${l.fecha_calculo}</td><td>${l.cantidad_empleados_lote} empleados</td><td><small>${l.sucursales_involucradas}</small></td><td><strong>$${l.total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td><td><button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})">📂 Ver Detalle</button><button class="btn-danger" onclick="eliminarLote(${l.id_lote})">🗑️</button></td></tr>`).join('');
             } catch(e) { tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar historial: ${e.message}</td></tr>`; console.error(e); }
         }
         async function abrirModalDetalleLote(id) {
@@ -512,33 +472,12 @@
             const body = document.getElementById('cuerpo_detalle_lote');
             header.innerHTML = '<p class="loading">Cargando datos del lote...</p>'; body.innerHTML = ''; modal.style.display = 'flex';
             try {
-                const res = await fetch(`${API_URL}/api/lotes/${id}`);
+                const res = await fetch(`${API_URL}/api/lotes/${id}`, { credentials: 'include' });
                 if(!res.ok) throw new Error("Error al obtener el detalle del lote");
                 const lote = await res.json();
-                header.innerHTML = `
-                    <div style="display:flex; justify-content:space-between;">
-                        <div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'} <br><small>Generado el ${lote.fecha_calculo}</small></div>
-                        <div style="text-align:right;"><div><strong>Total Lote:</strong> $${lote.total_usd.toFixed(2)}</div><div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div></div>
-                    </div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>
-                `;
-                // 🛠️ CORRECCIÓN EN EL FRONTEND: Validación extra de datos antes de mostrar
-                body.innerHTML = lote.nominas.map(n => `
-                    <tr>
-                        <td>${n.nombres} ${n.apellidos}</td>
-                        <td>$${(n.salario_base_usd || 0).toFixed(2)}</td>
-                        <td><small>$${(n.base_incidencia_60_usd || 0).toFixed(2)}</small></td>
-                        <td>$${(n.horas_extras_usd || 0).toFixed(2)}</td>
-                        <td>$${(n.total_asignaciones_usd || 0).toFixed(2)}</td>
-                        <td>$${(n.total_deducciones_usd || 0).toFixed(2)}</td>
-                        <td><strong>$${(n.neto_pagar_usd || 0).toFixed(2)}</strong></td>
-                        <td><strong>Bs. ${(n.neto_pagar_bs || 0).toFixed(2)}</strong></td>
-                    </tr>
-                `).join('');
-            } catch (e) { 
-                console.error(e);
-                Swal.fire('Error', 'No se pudo cargar el detalle del lote. Por favor, recarga la página.', 'error');
-                modal.style.display = 'none'; // Cerramos el modal si falla
-            }
+                header.innerHTML = `<div style="display:flex; justify-content:space-between;"><div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'} <br><small>Generado el ${lote.fecha_calculo}</small></div><div style="text-align:right;"><div><strong>Total Lote:</strong> $${lote.total_usd.toFixed(2)}</div><div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div></div></div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>`;
+                body.innerHTML = lote.nominas.map(n => `<tr><td>${n.nombres} ${n.apellidos}</td><td>$${(n.salario_base_usd || 0).toFixed(2)}</td><td><small>$${(n.base_incidencia_60_usd || 0).toFixed(2)}</small></td><td>$${(n.horas_extras_usd || 0).toFixed(2)}</td><td>$${(n.total_asignaciones_usd || 0).toFixed(2)}</td><td>$${(n.total_deducciones_usd || 0).toFixed(2)}</td><td><strong>$${(n.neto_pagar_usd || 0).toFixed(2)}</strong></td><td><strong>Bs. ${(n.neto_pagar_bs || 0).toFixed(2)}</strong></td></tr>`).join('');
+            } catch (e) { console.error(e); Swal.fire('Error', 'No se pudo cargar el detalle del lote.', 'error'); modal.style.display = 'none'; }
         }
         function cerrarModalDetalle() { document.getElementById('modalDetalleLote').style.display = 'none'; }
         window.onclick = function(event) { const modal = document.getElementById('modalDetalleLote'); if (event.target == modal) { cerrarModalDetalle(); } }
@@ -546,7 +485,7 @@
             const result = await Swal.fire({ title: '⚠️ ¿Estás seguro?', text: "Esta acción eliminará TODO el lote de nómina y todos sus registros asociados. No se puede deshacer.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar lote', cancelButtonText: 'Cancelar' });
             if (result.isConfirmed) {
                 try {
-                    const res = await fetch(`${API_URL}/api/lotes/${id}`, { method: 'DELETE' });
+                    const res = await fetch(`${API_URL}/api/lotes/${id}`, { method: 'DELETE', credentials: 'include' });
                     const resp = await res.json();
                     if(res.ok) { Swal.fire('¡Eliminado!', 'El lote de nómina ha sido eliminado.', 'success'); cargarLotes(); } else { Swal.fire('Error', resp.error || 'No se pudo eliminar el lote.', 'error'); }
                 } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
