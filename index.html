@@ -42,6 +42,8 @@
         .badge-quincenal { background: #e3f2fd; color: #0056b3; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 5px; }
         .badge-semanal { background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 5px; }
         .lote-total-row { background-color: #e9ecef; font-weight: bold; border-top: 2px solid #0056b3; }
+        /* Estilo para etiquetas de los campos de fecha */
+        .fecha-label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 0.9rem; color: #333; }
     </style>
 </head>
 <body>
@@ -92,11 +94,22 @@
                     <input placeholder="Apellidos" id="emp_apellidos"><input placeholder="Cargo" id="emp_cargo">
                     <input placeholder="Departamento" id="emp_depto"><input type="number" step="0.01" placeholder="Salario USD" id="emp_salario">
                 </div>
+                <!-- 🔽 AGREGADAS LAS ETIQUETAS PARA LAS FECHAS -->
                 <div class="form-group-3cols">
-                    <input type="date" placeholder="Fecha Nacimiento" id="emp_fecha_nacimiento">
-                    <input type="date" placeholder="Fecha Ingreso" id="emp_fecha_ingreso">
-                    <input placeholder="Cuenta Bancaria" id="emp_cuenta_bancaria">
+                    <div>
+                        <label class="fecha-label">Fecha Nacimiento:</label>
+                        <input type="date" id="emp_fecha_nacimiento">
+                    </div>
+                    <div>
+                        <label class="fecha-label">Fecha Ingreso:</label>
+                        <input type="date" id="emp_fecha_ingreso">
+                    </div>
+                    <div>
+                        <label class="fecha-label">Cuenta Bancaria:</label>
+                        <input placeholder="Cuenta Bancaria" id="emp_cuenta_bancaria">
+                    </div>
                 </div>
+                <!-- 🔽 FIN DE ETIQUETAS -->
                 <div class="form-group-3cols">
                     <select id="emp_sucursal"><option value="">Seleccione una sucursal...</option></select>
                     <select id="emp_tipo_pago"><option value="Quincenal">Pago Quincenal</option><option value="Semanal">Pago Semanal</option></select>
@@ -351,15 +364,52 @@
             } catch(e) { tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar empleados: ${e.message}</td></tr>`; console.error(e); }
         }
 
+        // 🔽 FUNCIÓN DE CREAR EMPLEADO (ACTUALIZADA PARA LIMPIAR CAMPOS)
         async function crearEmpleado() {
-            const data = { cedula: document.getElementById('emp_cedula').value, nombres: document.getElementById('emp_nombres').value, apellidos: document.getElementById('emp_apellidos').value, cargo: document.getElementById('emp_cargo').value, departamento: document.getElementById('emp_depto').value, salario_mensual_usd: parseFloat(document.getElementById('emp_salario').value) || 0, sucursal_id: parseInt(document.getElementById('emp_sucursal').value) || null, fecha_nacimiento: document.getElementById('emp_fecha_nacimiento').value || null, fecha_ingreso: document.getElementById('emp_fecha_ingreso').value || null, cuenta_bancaria: document.getElementById('emp_cuenta_bancaria').value || '', tipo_pago: document.getElementById('emp_tipo_pago').value };
+            const data = { 
+                cedula: document.getElementById('emp_cedula').value, 
+                nombres: document.getElementById('emp_nombres').value,
+                apellidos: document.getElementById('emp_apellidos').value, 
+                cargo: document.getElementById('emp_cargo').value,
+                departamento: document.getElementById('emp_depto').value, 
+                salario_mensual_usd: parseFloat(document.getElementById('emp_salario').value) || 0,
+                sucursal_id: parseInt(document.getElementById('emp_sucursal').value) || null,
+                fecha_nacimiento: document.getElementById('emp_fecha_nacimiento').value || null,
+                fecha_ingreso: document.getElementById('emp_fecha_ingreso').value || null,
+                cuenta_bancaria: document.getElementById('emp_cuenta_bancaria').value || '',
+                tipo_pago: document.getElementById('emp_tipo_pago').value
+            };
             try {
                 const res = await fetch(`${API_URL}/api/empleados`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
                 let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor respondió con HTML en lugar de JSON" }; }
                 const alertBox = document.getElementById('alert_emp');
-                if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; cargarEmpleadosAdmin(); Swal.fire('¡Éxito!', resp.mensaje, 'success'); }
-                else { alertBox.innerHTML = `<div class="alert alert-danger">Error: ${resp.error}</div>`; Swal.fire('Error', resp.error, 'error'); }
-            } catch (error) { document.getElementById('alert_emp').innerHTML = `<div class="alert alert-danger">Error de red: ${error.message}</div>`; Swal.fire('Error de red', error.message, 'error'); }
+                
+                if(res.ok) { 
+                    alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`;
+                    Swal.fire('¡Éxito!', resp.mensaje, 'success');
+                    
+                    // 🔽 LIMPIAR TODOS LOS CAMPOS DESPUÉS DE GUARDAR
+                    document.getElementById('emp_cedula').value = '';
+                    document.getElementById('emp_nombres').value = '';
+                    document.getElementById('emp_apellidos').value = '';
+                    document.getElementById('emp_cargo').value = '';
+                    document.getElementById('emp_depto').value = '';
+                    document.getElementById('emp_salario').value = '';
+                    document.getElementById('emp_fecha_nacimiento').value = '';
+                    document.getElementById('emp_fecha_ingreso').value = '';
+                    document.getElementById('emp_cuenta_bancaria').value = '';
+                    // Nota: El select de sucursal y tipo de pago los dejamos como están para que el usuario no tenga que volver a seleccionarlos si sigue agregando empleados.
+                    
+                    cargarEmpleadosAdmin(); 
+                }
+                else { 
+                    alertBox.innerHTML = `<div class="alert alert-danger">Error: ${resp.error}</div>`;
+                    Swal.fire('Error', resp.error, 'error'); 
+                }
+            } catch (error) { 
+                document.getElementById('alert_emp').innerHTML = `<div class="alert alert-danger">Error de red: ${error.message}</div>`;
+                Swal.fire('Error de red', error.message, 'error'); 
+            }
         }
 
         async function eliminarEmpleado(id) {
@@ -525,7 +575,7 @@
         }
 
         // =========================================
-        // 4.2 🆕 ELIMINAR LOTE (CORREGIDO Y ESTILIZADO)
+        // 4.2 ELIMINAR LOTE
         // =========================================
         async function eliminarLote(id) {
             const result = await Swal.fire({
