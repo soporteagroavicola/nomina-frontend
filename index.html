@@ -70,6 +70,13 @@
                 <div><label>Filtrar por Tipo de Pago:</label><select id="calc_tipo_pago"><option value="">Todos</option><option value="Quincenal">Quincenal</option><option value="Semanal">Semanal</option></select></div>
                 <div><label>Descripción:</label><input type="text" id="calc_descripcion" placeholder="Ej: Nómina 1ra Quincena Agosto 2026"></div>
             </div>
+            <!-- 🆕 INTERRUPTOR DE DEDUCCIONES -->
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: -5px; margin-bottom: 15px;">
+                <input type="checkbox" id="aplicar_deducciones" checked style="width: 20px; height: 20px; cursor: pointer;">
+                <label for="aplicar_deducciones" style="width: auto; margin: 0; font-weight: bold; cursor: pointer;">Aplicar deducciones (IVSS, RPE, FAOV)</label>
+            </div>
+            <!-- 🆕 FIN INTERRUPTOR -->
+            
             <div><label>Seleccionar empleados:</label><div id="lista_empleados" class="loading">Cargando empleados...</div></div>
             <div id="nomina_inputs_container" style="display:none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
                 <h4 style="margin-top:0;">📝 Detalles de Nómina por Empleado</h4>
@@ -123,7 +130,7 @@
             <table><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="tabla_sucursales"></tbody></table>
         </div>
 
-        <!-- 🆕 PESTAÑA PARÁMETROS -->
+        <!-- PESTAÑA PARÁMETROS -->
         <div id="parametros" class="tab-content">
             <h2>⚙️ Configuración de Parámetros de Nómina</h2>
             <div id="alert_params"></div>
@@ -205,7 +212,7 @@
                     if (tabId === 'empleados') cargarEmpleadosAdmin();
                     else if (tabId === 'sucursales') cargarSucursales();
                     else if (tabId === 'calculadora') cargarEmpleadosCalc();
-                    else if (tabId === 'parametros') cargarParametros(); // 🆕 Cargar parámetros
+                    else if (tabId === 'parametros') cargarParametros();
                     else if (tabId === 'historial') cargarLotes();
                 });
             });
@@ -306,6 +313,9 @@
             const fecha_inicio = document.getElementById('fecha_inicio').value;
             const fecha_fin = document.getElementById('fecha_fin').value;
             const descripcion = document.getElementById('calc_descripcion').value;
+            // 🆕 Leer estado del interruptor
+            const aplicar_deducciones = document.getElementById('aplicar_deducciones').checked;
+            
             const ids = Array.from(document.querySelectorAll('.emp-check:checked')).map(c => parseInt(c.value));
             if(!ids.length) {
                 Swal.fire('Atención', 'Selecciona al menos un empleado para calcular.', 'warning');
@@ -331,7 +341,8 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         tipo, fecha_inicio, fecha_fin, descripcion,
-                        empleados_ids: ids, faltas: faltas, horas_extras: horas_extras
+                        empleados_ids: ids, faltas: faltas, horas_extras: horas_extras,
+                        aplicar_deducciones: aplicar_deducciones // 🆕 Enviar al backend
                     })
                 });
                 const data = await res.json();
@@ -506,7 +517,7 @@
         }
 
         // =========================================
-        // 4. 🆕 MÓDULO PARÁMETROS
+        // 4. MÓDULO PARÁMETROS
         // =========================================
         async function cargarParametros() {
             try {
