@@ -113,7 +113,6 @@
             <div id="resultado_content"></div>
         </div>
 
-        <!-- PESTAÑA EMPLEADOS (ACTUALIZADA CON EDITAR) -->
         <div id="empleados" class="tab-content">
             <h2>Gestión de Empleados</h2>
             <div id="alert_emp"></div>
@@ -242,16 +241,19 @@
                     </div>
                 </div>
                 <div class="param-card">
-                    <h4 style="margin-top:0;">➕ Crear Nuevo Usuario</h4>
+                    <h4 style="margin-top:0;">➕ Crear / Editar Usuario</h4>
                     <div class="form-group-3cols">
                         <div><label>Nombre de Usuario:</label><input type="text" id="seg_new_user" placeholder="Ej: supervisor"></div>
-                        <div><label>Contraseña:</label><input type="password" id="seg_new_pass_user" placeholder="Contraseña para el nuevo usuario"></div>
-                        <div style="display: flex; align-items: flex-end;"><button class="btn-success" onclick="crearUsuario()" style="width:100%;">👤 Crear Usuario</button></div>
+                        <div><label>Contraseña (Dejar vacía si no se cambia):</label><input type="password" id="seg_new_pass_user" placeholder="Contraseña para el nuevo usuario"></div>
+                        <div style="display: flex; align-items: flex-end; gap: 5px;">
+                            <button class="btn-success" onclick="guardarUsuario()" style="width:50%;">💾 Guardar</button>
+                            <button class="btn-danger" onclick="cancelarEdicionUsuario()" style="width:50%; display:none;" id="btn_cancel_user">❌ Cancelar</button>
+                        </div>
                     </div>
                 </div>
                 <div>
                     <h4 style="margin-top:0;">👥 Lista de Usuarios del Sistema</h4>
-                    <table><thead><tr><th>ID</th><th>Usuario</th></tr></thead><tbody id="tabla_usuarios"></tbody></table>
+                    <table><thead><tr><th>ID</th><th>Usuario</th><th>Acciones</th></tr></thead><tbody id="tabla_usuarios"></tbody></table>
                 </div>
             </div>
         </div>
@@ -272,7 +274,8 @@
 
     <script>
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
-        let editingEmployeeId = null; // 🆕 Para controlar la edición
+        let editingEmployeeId = null;
+        let editingUserId = null;
 
         async function secureFetch(url, options = {}) {
             options.credentials = 'include';
@@ -301,8 +304,7 @@
                 window.location.href = 'login.html';
             }
             
-            // 🆕 Actualizar la tasa BCV automáticamente al abrir el sistema
-            await actualizarBCV(true); // true = silencioso (no muestra alerta)
+            await actualizarBCV(true);
 
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -344,9 +346,18 @@
             }
         }
 
+        // --- GESTIÓN DE USUARIOS ---
+        let editingUserId = null;
+        function cancelarEdicionUsuario() {
+            editingUserId = null;
+            document.getElementById('seg_new_user').value = '';
+            document.getElementById('seg_new_pass_user').value = '';
+            document.getElementById('btn_cancel_user').style.display = 'none';
+        }
+
         async function cargarUsuarios() {
             const tableBody = document.getElementById('tabla_usuarios');
-            tableBody.innerHTML = '<tr><td colspan="2" class="loading">Cargando usuarios...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="3" class="loading">Cargando usuarios...</td></tr>';
             try {
                 const res = await secureFetch(`${API_URL}/api/usuarios`);
                 if (!res) return;
@@ -355,28 +366,53 @@
                     throw new Error(errorData.error || 'Error al cargar usuarios');
                 }
                 const usuarios = await res.json();
-                tableBody.innerHTML = usuarios.map(u => `<tr><td>${u.id}</td><td><strong>${u.username}</strong></td></tr>`).join('');
+                tableBody.innerHTML = usuarios.map(u => `
+                    <tr>
+                        <td>${u.id}</td>
+                        <td><strong>${u.username}</strong></td>
+                        <td>
+                            <button class="btn-warning" onclick="cargarFormularioEditarUsuario(${u.id}, '${u.username}')" style="font-size: 12px; padding: 2px 8px;">✏️</button>
+                            <button class="btn-danger" onclick="eliminarUsuario(${u.id})" style="font-size: 12px; padding: 2px 8px;">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
             } catch (e) {
-                tableBody.innerHTML = `<tr><td colspan="2" style="color:red;text-align:center;">${e.message}</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="3" style="color:red;text-align:center;">${e.message}</td></tr>`;
                 console.error(e);
             }
         }
 
-        async function crearUsuario() {
+        function cargarFormularioEditarUsuario(id, username) {
+            editingUserId = id;
+            document.getElementById('seg_new_user').value = username;
+            document.getElementById('seg_new_pass_user').value = '';
+            document.getElementById('btn_cancel_user').style.display = 'inline-block';
+            document.getElementById('seguridad').scrollIntoView({behavior: "smooth"});
+        }
+
+        async function guardarUsuario() {
             const username = document.getElementById('seg_new_user').value.trim();
             const password = document.getElementById('seg_new_pass_user').value.trim();
-            if(!username || !password) return Swal.fire('Atención', 'El usuario y la contraseña son obligatorios.', 'warning');
+            if(!username) return Swal.fire('Atención', 'El nombre de usuario es obligatorio.', 'warning');
+
+            let url = `${API_URL}/api/usuarios`;
+            let method = 'POST';
+            let body = JSON.stringify({ username, password });
+
+            if (editingUserId) {
+                url += `/${editingUserId}`;
+                method = 'PUT';
+                // Si la contraseña está vacía en edición, solo actualizamos el usuario
+                body = JSON.stringify({ username, password: password || undefined });
+            }
+
             try {
-                const res = await secureFetch(`${API_URL}/api/usuarios`, {
-                    method: 'POST',
-                    body: JSON.stringify({ username, password })
-                });
+                const res = await secureFetch(url, { method, body });
                 if (!res) return;
                 const data = await res.json();
                 if(res.ok) {
                     Swal.fire('¡Éxito!', data.mensaje, 'success');
-                    document.getElementById('seg_new_user').value = '';
-                    document.getElementById('seg_new_pass_user').value = '';
+                    cancelarEdicionUsuario();
                     cargarUsuarios();
                 } else {
                     Swal.fire('Error', data.error, 'error');
@@ -384,27 +420,33 @@
             } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
 
-        async function cambiarPassword() {
-            const old_pass = document.getElementById('seg_old_pass').value.trim();
-            const new_pass = document.getElementById('seg_new_pass').value.trim();
-            if(!old_pass || !new_pass) return Swal.fire('Atención', 'Debes llenar la contraseña actual y la nueva.', 'warning');
-            if(new_pass.length < 6) return Swal.fire('Atención', 'La nueva contraseña debe tener al menos 6 caracteres.', 'warning');
-            try {
-                const res = await secureFetch(`${API_URL}/api/usuarios/password`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ old_password: old_pass, new_password: new_pass })
-                });
-                if (!res) return;
-                const data = await res.json();
-                if(res.ok) {
-                    Swal.fire('¡Actualizado!', data.mensaje, 'success');
-                    document.getElementById('seg_old_pass').value = '';
-                    document.getElementById('seg_new_pass').value = '';
-                } else {
-                    Swal.fire('Error', data.error, 'error');
-                }
-            } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+        async function eliminarUsuario(id) {
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción eliminará al usuario permanentemente.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+            if (result.isConfirmed) {
+                try {
+                    const res = await secureFetch(`${API_URL}/api/usuarios/${id}`, { method: 'DELETE' });
+                    if (!res) return;
+                    const data = await res.json();
+                    if(res.ok) {
+                        Swal.fire('Eliminado', data.mensaje, 'success');
+                        cancelarEdicionUsuario();
+                        cargarUsuarios();
+                    } else {
+                        Swal.fire('Error', data.error, 'error');
+                    }
+                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+            }
         }
+
+        // --- FIN GESTIÓN USUARIOS ---
 
         async function cargarSucursalesCalc() {
             try {
@@ -555,7 +597,6 @@
             } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
 
-        // 🆕 ACTUALIZACIÓN AUTOMÁTICA Y MANUAL DE LA TASA BCV
         async function actualizarBCV(silencioso = false) {
             try {
                 const res = await secureFetch(`${API_URL}/api/actualizar_bcv`);
@@ -576,28 +617,7 @@
             }
         }
 
-        // 🆕 GESTIÓN DE EMPLEADOS (Crear y Editar combinados)
-        function cargarFormularioEditar(id, cedula, nombres, apellidos, cargo, depto, salario, sucursal_id, fecha_nac, fecha_ing, cuenta, tipo_pago) {
-            editingEmployeeId = id;
-            document.getElementById('form_title').innerText = '✏️ Editando Empleado';
-            document.getElementById('btn_guardar_empleado').innerHTML = '💾 Actualizar Empleado';
-            
-            document.getElementById('emp_cedula').value = cedula;
-            document.getElementById('emp_nombres').value = nombres;
-            document.getElementById('emp_apellidos').value = apellidos;
-            document.getElementById('emp_cargo').value = cargo;
-            document.getElementById('emp_depto').value = depto;
-            document.getElementById('emp_salario').value = salario;
-            document.getElementById('emp_sucursal').value = sucursal_id;
-            document.getElementById('emp_fecha_nacimiento').value = fecha_nac;
-            document.getElementById('emp_fecha_ingreso').value = fecha_ing;
-            document.getElementById('emp_cuenta_bancaria').value = cuenta;
-            document.getElementById('emp_tipo_pago').value = tipo_pago;
-            
-            // Hacer scroll al formulario
-            document.getElementById('empleados').scrollIntoView({behavior: "smooth"});
-        }
-
+        // --- EMPLEADOS ---
         function cancelarEdicion() {
             editingEmployeeId = null;
             document.getElementById('form_title').innerText = 'Agregar Nuevo Empleado';
@@ -611,6 +631,24 @@
             document.getElementById('emp_fecha_nacimiento').value = '';
             document.getElementById('emp_fecha_ingreso').value = '';
             document.getElementById('emp_cuenta_bancaria').value = '';
+        }
+
+        function cargarFormularioEditar(id, cedula, nombres, apellidos, cargo, depto, salario, sucursal_id, fecha_nac, fecha_ing, cuenta, tipo_pago) {
+            editingEmployeeId = id;
+            document.getElementById('form_title').innerText = '✏️ Editando Empleado';
+            document.getElementById('btn_guardar_empleado').innerHTML = '💾 Actualizar Empleado';
+            document.getElementById('emp_cedula').value = cedula;
+            document.getElementById('emp_nombres').value = nombres;
+            document.getElementById('emp_apellidos').value = apellidos;
+            document.getElementById('emp_cargo').value = cargo;
+            document.getElementById('emp_depto').value = depto;
+            document.getElementById('emp_salario').value = salario;
+            document.getElementById('emp_sucursal').value = sucursal_id;
+            document.getElementById('emp_fecha_nacimiento').value = fecha_nac;
+            document.getElementById('emp_fecha_ingreso').value = fecha_ing;
+            document.getElementById('emp_cuenta_bancaria').value = cuenta;
+            document.getElementById('emp_tipo_pago').value = tipo_pago;
+            document.getElementById('empleados').scrollIntoView({behavior: "smooth"});
         }
 
         async function guardarEmpleado() {
@@ -711,6 +749,7 @@
             }
         }
 
+        // --- SUCURSALES ---
         async function cargarSucursales() {
             const tableBody = document.getElementById('tabla_sucursales');
             tableBody.innerHTML = '<tr><td colspan="3" class="loading">Cargando sucursales...</td></tr>';
@@ -751,6 +790,7 @@
             }
         }
 
+        // --- PARÁMETROS ---
         async function cargarParametros() {
             try {
                 const res = await secureFetch(`${API_URL}/api/parametros`);
@@ -798,9 +838,10 @@
             }
         }
 
-        async function generarArchivoPago(id) {
+        // --- DESCARGA DE ARCHIVOS (TXTs y PDFs) ---
+        async function generarArchivoPago(id, tipo) {
             try {
-                const res = await secureFetch(`${API_URL}/api/generar_archivo_pago/${id}`);
+                const res = await secureFetch(`${API_URL}/api/generar_archivo_pago/${id}?tipo=${tipo}`);
                 if (!res) return;
                 if (!res.ok) {
                     const errorData = await res.json();
@@ -810,7 +851,7 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `PROV_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.txt`;
+                a.download = `PROV_${tipo}_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.txt`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -820,9 +861,29 @@
             }
         }
 
-        // 🆕 GENERADOR DE PDF DEL LOTE COMPLETO
+        async function downloadFile(url, filename) {
+            try {
+                const res = await secureFetch(url);
+                if (!res) return;
+                if (!res.ok) throw new Error('Error al descargar el archivo');
+                const blob = await res.blob();
+                const a = document.createElement('a');
+                a.href = window.URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } catch (e) {
+                Swal.fire('Error', e.message, 'error');
+            }
+        }
+
         function generarLotePDF(id) {
-            window.open(`${API_URL}/api/generar_lote_pdf/${id}`, '_blank');
+            downloadFile(`${API_URL}/api/generar_lote_pdf/${id}`, `lote_${id}.pdf`);
+        }
+
+        function generarRecibo(id) {
+            downloadFile(`${API_URL}/api/generar_recibo/${id}`, `recibo_${id}.pdf`);
         }
 
         async function cargarLotes() {
@@ -847,7 +908,8 @@
                         <td><strong>$${l.total_usd.toFixed(2)}</strong></td>
                         <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
                         <td>
-                            <button class="btn-success" onclick="generarArchivoPago(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">💳 TXT Pago</button>
+                            <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 60%</button>
+                            <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 40%</button>
                             <button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">📄 Lote PDF</button>
                             <button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})">📂 Ver Detalle</button>
                             <button class="btn-danger" onclick="eliminarLote(${l.id_lote})">🗑️</button>
@@ -898,10 +960,6 @@
             }
         }
 
-        function generarRecibo(id) {
-            window.open(`${API_URL}/api/generar_recibo/${id}`, '_blank');
-        }
-
         function cerrarModalDetalle() { document.getElementById('modalDetalleLote').style.display = 'none'; }
         window.onclick = function(event) { const modal = document.getElementById('modalDetalleLote'); if (event.target == modal) { cerrarModalDetalle(); } }
         async function eliminarLote(id) {
@@ -917,5 +975,4 @@
         }
     </script>
 </body>
-</html>
 </html>
