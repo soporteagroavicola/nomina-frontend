@@ -692,9 +692,27 @@
             }
         }
 
-        // 🆕 NUEVA FUNCIÓN PARA DESCARGAR EL TXT BANCARIO
-        function generarArchivoPago(id) {
-            window.open(`${API_URL}/api/generar_archivo_pago/${id}`, '_blank');
+        // 🆕 NUEVA FUNCIÓN CORREGIDA (Descarga segura vía Fetch + Blob)
+        async function generarArchivoPago(id) {
+            try {
+                const res = await secureFetch(`${API_URL}/api/generar_archivo_pago/${id}`);
+                if (!res) return;
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error || 'Error al descargar el archivo');
+                }
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `PROV_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (e) {
+                Swal.fire('Error', `No se pudo descargar el archivo: ${e.message}`, 'error');
+            }
         }
 
         async function cargarLotes() {
