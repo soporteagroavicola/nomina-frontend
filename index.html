@@ -303,8 +303,12 @@
             } catch (error) {
                 window.location.href = 'login.html';
             }
-            
-            await actualizarBCV(true);
+
+            // 🛠️ CRUCIAL FIX: La actualización del BCV se ejecuta en segundo plano (sin await)
+            // para que los botones y la lista de empleados carguen INMEDIATAMENTE.
+            setTimeout(() => {
+                actualizarBCV(true);
+            }, 0);
 
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -347,7 +351,6 @@
         }
 
         // --- GESTIÓN DE USUARIOS ---
-        let editingUserId = null;
         function cancelarEdicionUsuario() {
             editingUserId = null;
             document.getElementById('seg_new_user').value = '';
