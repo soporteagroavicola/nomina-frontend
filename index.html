@@ -68,6 +68,7 @@
             <button class="tab-btn" data-target="sucursales">🏢 Sucursales</button>
             <button class="tab-btn" data-target="parametros">⚙️ Parámetros</button>
             <button class="tab-btn" data-target="pasivos">📄 Pasivos Laborales</button>
+            <button class="tab-btn" data-target="cestaticket">🍽️ Cestaticket</button>
             <button class="tab-btn" data-target="historial">📋 Historial</button>
             <button class="tab-btn" data-target="seguridad">🔐 Usuarios</button>
         </div>
@@ -211,6 +212,30 @@
             </div>
         </div>
 
+        <!-- 🆕 PESTAÑA CESTATICKET -->
+        <div id="cestaticket" class="tab-content">
+            <h2>🍽️ Calcular Cestaticket (Bono de Alimentación)</h2>
+            <div class="form-group">
+                <div><label>Fecha Inicio:</label><input type="date" id="cesta_fecha_inicio"></div>
+                <div><label>Fecha Fin:</label><input type="date" id="cesta_fecha_fin"></div>
+                <div><label>Descripción:</label><input type="text" id="cesta_descripcion" placeholder="Ej: Cestaticket 1ra Quincena Agosto 2026"></div>
+            </div>
+            <div><label>Seleccionar empleados:</label><div id="lista_empleados_cesta" class="loading">Cargando empleados...</div></div>
+            <br><button class="btn-primary" onclick="calcularCestaticket()">🍽️ Calcular Cestaticket</button>
+            <div id="resultado_cesta"></div>
+            
+            <hr style="margin: 40px 0;">
+            <h2>📋 Historial de Cestaticket</h2>
+            <div id="alert_hist_cesta"></div>
+            <div class="filters-container">
+                <input type="text" id="search_historial_cesta" placeholder="🔍 Buscar por descripción o ID..." oninput="cargarLotesCestaticket()">
+            </div>
+            <table>
+                <thead><tr><th>ID Lote</th><th>Descripción</th><th>Fecha Cálculo</th><th>Empleados</th><th>Total Bs</th><th>Acciones</th></tr></thead>
+                <tbody id="tabla_historial_cesta"></tbody>
+            </table>
+        </div>
+
         <div id="historial" class="tab-content">
             <h2>📋 Historial de Nóminas</h2>
             <div id="alert_hist"></div>
@@ -263,6 +288,7 @@
         </div>
     </div>
 
+    <!-- MODAL DETALLE LOTE NÓMINA -->
     <div id="modalDetalleLote" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3>📄 Detalle del Lote</h3><span class="close-btn" onclick="cerrarModalDetalle()">&times;</span></div>
@@ -271,6 +297,20 @@
                 <table id="tabla_detalle_lote">
                     <thead><tr><th>Empleado</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Bono Comp.</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th><th>Acciones</th></tr></thead>
                     <tbody id="cuerpo_detalle_lote"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🆕 MODAL DETALLE LOTE CESTATICKET -->
+    <div id="modalDetalleCesta" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>🍽️ Detalle del Lote de Cestaticket</h3><span class="close-btn" onclick="cerrarModalDetalleCesta()">&times;</span></div>
+            <div id="cesta_header_info"></div>
+            <div id="cesta_detalle_body" style="max-height: 500px; overflow-y: auto;">
+                <table id="tabla_detalle_cesta">
+                    <thead><tr><th>Empleado</th><th>Días Pagados</th><th>Total USD</th><th>Total Bs</th><th>Acciones</th></tr></thead>
+                    <tbody id="cuerpo_detalle_cesta"></tbody>
                 </table>
             </div>
         </div>
@@ -298,6 +338,7 @@
             const res = await fetch(url, options);
             if (res.status === 401) {
                 cerrarModalDetalle();
+                cerrarModalDetalleCesta();
                 window.location.href = 'login.html';
                 return null;
             }
@@ -332,6 +373,7 @@
                     else if (tabId === 'sucursales') cargarSucursales();
                     else if (tabId === 'calculadora') cargarEmpleadosCalc();
                     else if (tabId === 'parametros') cargarParametros();
+                    else if (tabId === 'cestaticket') { cargarEmpleadosCesta(); cargarLotesCestaticket(); }
                     else if (tabId === 'historial') cargarLotes();
                     else if (tabId === 'seguridad') cargarUsuarios();
                 });
@@ -594,6 +636,167 @@
             } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
 
+        // ============================================
+        // 🆕 CESTATICKET FUNCTIONS
+        // ============================================
+        async function cargarEmpleadosCesta() {
+            try {
+                const container = document.getElementById('lista_empleados_cesta');
+                container.innerHTML = '<p class="loading">Cargando empleados...</p>';
+                
+                const res = await secureFetch(`${API_URL}/api/empleados`);
+                if (!res) return;
+                if(!res.ok) throw new Error("Error al obtener empleados");
+                const data = await res.json();
+                
+                if(data.length === 0) container.innerHTML = "<p style='color: #888;'>No hay empleados registrados.</p>";
+                else {
+                    const quincenal = data.filter(e => e.tipo_pago === 'Quincenal');
+                    const semanal = data.filter(e => e.tipo_pago === 'Semanal');
+                    let html = '';
+                    if (quincenal.length > 0) html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#007bff;">📅 Pago Quincenal</div>` + quincenal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                    if (semanal.length > 0) html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#856404;">📅 Pago Semanal</div>` + semanal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                    container.innerHTML = html;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function calcularCestaticket() {
+            const fecha_inicio = document.getElementById('cesta_fecha_inicio').value;
+            const fecha_fin = document.getElementById('cesta_fecha_fin').value;
+            const descripcion = document.getElementById('cesta_descripcion').value;
+            const ids = Array.from(document.querySelectorAll('#lista_empleados_cesta input.cesta-check:checked')).map(c => parseInt(c.value));
+            if(!ids.length) { Swal.fire('Atención', 'Selecciona al menos un empleado para calcular el Cestaticket.', 'warning'); return; }
+
+            try {
+                const res = await secureFetch(`${API_URL}/api/calcular_cestaticket`, {
+                    method: 'POST',
+                    body: JSON.stringify({ fecha_inicio, fecha_fin, descripcion, empleados_ids: ids })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if(data.error) { Swal.fire('Error', data.error, 'error'); return; }
+
+                let total_bs = 0;
+                let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
+                html += `<table><tr><th>Empleado</th><th>Días Pagados</th><th>Valor Día USD</th><th>Total USD</th><th>Total Bs</th></tr>`;
+                data.resultados.forEach(r => { total_bs += r.total_bs; html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_pagados}</td><td>$${r.valor_diario_usd.toFixed(2)}</td><td>$${r.total_usd.toFixed(2)}</td><td><b>Bs. ${r.total_bs.toFixed(2)}</b></td></tr>`; });
+                html += `<tr class="lote-total-row"><td colspan="4" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr></table>`;
+                document.getElementById('resultado_cesta').innerHTML = html;
+                Swal.fire('¡Éxito!', `Cestaticket guardado como Lote #${data.lote_id}`, 'success');
+                cargarLotesCestaticket();
+            } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+        }
+
+        async function cargarLotesCestaticket() {
+            const tableBody = document.getElementById('tabla_historial_cesta');
+            tableBody.innerHTML = '<tr><td colspan="6" class="loading">Cargando lotes de cestaticket...</td></tr>';
+            try {
+                const searchText = document.getElementById('search_historial_cesta').value;
+                let url = `${API_URL}/api/lotes_cestaticket`;
+                if (searchText) url += `?search=${encodeURIComponent(searchText)}`;
+                const res = await secureFetch(url);
+                if (!res) return;
+                if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
+                const lotes = await res.json();
+                if(lotes.length === 0) tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No hay lotes de Cestaticket registrados.</td></tr>';
+                else tableBody.innerHTML = lotes.map(l => `
+                    <tr>
+                        <td><strong>#${l.id_lote}</strong></td>
+                        <td><strong>${l.descripcion || 'Sin descripción'}</strong></td>
+                        <td>${l.fecha_calculo}</td>
+                        <td>${l.cantidad_empleados_lote} empleados</td>
+                        <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
+                        <td>
+                            <button class="btn-success" onclick="generarArchivoCestaticket(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">💳 TXT</button>
+                            <button class="btn-warning" onclick="abrirModalDetalleCesta(${l.id_lote})">📂 Ver Detalle</button>
+                            <button class="btn-danger" onclick="eliminarLoteCestaticket(${l.id_lote})">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) { tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; font-weight:bold;">Error al cargar historial de cestaticket: ${e.message}</td></tr>`; console.error(e); }
+        }
+
+        async function generarArchivoCestaticket(id) {
+            try {
+                const res = await secureFetch(`${API_URL}/api/generar_archivo_cestaticket/${id}`);
+                if (!res) return;
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error || 'Error al descargar el archivo');
+                }
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `CESTA_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (e) {
+                Swal.fire('Error', `No se pudo descargar el archivo: ${e.message}`, 'error');
+            }
+        }
+
+        async function abrirModalDetalleCesta(id) {
+            const modal = document.getElementById('modalDetalleCesta');
+            const header = document.getElementById('cesta_header_info');
+            const body = document.getElementById('cuerpo_detalle_cesta');
+            header.innerHTML = '<p class="loading">Cargando datos del lote...</p>'; body.innerHTML = ''; modal.style.display = 'flex';
+            try {
+                const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`);
+                if (!res) return;
+                if(!res.ok) {
+                    let errorMsg = `Error ${res.status}: ${res.statusText}`;
+                    try {
+                        const errorData = await res.json();
+                        if (errorData.error) errorMsg = errorData.error;
+                    } catch (parseError) { /* Ignorar si no es JSON */ }
+                    throw new Error(errorMsg);
+                }
+                const lote = await res.json();
+                header.innerHTML = `<div style="display:flex; justify-content:space-between;"><div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'} <br><small>Generado el ${lote.fecha_calculo}</small></div><div style="text-align:right;"><div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div></div></div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>`;
+                body.innerHTML = lote.nominas.map(n => `
+                    <tr>
+                        <td>${n.nombres} ${n.apellidos}</td>
+                        <td>${n.dias_pagados}</td>
+                        <td>$${(n.total_usd || 0).toFixed(2)}</td>
+                        <td><strong>Bs. ${(n.total_bs || 0).toFixed(2)}</strong></td>
+                        <td>
+                            <button class="btn-warning" onclick="generarReciboCestaticket(${n.id})" style="font-size: 12px; padding: 4px 10px;">📄 Recibo</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', `No se pudo cargar el detalle del lote de cestaticket: ${e.message}`, 'error');
+                modal.style.display = 'none';
+            }
+        }
+
+        function cerrarModalDetalleCesta() { document.getElementById('modalDetalleCesta').style.display = 'none'; }
+        window.onclick = function(event) { const modal = document.getElementById('modalDetalleCesta'); if (event.target == modal) { cerrarModalDetalleCesta(); } }
+
+        async function eliminarLoteCestaticket(id) {
+            const result = await Swal.fire({ title: '⚠️ ¿Estás seguro?', text: "Esta acción eliminará TODO el lote de Cestaticket y todos sus registros asociados. No se puede deshacer.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar lote', cancelButtonText: 'Cancelar' });
+            if (result.isConfirmed) {
+                try {
+                    const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`, { method: 'DELETE' });
+                    if (!res) return;
+                    const resp = await res.json();
+                    if(res.ok) { Swal.fire('¡Eliminado!', 'El lote de Cestaticket ha sido eliminado.', 'success'); cargarLotesCestaticket(); } else { Swal.fire('Error', resp.error || 'No se pudo eliminar el lote.', 'error'); }
+                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+            }
+        }
+
+        function generarReciboCestaticket(id) {
+            downloadFile(`${API_URL}/api/generar_recibo_cestaticket/${id}`, `recibo_cesta_${id}.pdf`);
+        }
+
+        // ============================================
+        // CÁLCULO PASIVOS Y BONOS
+        // ============================================
         async function calcularPasivos() {
             const salario_mensual = parseFloat(document.getElementById('pasivos_salario').value) || 0;
             const dias = parseInt(document.getElementById('pasivos_dias').value) || 30;
@@ -924,7 +1127,6 @@
                         <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
                         <td>
                             <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 60%</button>
-                            <!-- 🆕 NUEVO BOTÓN TXT 100% -->
                             <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 100%</button>
                             <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 40%</button>
                             <button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">📄 Lote PDF</button>
