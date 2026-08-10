@@ -102,7 +102,7 @@
             <div><label>Seleccionar empleados:</label><div id="lista_empleados" class="loading">Cargando empleados...</div></div>
             <div id="nomina_inputs_container" style="display:none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
                 <h4 style="margin-top:0;">📝 Detalles de Nómina por Empleado</h4>
-                <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Ingresa los días de falta, horas extras y el valor de la hora extra en USD.</div>
+                <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Ingresa los días de falta, horas extras, valor de hora y bono complementario en USD.</div>
                 <table id="tabla_detalle_nomina">
                     <thead><tr>
                         <th>Empleado</th>
@@ -212,7 +212,7 @@
             </div>
         </div>
 
-        <!-- 🆕 PESTAÑA CESTATICKET (Actualizada para incluir Faltas) -->
+        <!-- 🆕 PESTAÑA CESTATICKET -->
         <div id="cestaticket" class="tab-content">
             <h2>🍽️ Calcular Cestaticket (Bono de Alimentación)</h2>
             <div class="form-group">
@@ -221,18 +221,6 @@
                 <div><label>Descripción:</label><input type="text" id="cesta_descripcion" placeholder="Ej: Cestaticket 1ra Quincena Agosto 2026"></div>
             </div>
             <div><label>Seleccionar empleados:</label><div id="lista_empleados_cesta" class="loading">Cargando empleados...</div></div>
-            
-            <!-- 🆕 Detalles de Faltas para Cestaticket -->
-            <div id="cesta_inputs_container" style="display:none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
-                <h4 style="margin-top:0;">📝 Faltas por Empleado</h4>
-                <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Ingresa los días de falta del empleado para descontar del pago de Cestaticket.</div>
-                <table id="tabla_detalle_cesta">
-                    <thead><tr><th>Empleado</th><th style="width:100px;">Faltas (Días)</th></tr></thead>
-                    <tbody id="cuerpo_detalle_cesta"></tbody>
-                </table>
-            </div>
-            <!-- 🆕 Fin Detalles -->
-
             <br><button class="btn-primary" onclick="calcularCestaticket()">🍽️ Calcular Cestaticket</button>
             <div id="resultado_cesta"></div>
             
@@ -321,7 +309,7 @@
             <div id="cesta_header_info"></div>
             <div id="cesta_detalle_body" style="max-height: 500px; overflow-y: auto;">
                 <table id="tabla_detalle_cesta">
-                    <thead><tr><th>Empleado</th><th>Días Pagados</th><th>Faltas</th><th>Total USD</th><th>Total Bs</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>Empleado</th><th>Días Pagados</th><th>Total USD</th><th>Total Bs</th><th>Acciones</th></tr></thead>
                     <tbody id="cuerpo_detalle_cesta"></tbody>
                 </table>
             </div>
@@ -605,4 +593,605 @@
             const ids = Array.from(document.querySelectorAll('.emp-check:checked')).map(c => parseInt(c.value));
             if(!ids.length) { Swal.fire('Atención', 'Selecciona al menos un empleado.', 'warning'); return; }
             const faltas = {}; const horas_extras = {}; const bonos = {};
-            document.querySelectorAll('#cuerpo_detalle
+            document.querySelectorAll('#cuerpo_detalle_nomina tr').forEach(row => {
+                if(row.hasAttribute('data-cedula') && row.style.display !== 'none') {
+                    const cedula = row.getAttribute('data-cedula');
+                    const faltas_val = parseInt(row.querySelector('.input_faltas').value) || 0;
+                    const horas_val = parseFloat(row.querySelector('.input_horas').value) || 0;
+                    const valor_val = parseFloat(row.querySelector('.input_valor_hora').value) || 0;
+                    const bono_val = parseFloat(row.querySelector('.input_bono').value) || 0;
+                    if (faltas_val > 0) faltas[cedula] = faltas_val;
+                    if (horas_val > 0 || valor_val > 0) horas_extras[cedula] = { horas: horas_val, valor_hora: valor_val };
+                    if (bono_val > 0) bonos[cedula] = bono_val;
+                }
+            });
+            try {
+                const res = await secureFetch(`${API_URL}/api/calcular_nomina`, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        tipo, fecha_inicio, fecha_fin, descripcion, 
+                        empleados_ids: ids, faltas, horas_extras, bonos, 
+                        aplicar_deducciones, split_60_40, calcular_solo_bono
+                    })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if(data.error) { Swal.fire('Error', data.error, 'error'); return; }
+                let total_usd = 0; let total_bs = 0;
+                data.resultados.forEach(r => { total_usd += r.neto_pagar_usd; total_bs += r.neto_pagar_bs; });
+                if (split_60_40) {
+                    let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
+                    html += `<table><tr><th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trab.</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Bono Comp.</th><th>Asign.</th><th>Deducc.</th><th>Pago 60% (Cta) USD</th><th>Pago 40% (Efec) USD</th><th>Pago 60% (Cta) Bs</th><th>Pago 40% (Efec) Bs</th></tr>`;
+                    data.resultados.forEach(r => html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td><td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.bono_complementario_usd.toFixed(2)}</td><td>$${r.total_asignaciones_base_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.pago_60_usd.toFixed(2)}</b></td><td><b>$${r.pago_40_usd.toFixed(2)}</b></td><td><b>Bs. ${r.pago_60_bs.toFixed(2)}</b></td><td><b>Bs. ${r.pago_40_bs.toFixed(2)}</b></td></tr>`);
+                    html += `<tr class="lote-total-row"><td colspan="10" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td><td><strong>$${total_usd.toFixed(2)}</strong></td><td></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td><td></td></tr></table>`;
+                    document.getElementById('resultado_content').innerHTML = html;
+                } else {
+                    let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
+                    html += `<table><tr><th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trab.</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Bono Comp.</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr>`;
+                    data.resultados.forEach(r => html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td><td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.bono_complementario_usd.toFixed(2)}</td><td>$${r.total_asignaciones_base_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td><td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td></tr>`);
+                    html += `<tr class="lote-total-row"><td colspan="10" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td><td><strong>$${total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr></table>`;
+                    document.getElementById('resultado_content').innerHTML = html;
+                }
+                Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success'); cargarLotes();
+            } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+        }
+
+        // ============================================
+        // 🆕 CESTATICKET FUNCTIONS
+        // ============================================
+        async function cargarEmpleadosCesta() {
+            try {
+                const container = document.getElementById('lista_empleados_cesta');
+                container.innerHTML = '<p class="loading">Cargando empleados...</p>';
+                
+                const res = await secureFetch(`${API_URL}/api/empleados`);
+                if (!res) return;
+                if(!res.ok) throw new Error("Error al obtener empleados");
+                const data = await res.json();
+                
+                if(data.length === 0) container.innerHTML = "<p style='color: #888;'>No hay empleados registrados.</p>";
+                else {
+                    const quincenal = data.filter(e => e.tipo_pago === 'Quincenal');
+                    const semanal = data.filter(e => e.tipo_pago === 'Semanal');
+                    let html = '';
+                    if (quincenal.length > 0) html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#007bff;">📅 Pago Quincenal</div>` + quincenal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                    if (semanal.length > 0) html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#856404;">📅 Pago Semanal</div>` + semanal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                    container.innerHTML = html;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function calcularCestaticket() {
+            const fecha_inicio = document.getElementById('cesta_fecha_inicio').value;
+            const fecha_fin = document.getElementById('cesta_fecha_fin').value;
+            const descripcion = document.getElementById('cesta_descripcion').value;
+            const ids = Array.from(document.querySelectorAll('#lista_empleados_cesta input.cesta-check:checked')).map(c => parseInt(c.value));
+            if(!ids.length) { Swal.fire('Atención', 'Selecciona al menos un empleado para calcular el Cestaticket.', 'warning'); return; }
+
+            try {
+                const res = await secureFetch(`${API_URL}/api/calcular_cestaticket`, {
+                    method: 'POST',
+                    body: JSON.stringify({ fecha_inicio, fecha_fin, descripcion, empleados_ids: ids })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if(data.error) { Swal.fire('Error', data.error, 'error'); return; }
+
+                let total_bs = 0;
+                let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
+                html += `<table><tr><th>Empleado</th><th>Días Pagados</th><th>Valor Día USD</th><th>Total USD</th><th>Total Bs</th></tr>`;
+                data.resultados.forEach(r => { total_bs += r.total_bs; html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_pagados}</td><td>$${r.valor_diario_usd.toFixed(2)}</td><td>$${r.total_usd.toFixed(2)}</td><td><b>Bs. ${r.total_bs.toFixed(2)}</b></td></tr>`; });
+                html += `<tr class="lote-total-row"><td colspan="4" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr></table>`;
+                document.getElementById('resultado_cesta').innerHTML = html;
+                Swal.fire('¡Éxito!', `Cestaticket guardado como Lote #${data.lote_id}`, 'success');
+                cargarLotesCestaticket();
+            } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+        }
+
+        async function cargarLotesCestaticket() {
+            const tableBody = document.getElementById('tabla_historial_cesta');
+            tableBody.innerHTML = '<tr><td colspan="6" class="loading">Cargando lotes de cestaticket...</td></tr>';
+            try {
+                const searchText = document.getElementById('search_historial_cesta').value;
+                let url = `${API_URL}/api/lotes_cestaticket`;
+                if (searchText) url += `?search=${encodeURIComponent(searchText)}`;
+                const res = await secureFetch(url);
+                if (!res) return;
+                if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
+                const lotes = await res.json();
+                if(lotes.length === 0) tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No hay lotes de Cestaticket registrados.</td></tr>';
+                else tableBody.innerHTML = lotes.map(l => `
+                    <tr>
+                        <td><strong>#${l.id_lote}</strong></td>
+                        <td><strong>${l.descripcion || 'Sin descripción'}</strong></td>
+                        <td>${l.fecha_calculo}</td>
+                        <td>${l.cantidad_empleados_lote} empleados</td>
+                        <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
+                        <td>
+                            <button class="btn-success" onclick="generarArchivoCestaticket(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">💳 TXT</button>
+                            <button class="btn-warning" onclick="abrirModalDetalleCesta(${l.id_lote})">📂 Ver Detalle</button>
+                            <button class="btn-danger" onclick="eliminarLoteCestaticket(${l.id_lote})">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) { tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; font-weight:bold;">Error al cargar historial de cestaticket: ${e.message}</td></tr>`; console.error(e); }
+        }
+
+        async function generarArchivoCestaticket(id) {
+            try {
+                const res = await secureFetch(`${API_URL}/api/generar_archivo_cestaticket/${id}`);
+                if (!res) return;
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error || 'Error al descargar el archivo');
+                }
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `CESTA_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (e) {
+                Swal.fire('Error', `No se pudo descargar el archivo: ${e.message}`, 'error');
+            }
+        }
+
+        async function abrirModalDetalleCesta(id) {
+            const modal = document.getElementById('modalDetalleCesta');
+            const header = document.getElementById('cesta_header_info');
+            const body = document.getElementById('cuerpo_detalle_cesta');
+            header.innerHTML = '<p class="loading">Cargando datos del lote...</p>'; body.innerHTML = ''; modal.style.display = 'flex';
+            try {
+                const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`);
+                if (!res) return;
+                if(!res.ok) {
+                    let errorMsg = `Error ${res.status}: ${res.statusText}`;
+                    try {
+                        const errorData = await res.json();
+                        if (errorData.error) errorMsg = errorData.error;
+                    } catch (parseError) { /* Ignorar si no es JSON */ }
+                    throw new Error(errorMsg);
+                }
+                const lote = await res.json();
+                header.innerHTML = `<div style="display:flex; justify-content:space-between;"><div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'} <br><small>Generado el ${lote.fecha_calculo}</small></div><div style="text-align:right;"><div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div></div></div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>`;
+                body.innerHTML = lote.nominas.map(n => `
+                    <tr>
+                        <td>${n.nombres} ${n.apellidos}</td>
+                        <td>${n.dias_pagados}</td>
+                        <td>$${(n.total_usd || 0).toFixed(2)}</td>
+                        <td><strong>Bs. ${(n.total_bs || 0).toFixed(2)}</strong></td>
+                        <td>
+                            <button class="btn-warning" onclick="generarReciboCestaticket(${n.id})" style="font-size: 12px; padding: 4px 10px;">📄 Recibo</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', `No se pudo cargar el detalle del lote de cestaticket: ${e.message}`, 'error');
+                modal.style.display = 'none';
+            }
+        }
+
+        function cerrarModalDetalleCesta() { document.getElementById('modalDetalleCesta').style.display = 'none'; }
+        window.onclick = function(event) { const modal = document.getElementById('modalDetalleCesta'); if (event.target == modal) { cerrarModalDetalleCesta(); } }
+
+        async function eliminarLoteCestaticket(id) {
+            const result = await Swal.fire({ title: '⚠️ ¿Estás seguro?', text: "Esta acción eliminará TODO el lote de Cestaticket y todos sus registros asociados. No se puede deshacer.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar lote', cancelButtonText: 'Cancelar' });
+            if (result.isConfirmed) {
+                try {
+                    const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`, { method: 'DELETE' });
+                    if (!res) return;
+                    const resp = await res.json();
+                    if(res.ok) { Swal.fire('¡Eliminado!', 'El lote de Cestaticket ha sido eliminado.', 'success'); cargarLotesCestaticket(); } else { Swal.fire('Error', resp.error || 'No se pudo eliminar el lote.', 'error'); }
+                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+            }
+        }
+
+        function generarReciboCestaticket(id) {
+            downloadFile(`${API_URL}/api/generar_recibo_cestaticket/${id}`, `recibo_cesta_${id}.pdf`);
+        }
+
+        // ============================================
+        // CÁLCULO PASIVOS Y BONOS
+        // ============================================
+        async function calcularPasivos() {
+            const salario_mensual = parseFloat(document.getElementById('pasivos_salario').value) || 0;
+            const dias = parseInt(document.getElementById('pasivos_dias').value) || 30;
+            const usar_base_60 = document.getElementById('pasivos_60').checked;
+            if(salario_mensual <= 0) { Swal.fire('Atención', 'Ingresa un salario mensual base válido en USD.', 'warning'); return; }
+            try {
+                const res = await secureFetch(`${API_URL}/api/calcular_pasivos`, {
+                    method: 'POST',
+                    body: JSON.stringify({ salario_mensual, dias, usar_base_60 })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if(data.error) { Swal.fire('Error', data.error, 'error'); return; }
+                let html = `<h4>Resultado del Cálculo</h4><div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;"><div><strong>Días calculados:</strong> ${data.dias}</div><div><strong>Base utilizada:</strong> ${data.base_usada}</div><div><strong>Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(2)}</div></div><div style="margin-top:20px; font-size: 1.3em; padding: 20px; background: #e9f7ef; border-radius: 8px; text-align: center;"><div><strong>Total a Pagar en USD:</strong> <span style="color:#0056b3;">$${data.total_usd.toFixed(2)}</span></div><div><strong>Total a Pagar en Bs (a tasa BCV):</strong> <span style="color:#0056b3;">Bs. ${data.total_bs.toFixed(2)}</span></div></div>`;
+                document.getElementById('resultado_pasivos').innerHTML = html;
+                document.getElementById('alert_pasivos').innerHTML = `<div class="alert alert-success">✅ Cálculo de pasivos realizado correctamente.</div>`;
+            } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+        }
+
+        async function actualizarBCV(silencioso = false) {
+            try {
+                const res = await secureFetch(`${API_URL}/api/actualizar_bcv`);
+                if (!res) return;
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById('param_tasa_bcv').value = data.tasa;
+                    if (!silencioso) {
+                        Swal.fire('¡Tasa Actualizada!', `La nueva tasa BCV es: Bs. ${data.tasa}`, 'success');
+                    }
+                } else if (!silencioso) {
+                    Swal.fire('Error', data.error || 'No se pudo actualizar la tasa.', 'error');
+                }
+            } catch (e) {
+                if (!silencioso) {
+                    Swal.fire('Error de red', 'No se pudo conectar con el servidor para actualizar la tasa.', 'error');
+                }
+            }
+        }
+
+        function cancelarEdicion() {
+            editingEmployeeId = null;
+            document.getElementById('form_title').innerText = 'Agregar Nuevo Empleado';
+            document.getElementById('btn_guardar_empleado').innerHTML = '➕ Guardar Empleado';
+            document.getElementById('emp_cedula').value = '';
+            document.getElementById('emp_nombres').value = '';
+            document.getElementById('emp_apellidos').value = '';
+            document.getElementById('emp_cargo').value = '';
+            document.getElementById('emp_depto').value = '';
+            document.getElementById('emp_salario').value = '';
+            document.getElementById('emp_fecha_nacimiento').value = '';
+            document.getElementById('emp_fecha_ingreso').value = '';
+            document.getElementById('emp_cuenta_bancaria').value = '';
+        }
+
+        function cargarFormularioEditar(id, cedula, nombres, apellidos, cargo, depto, salario, sucursal_id, fecha_nac, fecha_ing, cuenta, tipo_pago) {
+            editingEmployeeId = id;
+            document.getElementById('form_title').innerText = '✏️ Editando Empleado';
+            document.getElementById('btn_guardar_empleado').innerHTML = '💾 Actualizar Empleado';
+            document.getElementById('emp_cedula').value = cedula;
+            document.getElementById('emp_nombres').value = nombres;
+            document.getElementById('emp_apellidos').value = apellidos;
+            document.getElementById('emp_cargo').value = cargo;
+            document.getElementById('emp_depto').value = depto;
+            document.getElementById('emp_salario').value = salario;
+            document.getElementById('emp_sucursal').value = sucursal_id;
+            document.getElementById('emp_fecha_nacimiento').value = fecha_nac;
+            document.getElementById('emp_fecha_ingreso').value = fecha_ing;
+            document.getElementById('emp_cuenta_bancaria').value = cuenta;
+            document.getElementById('emp_tipo_pago').value = tipo_pago;
+            document.getElementById('empleados').scrollIntoView({behavior: "smooth"});
+        }
+
+        async function guardarEmpleado() {
+            const data = { 
+                cedula: document.getElementById('emp_cedula').value, 
+                nombres: document.getElementById('emp_nombres').value,
+                apellidos: document.getElementById('emp_apellidos').value, 
+                cargo: document.getElementById('emp_cargo').value,
+                departamento: document.getElementById('emp_depto').value, 
+                salario_mensual_usd: parseFloat(document.getElementById('emp_salario').value) || 0,
+                sucursal_id: parseInt(document.getElementById('emp_sucursal').value) || null,
+                fecha_nacimiento: document.getElementById('emp_fecha_nacimiento').value || null,
+                fecha_ingreso: document.getElementById('emp_fecha_ingreso').value || null,
+                cuenta_bancaria: document.getElementById('emp_cuenta_bancaria').value || '',
+                tipo_pago: document.getElementById('emp_tipo_pago').value
+            };
+
+            let url = `${API_URL}/api/empleados`;
+            let method = 'POST';
+
+            if (editingEmployeeId) {
+                url += `/${editingEmployeeId}`;
+                method = 'PUT';
+            }
+
+            try {
+                const res = await secureFetch(url, { method: method, body: JSON.stringify(data) });
+                if (!res) return;
+                let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor respondió con HTML" }; }
+                const alertBox = document.getElementById('alert_emp');
+                if(res.ok) { 
+                    alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`;
+                    Swal.fire('¡Éxito!', resp.mensaje, 'success');
+                    cancelarEdicion();
+                    cargarEmpleadosAdmin();
+                } else { 
+                    alertBox.innerHTML = `<div class="alert alert-danger">Error: ${resp.error}</div>`;
+                    Swal.fire('Error', resp.error, 'error'); 
+                }
+            } catch (error) { 
+                document.getElementById('alert_emp').innerHTML = `<div class="alert alert-danger">Error de red: ${error.message}</div>`;
+                Swal.fire('Error de red', error.message, 'error'); 
+            }
+        }
+
+        async function cargarEmpleadosAdmin() {
+            const tableBody = document.getElementById('tabla_empleados');
+            tableBody.innerHTML = '<tr><td colspan="8" class="loading">Cargando empleados...</td></tr>';
+            try {
+                const searchText = document.getElementById('search_empleado').value;
+                const filterSucursal = document.getElementById('filter_sucursal').value;
+                let url = `${API_URL}/api/empleados`; const params = [];
+                if (searchText) params.push(`search=${encodeURIComponent(searchText)}`);
+                if (filterSucursal) params.push(`sucursal_id=${encodeURIComponent(filterSucursal)}`);
+                if (params.length > 0) url += '?' + params.join('&');
+                const res = await secureFetch(url);
+                if (!res) return;
+                if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
+                const empleados = await res.json();
+                if(empleados.length === 0) tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No se encontraron empleados con esos filtros.</td></tr>';
+                else {
+                    tableBody.innerHTML = empleados.map(e => `
+                        <tr>
+                            <td>${e.id_empleado}</td>
+                            <td>${e.cedula}</td>
+                            <td>${e.nombres} ${e.apellidos}</td>
+                            <td>${e.cargo}</td>
+                            <td>$${e.salario_mensual_usd}</td>
+                            <td>${e.tipo_pago}</td>
+                            <td>${e.fecha_ingreso || '-'}</td>
+                            <td>
+                                <button class="btn-warning" onclick="cargarFormularioEditar(${e.id_empleado}, '${e.cedula}', '${e.nombres}', '${e.apellidos}', '${e.cargo}', '${e.departamento}', ${e.salario_mensual_usd}, ${e.sucursal_id || ''}, '${e.fecha_nacimiento || ''}', '${e.fecha_ingreso || ''}', '${e.cuenta_bancaria || ''}', '${e.tipo_pago}')">✏️ Editar</button>
+                                <button class="btn-danger" onclick="eliminarEmpleado(${e.id_empleado})">🗑️ Eliminar</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+                const resSuc = await secureFetch(`${API_URL}/api/sucursales`);
+                if (resSuc && resSuc.ok) {
+                    const sucs = await resSuc.json();
+                    document.getElementById('emp_sucursal').innerHTML = '<option value="">Seleccione una sucursal...</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+                    const selectSucFilter = document.getElementById('filter_sucursal'); const cVal = selectSucFilter.value;
+                    selectSucFilter.innerHTML = '<option value="">Ver todas las sucursales</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+                    selectSucFilter.value = cVal;
+                }
+            } catch(e) { tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar empleados: ${e.message}</td></tr>`; console.error(e); }
+        }
+
+        async function eliminarEmpleado(id) {
+            const result = await Swal.fire({ title: '¿Estás seguro?', text: "El empleado será inactivo.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
+            if (result.isConfirmed) {
+                try {
+                    const res = await secureFetch(`${API_URL}/api/empleados/${id}`, { method: 'DELETE' });
+                    if (!res) return;
+                    const resp = await res.json();
+                    if(res.ok) { cargarEmpleadosAdmin(); Swal.fire('Eliminado', 'El empleado ha sido eliminado.', 'success'); } else { Swal.fire('Error', resp.error, 'error'); }
+                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+            }
+        }
+
+        async function cargarSucursales() {
+            const tableBody = document.getElementById('tabla_sucursales');
+            tableBody.innerHTML = '<tr><td colspan="3" class="loading">Cargando sucursales...</td></tr>';
+            try {
+                const res = await secureFetch(`${API_URL}/api/sucursales`);
+                if (!res) return;
+                if(!res.ok) throw new Error(`Error del servidor: ${res.status}`);
+                let data; const contentType = res.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) data = await res.json();
+                else { const text = await res.text(); throw new Error(`HTML recibido. ${text.substring(0,80)}...`); }
+                if(data.length === 0) tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">No hay sucursales creadas.</td></tr>';
+                else tableBody.innerHTML = data.map(s => `<tr><td>${s.id_sucursal}</td><td>${s.nombre}</td><td><button class="btn-danger" onclick="eliminarSucursal(${s.id_sucursal})">🗑️ Eliminar</button></td></tr>`).join('');
+            } catch(e) { tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`; console.error(e); }
+        }
+
+        async function crearSucursal() {
+            const nombre = document.getElementById('suc_nombre').value;
+            if(!nombre) { Swal.fire('Atención', 'El nombre no puede estar vacío.', 'warning'); return; }
+            try {
+                const res = await secureFetch(`${API_URL}/api/sucursales`, { method: 'POST', body: JSON.stringify({nombre}) });
+                if (!res) return;
+                let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor no respondió con JSON" }; }
+                const alertBox = document.getElementById('alert_suc');
+                if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; document.getElementById('suc_nombre').value = ''; cargarSucursales(); Swal.fire('¡Éxito!', resp.mensaje, 'success'); } 
+                else { alertBox.innerHTML = `<div class="alert alert-danger">⚠️ Error: ${resp.error || 'Error desconocido'}</div>`; Swal.fire('Error', resp.error || 'Error desconocido', 'error'); }
+            } catch (error) { document.getElementById('alert_suc').innerHTML = `<div class="alert alert-danger">❌ Error de red: ${error.message}</div>`; Swal.fire('Error de red', error.message, 'error'); }
+        }
+
+        async function eliminarSucursal(id) {
+            const result = await Swal.fire({ title: '¿Estás seguro?', text: "Esta acción eliminará la sucursal.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
+            if (result.isConfirmed) {
+                try {
+                    const res = await secureFetch(`${API_URL}/api/sucursales/${id}`, { method: 'DELETE' });
+                    if (!res) return;
+                    const resp = await res.json();
+                    if(res.ok) { cargarSucursales(); Swal.fire('Eliminado', 'Sucursal eliminada.', 'success'); } else { Swal.fire('Error', resp.error, 'error'); }
+                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+            }
+        }
+
+        async function cargarParametros() {
+            try {
+                const res = await secureFetch(`${API_URL}/api/parametros`);
+                if (!res) return;
+                if(!res.ok) throw new Error("Error al cargar parámetros");
+                const params = await res.json();
+                document.getElementById('param_tasa_bcv').value = params.tasa_bcv || 755.1552;
+                document.getElementById('param_ivss').value = params.porcentaje_ivss || 0.04;
+                document.getElementById('param_rpe').value = params.porcentaje_rpe || 0.005;
+                document.getElementById('param_faov').value = params.porcentaje_faov || 0.01;
+                document.getElementById('param_cestaticket').value = params.cestaticket_usd || 40.0;
+                document.getElementById('param_rif_empresa').value = params.rif_empresa || '';
+                document.getElementById('param_cuenta_empresa').value = params.cuenta_empresa || '';
+                document.getElementById('param_nombre_cuenta_empresa').value = params.nombre_cuenta_empresa || '';
+                document.getElementById('param_codigo_banco').value = params.codigo_banco_defecto || '';
+            } catch (e) { console.error(e); Swal.fire('Error', 'No se pudieron cargar los parámetros.', 'error'); }
+        }
+
+        async function guardarParametros() {
+            const parametros = [
+                { clave: 'tasa_bcv', valor: parseFloat(document.getElementById('param_tasa_bcv').value) || 0 },
+                { clave: 'porcentaje_ivss', valor: parseFloat(document.getElementById('param_ivss').value) || 0 },
+                { clave: 'porcentaje_rpe', valor: parseFloat(document.getElementById('param_rpe').value) || 0 },
+                { clave: 'porcentaje_faov', valor: parseFloat(document.getElementById('param_faov').value) || 0 },
+                { clave: 'cestaticket_usd', valor: parseFloat(document.getElementById('param_cestaticket').value) || 0 },
+                { clave: 'rif_empresa', valor: document.getElementById('param_rif_empresa').value.trim() },
+                { clave: 'cuenta_empresa', valor: document.getElementById('param_cuenta_empresa').value.trim() },
+                { clave: 'nombre_cuenta_empresa', valor: document.getElementById('param_nombre_cuenta_empresa').value.trim() },
+                { clave: 'codigo_banco_defecto', valor: document.getElementById('param_codigo_banco').value.trim() }
+            ];
+            let errores = 0;
+            for (const param of parametros) {
+                try {
+                    const res = await secureFetch(`${API_URL}/api/parametros`, { method: 'PUT', body: JSON.stringify(param) });
+                    if (!res) return;
+                    if (!res.ok) errores++;
+                } catch (e) { errores++; }
+            }
+            if (errores === 0) {
+                Swal.fire('¡Actualizado!', 'Todos los parámetros (Nómina y Empresa) se han guardado.', 'success');
+                document.getElementById('alert_params').innerHTML = `<div class="alert alert-success">✅ Parámetros actualizados correctamente.</div>`;
+            } else {
+                Swal.fire('Error', 'Ocurrió un error al guardar algunos parámetros.', 'error');
+                document.getElementById('alert_params').innerHTML = `<div class="alert alert-danger">❌ Error al guardar.</div>`;
+            }
+        }
+
+        async function generarArchivoPago(id, tipo) {
+            try {
+                const res = await secureFetch(`${API_URL}/api/generar_archivo_pago/${id}?tipo=${tipo}`);
+                if (!res) return;
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error || 'Error al descargar el archivo');
+                }
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `PROV_${tipo}_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (e) {
+                Swal.fire('Error', `No se pudo descargar el archivo: ${e.message}`, 'error');
+            }
+        }
+
+        async function downloadFile(url, filename) {
+            try {
+                const res = await secureFetch(url);
+                if (!res) return;
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error(`Error ${res.status}: ${errorText || 'Error desconocido al descargar el archivo'}`);
+                }
+                const blob = await res.blob();
+                const a = document.createElement('a');
+                a.href = window.URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } catch (e) {
+                Swal.fire('Error', e.message, 'error');
+            }
+        }
+
+        function generarLotePDF(id) {
+            downloadFile(`${API_URL}/api/generar_lote_pdf/${id}`, `lote_${id}.pdf`);
+        }
+
+        function generarRecibo(id) {
+            downloadFile(`${API_URL}/api/generar_recibo/${id}`, `recibo_${id}.pdf`);
+        }
+
+        async function cargarLotes() {
+            const tableBody = document.getElementById('tabla_historial');
+            tableBody.innerHTML = '<tr><td colspan="8" class="loading">Cargando lotes...</td></tr>';
+            try {
+                const searchText = document.getElementById('search_historial').value;
+                let url = `${API_URL}/api/lotes`;
+                if (searchText) url += `?search=${encodeURIComponent(searchText)}`;
+                const res = await secureFetch(url);
+                if (!res) return;
+                if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
+                const lotes = await res.json();
+                if(lotes.length === 0) tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No hay lotes registrados.</td></tr>';
+                else tableBody.innerHTML = lotes.map(l => `
+                    <tr>
+                        <td><strong>#${l.id_lote}</strong></td>
+                        <td><strong>${l.descripcion || 'Sin descripción'}</strong></td>
+                        <td>${l.fecha_calculo}</td>
+                        <td>${l.cantidad_empleados_lote} empleados</td>
+                        <td><small>${l.sucursales_involucradas}</small></td>
+                        <td><strong>$${l.total_usd.toFixed(2)}</strong></td>
+                        <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
+                        <td>
+                            <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 60%</button>
+                            <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 100%</button>
+                            <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 40%</button>
+                            <button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">📄 Lote PDF</button>
+                            <button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})">📂 Ver Detalle</button>
+                            <button class="btn-danger" onclick="eliminarLote(${l.id_lote})">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) { tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar historial: ${e.message}</td></tr>`; console.error(e); }
+        }
+
+        async function abrirModalDetalleLote(id) {
+            const modal = document.getElementById('modalDetalleLote');
+            const header = document.getElementById('lote_header_info');
+            const body = document.getElementById('cuerpo_detalle_lote');
+            header.innerHTML = '<p class="loading">Cargando datos del lote...</p>'; body.innerHTML = ''; modal.style.display = 'flex';
+            try {
+                const res = await secureFetch(`${API_URL}/api/lotes/${id}`);
+                if (!res) return;
+                if(!res.ok) {
+                    let errorMsg = `Error ${res.status}: ${res.statusText}`;
+                    try {
+                        const errorData = await res.json();
+                        if (errorData.error) errorMsg = errorData.error;
+                    } catch (parseError) { /* Ignorar si no es JSON */ }
+                    throw new Error(errorMsg);
+                }
+                const lote = await res.json();
+                header.innerHTML = `<div style="display:flex; justify-content:space-between;"><div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'} <br><small>Generado el ${lote.fecha_calculo}</small></div><div style="text-align:right;"><div><strong>Total Lote:</strong> $${lote.total_usd.toFixed(2)}</div><div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div></div></div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>`;
+                body.innerHTML = lote.nominas.map(n => `
+                    <tr>
+                        <td>${n.nombres} ${n.apellidos}</td>
+                        <td>$${(n.salario_base_usd || 0).toFixed(2)}</td>
+                        <td><small>$${(n.base_incidencia_60_usd || 0).toFixed(2)}</small></td>
+                        <td>$${(n.horas_extras_usd || 0).toFixed(2)}</td>
+                        <td>$${(n.bono_complementario_usd || 0).toFixed(2)}</td>
+                        <td>$${(n.total_asignaciones_usd || 0).toFixed(2)}</td>
+                        <td>$${(n.total_deducciones_usd || 0).toFixed(2)}</td>
+                        <td><strong>$${(n.neto_pagar_usd || 0).toFixed(2)}</strong></td>
+                        <td><strong>Bs. ${(n.neto_pagar_bs || 0).toFixed(2)}</strong></td>
+                        <td>
+                            <button class="btn-warning" onclick="generarRecibo(${n.id_nomina})" style="font-size: 12px; padding: 4px 10px;">📄 Recibo</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', `No se pudo cargar el detalle del lote: ${e.message}`, 'error');
+                modal.style.display = 'none';
+            }
+        }
+
+        function cerrarModalDetalle() { document.getElementById('modalDetalleLote').style.display = 'none'; }
+        window.onclick = function(event) { const modal = document.getElementById('modalDetalleLote'); if (event.target == modal) { cerrarModalDetalle(); } }
+        async function eliminarLote(id) {
+            const result = await Swal.fire({ title: '⚠️ ¿Estás seguro?', text: "Esta acción eliminará TODO el lote de nómina y todos sus registros asociados. No se puede deshacer.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar lote', cancelButtonText: 'Cancelar' });
+            if (result.isConfirmed) {
+                try {
+                    const res = await secureFetch(`${API_URL}/api/lotes/${id}`, { method: 'DELETE' });
+                    if (!res) return;
+                    const resp = await res.json();
+                    if(res.ok) { Swal.fire('¡Eliminado!', 'El lote de nómina ha sido eliminado.', 'success'); cargarLotes(); } else { Swal.fire('Error', resp.error || 'No se pudo eliminar el lote.', 'error'); }
+                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+            }
+        }
+    </script>
+</body>
+</html>
