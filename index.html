@@ -704,7 +704,16 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes/${id}`);
                 if (!res) return;
-                if(!res.ok) throw new Error("Error al obtener el detalle del lote");
+                
+                if(!res.ok) {
+                    let errorMsg = `Error ${res.status}: ${res.statusText}`;
+                    try {
+                        const errorData = await res.json();
+                        if (errorData.error) errorMsg = errorData.error;
+                    } catch (parseError) { /* Ignorar si no es JSON */ }
+                    throw new Error(errorMsg);
+                }
+
                 const lote = await res.json();
                 header.innerHTML = `<div style="display:flex; justify-content:space-between;"><div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'} <br><small>Generado el ${lote.fecha_calculo}</small></div><div style="text-align:right;"><div><strong>Total Lote:</strong> $${lote.total_usd.toFixed(2)}</div><div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div></div></div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>`;
                 
@@ -724,7 +733,11 @@
                         </td>
                     </tr>
                 `).join('');
-            } catch (e) { console.error(e); Swal.fire('Error', 'No se pudo cargar el detalle del lote.', 'error'); modal.style.display = 'none'; }
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', `No se pudo cargar el detalle del lote: ${e.message}`, 'error');
+                modal.style.display = 'none';
+            }
         }
 
         function generarRecibo(id) {
