@@ -84,7 +84,6 @@
                 <div><label>Filtrar por Tipo de Pago:</label><select id="calc_tipo_pago"><option value="">Todos</option><option value="Quincenal">Quincenal</option><option value="Semanal">Semanal</option></select></div>
                 <div><label>Descripción:</label><input type="text" id="calc_descripcion" placeholder="Ej: Nómina 1ra Quincena Agosto 2026"></div>
             </div>
-            
             <div class="form-group" style="display: flex; flex-direction: column; gap: 10px; margin-top: -5px; margin-bottom: 15px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <input type="checkbox" id="aplicar_deducciones" checked style="width: 20px; height: 20px; cursor: pointer;">
@@ -95,7 +94,6 @@
                     <label for="split_60_40" style="width: auto; margin: 0; font-weight: bold; cursor: pointer;">Dividir pago en dos partes (60% Cuenta / 40% Efectivo)</label>
                 </div>
             </div>
-            
             <div><label>Seleccionar empleados:</label><div id="lista_empleados" class="loading">Cargando empleados...</div></div>
             <div id="nomina_inputs_container" style="display:none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
                 <h4 style="margin-top:0;">📝 Detalles de Nómina por Empleado</h4>
@@ -192,7 +190,21 @@
             <h2>📋 Historial de Nóminas</h2>
             <div id="alert_hist"></div>
             <div class="filters-container"><input type="text" id="search_historial" placeholder="🔍 Buscar por descripción o ID..." oninput="cargarLotes()"></div>
-            <table><thead><tr><th>ID Lote</th><th>Descripción</th><th>Fecha Cálculo</th><th>Empleados</th><th>Sucursales</th><th>Total USD</th><th>Total Bs</th><th>Acciones</th></tr></thead><tbody id="tabla_historial"></tbody></table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Lote</th>
+                        <th>Descripción</th>
+                        <th>Fecha Cálculo</th>
+                        <th>Empleados</th>
+                        <th>Sucursales</th>
+                        <th>Total USD</th>
+                        <th>Total Bs</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla_historial"></tbody>
+            </table>
         </div>
 
         <div id="seguridad" class="tab-content">
@@ -680,6 +692,11 @@
             }
         }
 
+        // 🆕 NUEVA FUNCIÓN PARA DESCARGAR EL TXT BANCARIO
+        function generarArchivoPago(id) {
+            window.open(`${API_URL}/api/generar_archivo_pago/${id}`, '_blank');
+        }
+
         async function cargarLotes() {
             const tableBody = document.getElementById('tabla_historial');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading">Cargando lotes...</td></tr>';
@@ -692,7 +709,22 @@
                 if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const lotes = await res.json();
                 if(lotes.length === 0) tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No hay lotes registrados.</td></tr>';
-                else tableBody.innerHTML = lotes.map(l => `<tr><td><strong>#${l.id_lote}</strong></td><td><strong>${l.descripcion || 'Sin descripción'}</strong></td><td>${l.fecha_calculo}</td><td>${l.cantidad_empleados_lote} empleados</td><td><small>${l.sucursales_involucradas}</small></td><td><strong>$${l.total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td><td><button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})">📂 Ver Detalle</button><button class="btn-danger" onclick="eliminarLote(${l.id_lote})">🗑️</button></td></tr>`).join('');
+                else tableBody.innerHTML = lotes.map(l => `
+                    <tr>
+                        <td><strong>#${l.id_lote}</strong></td>
+                        <td><strong>${l.descripcion || 'Sin descripción'}</strong></td>
+                        <td>${l.fecha_calculo}</td>
+                        <td>${l.cantidad_empleados_lote} empleados</td>
+                        <td><small>${l.sucursales_involucradas}</small></td>
+                        <td><strong>$${l.total_usd.toFixed(2)}</strong></td>
+                        <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
+                        <td>
+                            <button class="btn-success" onclick="generarArchivoPago(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">💳 TXT Pago</button>
+                            <button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})">📂 Ver Detalle</button>
+                            <button class="btn-danger" onclick="eliminarLote(${l.id_lote})">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
             } catch(e) { tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar historial: ${e.message}</td></tr>`; console.error(e); }
         }
 
@@ -704,7 +736,6 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes/${id}`);
                 if (!res) return;
-                
                 if(!res.ok) {
                     let errorMsg = `Error ${res.status}: ${res.statusText}`;
                     try {
