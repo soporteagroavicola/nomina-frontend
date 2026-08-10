@@ -84,7 +84,6 @@
                 <div><label>Filtrar por Tipo de Pago:</label><select id="calc_tipo_pago"><option value="">Todos</option><option value="Quincenal">Quincenal</option><option value="Semanal">Semanal</option></select></div>
                 <div><label>Descripción:</label><input type="text" id="calc_descripcion" placeholder="Ej: Nómina 1ra Quincena Agosto 2026"></div>
             </div>
-            
             <div class="form-group" style="display: flex; flex-direction: column; gap: 10px; margin-top: -5px; margin-bottom: 15px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <input type="checkbox" id="aplicar_deducciones" checked style="width: 20px; height: 20px; cursor: pointer;">
@@ -94,13 +93,11 @@
                     <input type="checkbox" id="split_60_40" style="width: 20px; height: 20px; cursor: pointer;">
                     <label for="split_60_40" style="width: auto; margin: 0; font-weight: bold; cursor: pointer;">Dividir pago en dos partes (60% Cuenta / 40% Efectivo)</label>
                 </div>
-                <!-- 🆕 NUEVO MODO SOLO BONO -->
                 <div style="display: flex; align-items: center; gap: 10px; border: 1px solid #ccc; padding: 10px; border-radius: 5px; background: #f1f8ff;">
                     <input type="checkbox" id="calcular_solo_bono" style="width: 20px; height: 20px; cursor: pointer;" onchange="toggleSoloBono()">
                     <label for="calcular_solo_bono" style="width: auto; margin: 0; font-weight: bold; cursor: pointer;">🔘 Calcular solo Bono (Ignorar sueldo base, faltas y horas extras)</label>
                 </div>
             </div>
-            
             <div><label>Seleccionar empleados:</label><div id="lista_empleados" class="loading">Cargando empleados...</div></div>
             <div id="nomina_inputs_container" style="display:none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
                 <h4 style="margin-top:0;">📝 Detalles de Nómina por Empleado</h4>
@@ -284,7 +281,6 @@
         let editingEmployeeId = null;
         let editingUserId = null;
 
-        // 🆕 Función para deshabilitar campos cuando se activa "Solo Bono"
         function toggleSoloBono() {
             const isSoloBono = document.getElementById('calcular_solo_bono').checked;
             document.getElementById('tipo').disabled = isSoloBono;
@@ -551,7 +547,7 @@
             const descripcion = document.getElementById('calc_descripcion').value;
             const aplicar_deducciones = document.getElementById('aplicar_deducciones').checked;
             const split_60_40 = document.getElementById('split_60_40').checked;
-            const calcular_solo_bono = document.getElementById('calcular_solo_bono').checked; // 🆕 Leer estado
+            const calcular_solo_bono = document.getElementById('calcular_solo_bono').checked;
             const ids = Array.from(document.querySelectorAll('.emp-check:checked')).map(c => parseInt(c.value));
             if(!ids.length) { Swal.fire('Atención', 'Selecciona al menos un empleado.', 'warning'); return; }
             const faltas = {}; const horas_extras = {}; const bonos = {};
@@ -573,7 +569,7 @@
                     body: JSON.stringify({ 
                         tipo, fecha_inicio, fecha_fin, descripcion, 
                         empleados_ids: ids, faltas, horas_extras, bonos, 
-                        aplicar_deducciones, split_60_40, calcular_solo_bono // 🆕 Enviar flag
+                        aplicar_deducciones, split_60_40, calcular_solo_bono
                     })
                 });
                 if (!res) return;
@@ -928,6 +924,8 @@
                         <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
                         <td>
                             <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 60%</button>
+                            <!-- 🆕 NUEVO BOTÓN TXT 100% -->
+                            <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 100%</button>
                             <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 40%</button>
                             <button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">📄 Lote PDF</button>
                             <button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})">📂 Ver Detalle</button>
