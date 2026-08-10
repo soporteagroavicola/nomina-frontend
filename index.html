@@ -72,6 +72,7 @@
             <button class="tab-btn" data-target="seguridad">🔐 Usuarios</button>
         </div>
 
+        <!-- PESTAÑA CALCULADORA -->
         <div id="calculadora" class="tab-content active">
             <h2>Calcular Nómina</h2>
             <div class="form-group">
@@ -84,10 +85,19 @@
                 <div><label>Filtrar por Tipo de Pago:</label><select id="calc_tipo_pago"><option value="">Todos</option><option value="Quincenal">Quincenal</option><option value="Semanal">Semanal</option></select></div>
                 <div><label>Descripción:</label><input type="text" id="calc_descripcion" placeholder="Ej: Nómina 1ra Quincena Agosto 2026"></div>
             </div>
-            <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: -5px; margin-bottom: 15px;">
-                <input type="checkbox" id="aplicar_deducciones" checked style="width: 20px; height: 20px; cursor: pointer;">
-                <label for="aplicar_deducciones" style="width: auto; margin: 0; font-weight: bold; cursor: pointer;">Aplicar deducciones (IVSS, RPE, FAOV)</label>
+            
+            <!-- 🆕 INTERRUPTOR DEDUCCIONES Y DIVISIÓN 60/40 -->
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 10px; margin-top: -5px; margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="aplicar_deducciones" checked style="width: 20px; height: 20px; cursor: pointer;">
+                    <label for="aplicar_deducciones" style="width: auto; margin: 0; font-weight: bold; cursor: pointer;">Aplicar deducciones (IVSS, RPE, FAOV)</label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="split_60_40" style="width: 20px; height: 20px; cursor: pointer;">
+                    <label for="split_60_40" style="width: auto; margin: 0; font-weight: bold; cursor: pointer;">Dividir pago en dos partes (60% Cuenta / 40% Efectivo)</label>
+                </div>
             </div>
+            
             <div><label>Seleccionar empleados:</label><div id="lista_empleados" class="loading">Cargando empleados...</div></div>
             <div id="nomina_inputs_container" style="display:none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
                 <h4 style="margin-top:0;">📝 Detalles de Nómina por Empleado</h4>
@@ -412,6 +422,7 @@
             const fecha_fin = document.getElementById('fecha_fin').value;
             const descripcion = document.getElementById('calc_descripcion').value;
             const aplicar_deducciones = document.getElementById('aplicar_deducciones').checked;
+            const split_60_40 = document.getElementById('split_60_40').checked; // 🆕 Leer estado
             const ids = Array.from(document.querySelectorAll('.emp-check:checked')).map(c => parseInt(c.value));
             if(!ids.length) { Swal.fire('Atención', 'Selecciona al menos un empleado.', 'warning'); return; }
             const faltas = {}; const horas_extras = {};
@@ -428,18 +439,45 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/calcular_nomina`, {
                     method: 'POST',
-                    body: JSON.stringify({ tipo, fecha_inicio, fecha_fin, descripcion, empleados_ids: ids, faltas, horas_extras, aplicar_deducciones })
+                    body: JSON.stringify({ tipo, fecha_inicio, fecha_fin, descripcion, empleados_ids: ids, faltas, horas_extras, aplicar_deducciones, split_60_40 })
                 });
                 if (!res) return;
                 const data = await res.json();
                 if(data.error) { Swal.fire('Error', data.error, 'error'); return; }
+                
                 let total_usd = 0; let total_bs = 0;
                 data.resultados.forEach(r => { total_usd += r.neto_pagar_usd; total_bs += r.neto_pagar_bs; });
-                let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
-                html += `<table><tr><th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trabaj.</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr>`;
-                data.resultados.forEach(r => html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td><td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.total_asignaciones_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td><td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td></tr>`);
-                html += `<tr class="lote-total-row"><td colspan="9" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td><td><strong>$${total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr></table>`;
-                document.getElementById('resultado_content').innerHTML = html;
+
+                // 🆕 LÓGICA DE VISUALIZACIÓN DE TABLA (CON DIVISIÓN 60/40 O SIN ELLA)
+                if (split_60_40) {
+                    // Vista con división de pago
+                    let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
+                    html += `<table><tr>
+                        <th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trab.</th>
+                        <th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th>
+                        <th>Pago 60% (Cta) USD</th><th>Pago 40% (Efec) USD</th><th>Pago 60% (Cta) Bs</th><th>Pago 40% (Efec) Bs</th></tr>`;
+                    data.resultados.forEach(r => html += `<tr>
+                        <td>${r.empleado.nombre_completo}</td>
+                        <td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td>
+                        <td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td>
+                        <td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.total_asignaciones_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td>
+                        <td><b>$${r.pago_60_usd.toFixed(2)}</b></td><td><b>$${r.pago_40_usd.toFixed(2)}</b></td>
+                        <td><b>Bs. ${r.pago_60_bs.toFixed(2)}</b></td><td><b>Bs. ${r.pago_40_bs.toFixed(2)}</b></td>
+                    </tr>`);
+                    html += `<tr class="lote-total-row"><td colspan="9" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td>
+                        <td><strong>$${total_usd.toFixed(2)} (60%)</strong></td><td></td>
+                        <td><strong>Bs. ${total_bs.toFixed(2)} (60%)</strong></td><td></td>
+                    </tr></table>`;
+                    document.getElementById('resultado_content').innerHTML = html;
+                } else {
+                    // Vista normal sin división
+                    let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
+                    html += `<table><tr><th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trabaj.</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr>`;
+                    data.resultados.forEach(r => html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td><td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.total_asignaciones_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td><td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td></tr>`);
+                    html += `<tr class="lote-total-row"><td colspan="9" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td><td><strong>$${total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr></table>`;
+                    document.getElementById('resultado_content').innerHTML = html;
+                }
+                
                 Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success'); cargarLotes();
             } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
@@ -625,7 +663,6 @@
                 const lote = await res.json();
                 header.innerHTML = `<div style="display:flex; justify-content:space-between;"><div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'} <br><small>Generado el ${lote.fecha_calculo}</small></div><div style="text-align:right;"><div><strong>Total Lote:</strong> $${lote.total_usd.toFixed(2)}</div><div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div></div></div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>`;
                 
-                // 🆕 NUEVA TABLA CON BOTÓN DE RECIBO PDF
                 body.innerHTML = lote.nominas.map(n => `
                     <tr>
                         <td>${n.nombres} ${n.apellidos}</td>
@@ -644,7 +681,6 @@
             } catch (e) { console.error(e); Swal.fire('Error', 'No se pudo cargar el detalle del lote.', 'error'); modal.style.display = 'none'; }
         }
 
-        // 🆕 Función para generar el PDF del Recibo
         function generarRecibo(id) {
             window.open(`${API_URL}/api/generar_recibo/${id}`, '_blank');
         }
