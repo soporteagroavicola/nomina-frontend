@@ -72,7 +72,6 @@
             <button class="tab-btn" data-target="seguridad">🔐 Usuarios</button>
         </div>
 
-        <!-- PESTAÑA CALCULADORA -->
         <div id="calculadora" class="tab-content active">
             <h2>Calcular Nómina</h2>
             <div class="form-group">
@@ -86,7 +85,6 @@
                 <div><label>Descripción:</label><input type="text" id="calc_descripcion" placeholder="Ej: Nómina 1ra Quincena Agosto 2026"></div>
             </div>
             
-            <!-- 🆕 INTERRUPTOR DEDUCCIONES Y DIVISIÓN 60/40 -->
             <div class="form-group" style="display: flex; flex-direction: column; gap: 10px; margin-top: -5px; margin-bottom: 15px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <input type="checkbox" id="aplicar_deducciones" checked style="width: 20px; height: 20px; cursor: pointer;">
@@ -101,9 +99,15 @@
             <div><label>Seleccionar empleados:</label><div id="lista_empleados" class="loading">Cargando empleados...</div></div>
             <div id="nomina_inputs_container" style="display:none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
                 <h4 style="margin-top:0;">📝 Detalles de Nómina por Empleado</h4>
-                <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Ingresa los días de falta, horas extras y el valor de la hora extra en USD.</div>
+                <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Ingresa los días de falta, horas extras, valor de hora y bono complementario en USD.</div>
                 <table id="tabla_detalle_nomina">
-                    <thead><tr><th>Empleado</th><th style="width:100px;">Faltas (Días)</th><th style="width:100px;">Horas Extras</th><th style="width:130px;">Valor Hora (USD)</th></tr></thead>
+                    <thead><tr>
+                        <th>Empleado</th>
+                        <th style="width:80px;">Faltas (Días)</th>
+                        <th style="width:80px;">Horas Extras</th>
+                        <th style="width:100px;">Valor Hora (USD)</th>
+                        <th style="width:100px;">Bono Comp. (USD)</th>
+                    </tr></thead>
                     <tbody id="cuerpo_detalle_nomina"></tbody>
                 </table>
             </div>
@@ -225,7 +229,7 @@
             <div id="lote_header_info"></div>
             <div id="lote_detalle_body" style="max-height: 500px; overflow-y: auto;">
                 <table id="tabla_detalle_lote">
-                    <thead><tr><th>Empleado</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>Empleado</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Bono Comp.</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th><th>Acciones</th></tr></thead>
                     <tbody id="cuerpo_detalle_lote"></tbody>
                 </table>
             </div>
@@ -403,8 +407,30 @@
                     container.innerHTML = html;
                     document.querySelectorAll('.emp-check').forEach(cb => cb.addEventListener('change', actualizarTablaNomina));
                     let detalleHtml = '';
-                    if (quincenal.length > 0) detalleHtml += `<tr style="background:#f0f7ff; font-weight:bold;"><td colspan="4">📅 Quincenales</td></tr>` + quincenal.map(e => `<tr data-cedula="${e.cedula}" style="display:table-row;"><td>${e.nombres} ${e.apellidos}</td><td><input type="number" class="input-detalle input_faltas" min="0" value="0"></td><td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0"></td><td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0"></td></tr>`).join('');
-                    if (semanal.length > 0) detalleHtml += `<tr style="background:#fffbe6; font-weight:bold;"><td colspan="4">📅 Semanales</td></tr>` + semanal.map(e => `<tr data-cedula="${e.cedula}" style="display:table-row;"><td>${e.nombres} ${e.apellidos}</td><td><input type="number" class="input-detalle input_faltas" min="0" value="0"></td><td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0"></td><td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0"></td></tr>`).join('');
+                    if (quincenal.length > 0) {
+                        detalleHtml += `<tr style="background:#f0f7ff; font-weight:bold;"><td colspan="5">📅 Quincenales</td></tr>`;
+                        detalleHtml += quincenal.map(e => `
+                            <tr data-cedula="${e.cedula}" style="display:table-row;">
+                                <td>${e.nombres} ${e.apellidos}</td>
+                                <td><input type="number" class="input-detalle input_faltas" min="0" value="0"></td>
+                                <td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0"></td>
+                                <td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0"></td>
+                                <td><input type="number" class="input-detalle input_bono" min="0" step="0.01" value="0"></td>
+                            </tr>
+                        `).join('');
+                    }
+                    if (semanal.length > 0) {
+                        detalleHtml += `<tr style="background:#fffbe6; font-weight:bold;"><td colspan="5">📅 Semanales</td></tr>`;
+                        detalleHtml += semanal.map(e => `
+                            <tr data-cedula="${e.cedula}" style="display:table-row;">
+                                <td>${e.nombres} ${e.apellidos}</td>
+                                <td><input type="number" class="input-detalle input_faltas" min="0" value="0"></td>
+                                <td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0"></td>
+                                <td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0"></td>
+                                <td><input type="number" class="input-detalle input_bono" min="0" step="0.01" value="0"></td>
+                            </tr>
+                        `).join('');
+                    }
                     detalleContainer.innerHTML = detalleHtml; inputsContainer.style.display = 'block'; actualizarTablaNomina();
                 }
             } catch (e) { container.innerHTML = `<p style='color: red; font-weight: bold;'>❌ Error al cargar empleados: ${e.message}</p>`; console.error(e); }
@@ -413,7 +439,14 @@
         function actualizarTablaNomina() {
             const checkboxes = document.querySelectorAll('.emp-check');
             const rows = document.querySelectorAll('#cuerpo_detalle_nomina tr'); let empIdx = 0;
-            rows.forEach(row => { if(row.hasAttribute('data-cedula')) { if(empIdx < checkboxes.length) { row.style.display = checkboxes[empIdx].checked ? 'table-row' : 'none'; empIdx++; } } });
+            rows.forEach(row => {
+                if(row.hasAttribute('data-cedula')) {
+                    if(empIdx < checkboxes.length) {
+                        row.style.display = checkboxes[empIdx].checked ? 'table-row' : 'none';
+                        empIdx++;
+                    }
+                }
+            });
         }
 
         async function calcularNomina() {
@@ -422,24 +455,26 @@
             const fecha_fin = document.getElementById('fecha_fin').value;
             const descripcion = document.getElementById('calc_descripcion').value;
             const aplicar_deducciones = document.getElementById('aplicar_deducciones').checked;
-            const split_60_40 = document.getElementById('split_60_40').checked; // 🆕 Leer estado
+            const split_60_40 = document.getElementById('split_60_40').checked;
             const ids = Array.from(document.querySelectorAll('.emp-check:checked')).map(c => parseInt(c.value));
             if(!ids.length) { Swal.fire('Atención', 'Selecciona al menos un empleado.', 'warning'); return; }
-            const faltas = {}; const horas_extras = {};
+            const faltas = {}; const horas_extras = {}; const bonos = {};
             document.querySelectorAll('#cuerpo_detalle_nomina tr').forEach(row => {
                 if(row.hasAttribute('data-cedula') && row.style.display !== 'none') {
                     const cedula = row.getAttribute('data-cedula');
                     const faltas_val = parseInt(row.querySelector('.input_faltas').value) || 0;
                     const horas_val = parseFloat(row.querySelector('.input_horas').value) || 0;
                     const valor_val = parseFloat(row.querySelector('.input_valor_hora').value) || 0;
+                    const bono_val = parseFloat(row.querySelector('.input_bono').value) || 0;
                     if (faltas_val > 0) faltas[cedula] = faltas_val;
                     if (horas_val > 0 || valor_val > 0) horas_extras[cedula] = { horas: horas_val, valor_hora: valor_val };
+                    if (bono_val > 0) bonos[cedula] = bono_val;
                 }
             });
             try {
                 const res = await secureFetch(`${API_URL}/api/calcular_nomina`, {
                     method: 'POST',
-                    body: JSON.stringify({ tipo, fecha_inicio, fecha_fin, descripcion, empleados_ids: ids, faltas, horas_extras, aplicar_deducciones, split_60_40 })
+                    body: JSON.stringify({ tipo, fecha_inicio, fecha_fin, descripcion, empleados_ids: ids, faltas, horas_extras, bonos, aplicar_deducciones, split_60_40 })
                 });
                 if (!res) return;
                 const data = await res.json();
@@ -448,33 +483,43 @@
                 let total_usd = 0; let total_bs = 0;
                 data.resultados.forEach(r => { total_usd += r.neto_pagar_usd; total_bs += r.neto_pagar_bs; });
 
-                // 🆕 LÓGICA DE VISUALIZACIÓN DE TABLA (CON DIVISIÓN 60/40 O SIN ELLA)
                 if (split_60_40) {
-                    // Vista con división de pago
                     let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
                     html += `<table><tr>
                         <th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trab.</th>
-                        <th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th>
+                        <th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Bono Comp.</th><th>Asign.</th><th>Deducc.</th>
                         <th>Pago 60% (Cta) USD</th><th>Pago 40% (Efec) USD</th><th>Pago 60% (Cta) Bs</th><th>Pago 40% (Efec) Bs</th></tr>`;
                     data.resultados.forEach(r => html += `<tr>
                         <td>${r.empleado.nombre_completo}</td>
                         <td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td>
                         <td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td>
-                        <td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.total_asignaciones_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td>
+                        <td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.bono_complementario_usd.toFixed(2)}</td>
+                        <td>$${r.total_asignaciones_base_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td>
                         <td><b>$${r.pago_60_usd.toFixed(2)}</b></td><td><b>$${r.pago_40_usd.toFixed(2)}</b></td>
                         <td><b>Bs. ${r.pago_60_bs.toFixed(2)}</b></td><td><b>Bs. ${r.pago_40_bs.toFixed(2)}</b></td>
                     </tr>`);
-                    html += `<tr class="lote-total-row"><td colspan="9" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td>
-                        <td><strong>$${total_usd.toFixed(2)} (60%)</strong></td><td></td>
-                        <td><strong>Bs. ${total_bs.toFixed(2)} (60%)</strong></td><td></td>
+                    html += `<tr class="lote-total-row"><td colspan="10" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td>
+                        <td><strong>$${total_usd.toFixed(2)}</strong></td><td></td>
+                        <td><strong>Bs. ${total_bs.toFixed(2)}</strong></td><td></td>
                     </tr></table>`;
                     document.getElementById('resultado_content').innerHTML = html;
                 } else {
-                    // Vista normal sin división
                     let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
-                    html += `<table><tr><th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trabaj.</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr>`;
-                    data.resultados.forEach(r => html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td><td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.total_asignaciones_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td><td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td></tr>`);
-                    html += `<tr class="lote-total-row"><td colspan="9" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td><td><strong>$${total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr></table>`;
+                    html += `<table><tr>
+                        <th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trab.</th>
+                        <th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Bono Comp.</th><th>Asign.</th><th>Deducc.</th>
+                        <th>Neto USD</th><th>Neto Bs</th></tr>`;
+                    data.resultados.forEach(r => html += `<tr>
+                        <td>${r.empleado.nombre_completo}</td>
+                        <td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td>
+                        <td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td>
+                        <td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.bono_complementario_usd.toFixed(2)}</td>
+                        <td>$${r.total_asignaciones_base_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td>
+                        <td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td><td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td>
+                    </tr>`);
+                    html += `<tr class="lote-total-row"><td colspan="10" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td>
+                        <td><strong>$${total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td>
+                    </tr></table>`;
                     document.getElementById('resultado_content').innerHTML = html;
                 }
                 
@@ -669,6 +714,7 @@
                         <td>$${(n.salario_base_usd || 0).toFixed(2)}</td>
                         <td><small>$${(n.base_incidencia_60_usd || 0).toFixed(2)}</small></td>
                         <td>$${(n.horas_extras_usd || 0).toFixed(2)}</td>
+                        <td>$${(n.bono_complementario_usd || 0).toFixed(2)}</td>
                         <td>$${(n.total_asignaciones_usd || 0).toFixed(2)}</td>
                         <td>$${(n.total_deducciones_usd || 0).toFixed(2)}</td>
                         <td><strong>$${(n.neto_pagar_usd || 0).toFixed(2)}</strong></td>
