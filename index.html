@@ -1200,6 +1200,7 @@
             }
         }
 
+        // ✅ CORREGIDO: Función generarReciboCestaticket
         function generarReciboCestaticket(id) {
             downloadFile(`${API_URL}/api/generar_recibo_cestaticket/${id}`, `recibo_cesta_${id}.pdf`);
         }
@@ -1613,11 +1614,11 @@
 
         async function downloadFile(url, filename) {
             try {
-                const res = await secureFetch(url);
-                if (!res) return;
+                const res = await fetch(url, {
+                    credentials: 'include'
+                });
                 if (!res.ok) {
-                    const errorText = await res.text();
-                    throw new Error(`Error ${res.status}: ${errorText || 'Error desconocido al descargar el archivo'}`);
+                    throw new Error(`Error ${res.status}: ${res.statusText}`);
                 }
                 const blob = await res.blob();
                 const a = document.createElement('a');
@@ -1626,6 +1627,7 @@
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
             } catch (e) {
                 Swal.fire('Error', e.message, 'error');
             }
