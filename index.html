@@ -49,6 +49,16 @@
         .fecha-label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 0.9rem; color: #333; }
         .param-card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; background: #fafafa; }
         .pasivos-card { border: 1px solid #003366; padding: 20px; border-radius: 8px; background: #e6f2ff; }
+        .connection-status { 
+            display: inline-block; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-online { background: #d4edda; color: #155724; }
+        .status-offline { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
@@ -57,6 +67,7 @@
     <div class="top-navbar">
         <div class="user-profile">
             <span id="username_display">👤 Cargando...</span>
+            <span id="connection_status" class="connection-status status-offline">🔴 Conectando...</span>
             <button class="btn-logout" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
         </div>
     </div>
@@ -212,7 +223,6 @@
             </div>
         </div>
 
-        <!-- 🆕 PESTAÑA CESTATICKET -->
         <div id="cestaticket" class="tab-content">
             <h2>🍽️ Calcular Cestaticket (Bono de Alimentación)</h2>
             <div class="form-group">
@@ -302,7 +312,7 @@
         </div>
     </div>
 
-    <!-- 🆕 MODAL DETALLE LOTE CESTATICKET -->
+    <!-- MODAL DETALLE LOTE CESTATICKET -->
     <div id="modalDetalleCesta" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3>🍽️ Detalle del Lote de Cestaticket</h3><span class="close-btn" onclick="cerrarModalDetalleCesta()">&times;</span></div>
@@ -317,10 +327,80 @@
     </div>
 
     <script>
+        // ============================================
+        // ✅ CONFIGURACIÓN - URL DEL BACKEND
+        // ============================================
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
-        let editingEmployeeId = null;
-        let editingUserId = null;
 
+        // ============================================
+        // ✅ FUNCIÓN: Verificar conexión al backend
+        // ============================================
+        async function checkBackendHealth() {
+            const statusEl = document.getElementById('connection_status');
+            try {
+                const res = await fetch(`${API_URL}/api/health`, {
+                    credentials: 'include'
+                });
+                if (res.ok) {
+                    statusEl.textContent = '🟢 Online';
+                    statusEl.className = 'connection-status status-online';
+                    console.log('✅ Backend conectado correctamente');
+                    return true;
+                } else {
+                    statusEl.textContent = '🔴 Error ' + res.status;
+                    statusEl.className = 'connection-status status-offline';
+                    console.error('❌ Backend respondió con error:', res.status);
+                    return false;
+                }
+            } catch (e) {
+                statusEl.textContent = '🔴 Sin conexión';
+                statusEl.className = 'connection-status status-offline';
+                console.error('❌ No se pudo conectar al backend:', e);
+                return false;
+            }
+        }
+
+        // ============================================
+        // ✅ FUNCIÓN: secureFetch con manejo de errores
+        // ============================================
+        async function secureFetch(url, options = {}) {
+            options.credentials = 'include';
+            options.headers = options.headers || {};
+            options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
+            
+            console.log(`🔍 Fetching: ${url}`);
+            
+            try {
+                const res = await fetch(url, options);
+                
+                if (res.status === 401) {
+                    cerrarModalDetalle();
+                    cerrarModalDetalleCesta();
+                    window.location.href = 'login.html';
+                    return null;
+                }
+                
+                if (!res.ok) {
+                    console.error(`❌ Error ${res.status}: ${res.statusText}`);
+                    try {
+                        const errorData = await res.json();
+                        console.error('❌ Error detalle:', errorData);
+                    } catch (e) {
+                        const text = await res.text();
+                        console.error('❌ Respuesta no JSON:', text.substring(0, 200));
+                    }
+                }
+                
+                return res;
+            } catch (e) {
+                console.error('❌ Error de red en secureFetch:', e);
+                throw e;
+            }
+        }
+
+        // ============================================
+        // FUNCIONES EXISTENTES (con correcciones)
+        // ============================================
         function toggleSoloBono() {
             const isSoloBono = document.getElementById('calcular_solo_bono').checked;
             document.getElementById('tipo').disabled = isSoloBono;
@@ -331,22 +411,9 @@
             document.querySelectorAll('.input_valor_hora').forEach(el => el.disabled = isSoloBono);
         }
 
-        async function secureFetch(url, options = {}) {
-            options.credentials = 'include';
-            options.headers = options.headers || {};
-            options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
-            const res = await fetch(url, options);
-            if (res.status === 401) {
-                cerrarModalDetalle();
-                cerrarModalDetalleCesta();
-                window.location.href = 'login.html';
-                return null;
-            }
-            return res;
-        }
-
         document.addEventListener('DOMContentLoaded', async function() {
             try {
+                // Verificar autenticación
                 const res = await secureFetch(`${API_URL}/api/check_auth`);
                 if (!res) return;
                 const data = await res.json();
@@ -355,32 +422,64 @@
                 } else {
                     document.getElementById('username_display').textContent = `👤 ${data.username}`;
                 }
-            } catch (error) {
-                window.location.href = 'login.html';
-            }
+                
+                // Verificar salud del backend
+                const healthOk = await checkBackendHealth();
+                if (!healthOk) {
+                    Swal.fire({
+                        title: '⚠️ Atención',
+                        text: 'No se pudo conectar con el servidor. Verifica tu conexión.',
+                        icon: 'warning',
+                        confirmButtonText: 'Reintentar'
+                    }).then(() => {
+                        location.reload();
+                    });
+                }
 
-            setTimeout(() => {
-                actualizarBCV(true);
-            }, 0);
+                // Cargar tasa BCV automáticamente
+                setTimeout(() => {
+                    actualizarBCV(true);
+                }, 0);
 
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-target');
-                    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-                    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-                    document.getElementById(tabId).classList.add('active'); this.classList.add('active');
-                    if (tabId === 'empleados') cargarEmpleadosAdmin();
-                    else if (tabId === 'sucursales') cargarSucursales();
-                    else if (tabId === 'calculadora') cargarEmpleadosCalc();
-                    else if (tabId === 'parametros') cargarParametros();
-                    else if (tabId === 'cestaticket') { cargarEmpleadosCesta(); cargarLotesCestaticket(); }
-                    else if (tabId === 'historial') cargarLotes();
-                    else if (tabId === 'seguridad') cargarUsuarios();
+                // Eventos de tabs
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const tabId = this.getAttribute('data-target');
+                        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+                        document.getElementById(tabId).classList.add('active');
+                        this.classList.add('active');
+                        if (tabId === 'empleados') cargarEmpleadosAdmin();
+                        else if (tabId === 'sucursales') cargarSucursales();
+                        else if (tabId === 'calculadora') cargarEmpleadosCalc();
+                        else if (tabId === 'parametros') cargarParametros();
+                        else if (tabId === 'cestaticket') { cargarEmpleadosCesta(); cargarLotesCestaticket(); }
+                        else if (tabId === 'historial') cargarLotes();
+                        else if (tabId === 'seguridad') cargarUsuarios();
+                    });
                 });
-            });
-            document.getElementById('calc_sucursal').addEventListener('change', function() { cargarEmpleadosCalc(this.value, document.getElementById('calc_tipo_pago').value); });
-            document.getElementById('calc_tipo_pago').addEventListener('change', function() { cargarEmpleadosCalc(document.getElementById('calc_sucursal').value, this.value); });
-            cargarSucursalesCalc(); cargarEmpleadosCalc('', '');
+
+                document.getElementById('calc_sucursal').addEventListener('change', function() {
+                    cargarEmpleadosCalc(this.value, document.getElementById('calc_tipo_pago').value);
+                });
+                document.getElementById('calc_tipo_pago').addEventListener('change', function() {
+                    cargarEmpleadosCalc(document.getElementById('calc_sucursal').value, this.value);
+                });
+
+                cargarSucursalesCalc();
+                cargarEmpleadosCalc('', '');
+
+            } catch (error) {
+                console.error('❌ Error en DOMContentLoaded:', error);
+                Swal.fire({
+                    title: '❌ Error de conexión',
+                    text: 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.',
+                    icon: 'error',
+                    confirmButtonText: 'Reintentar'
+                }).then(() => {
+                    location.reload();
+                });
+            }
         });
 
         async function cerrarSesion() {
@@ -501,6 +600,30 @@
             }
         }
 
+        async function cambiarPassword() {
+            const old_pass = document.getElementById('seg_old_pass').value.trim();
+            const new_pass = document.getElementById('seg_new_pass').value.trim();
+            if(!old_pass || !new_pass) return Swal.fire('Atención', 'Ambos campos son obligatorios.', 'warning');
+            try {
+                const res = await secureFetch(`${API_URL}/api/usuarios/password`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ old_password: old_pass, new_password: new_pass })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if(res.ok) {
+                    Swal.fire('¡Éxito!', data.mensaje, 'success');
+                    document.getElementById('seg_old_pass').value = '';
+                    document.getElementById('seg_new_pass').value = '';
+                } else {
+                    Swal.fire('Error', data.error, 'error');
+                }
+            } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+        }
+
+        // ============================================
+        // FUNCIONES DE SUCURSALES Y EMPLEADOS
+        // ============================================
         async function cargarSucursalesCalc() {
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
@@ -517,28 +640,45 @@
                 const container = document.getElementById('lista_empleados');
                 const detalleContainer = document.getElementById('cuerpo_detalle_nomina');
                 const inputsContainer = document.getElementById('nomina_inputs_container');
-                container.innerHTML = '<p class="loading">Cargando empleados...</p>'; inputsContainer.style.display = 'none';
+                container.innerHTML = '<p class="loading">Cargando empleados...</p>';
+                inputsContainer.style.display = 'none';
+                
                 let url = `${API_URL}/api/empleados`;
                 const params = [];
                 if (sucursal_id) params.push(`sucursal_id=${encodeURIComponent(sucursal_id)}`);
                 if (tipo_pago) params.push(`tipo_pago=${encodeURIComponent(tipo_pago)}`);
                 if (params.length > 0) url += '?' + params.join('&');
+                
                 const res = await secureFetch(url);
                 if (!res) return;
                 if(!res.ok) throw new Error("Error al obtener empleados");
-                let data; const contentType = res.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) data = await res.json();
-                else { const text = await res.text(); throw new Error(`HTML recibido. ${text.substring(0,80)}...`); }
+                
+                let data;
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    throw new Error(`HTML recibido. ${text.substring(0,80)}...`);
+                }
 
-                if(data.length === 0) container.innerHTML = "<p style='color: #888;'>No hay empleados con esos filtros.</p>";
-                else {
+                if(data.length === 0) {
+                    container.innerHTML = "<p style='color: #888;'>No hay empleados con esos filtros.</p>";
+                } else {
                     const quincenal = data.filter(e => e.tipo_pago === 'Quincenal');
                     const semanal = data.filter(e => e.tipo_pago === 'Semanal');
                     let html = '';
-                    if (quincenal.length > 0) html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#007bff;">📅 Pago Quincenal</div>` + quincenal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="emp-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
-                    if (semanal.length > 0) html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#856404;">📅 Pago Semanal</div>` + semanal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="emp-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                    if (quincenal.length > 0) {
+                        html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#007bff;">📅 Pago Quincenal</div>`;
+                        html += quincenal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="emp-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                    }
+                    if (semanal.length > 0) {
+                        html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#856404;">📅 Pago Semanal</div>`;
+                        html += semanal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="emp-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                    }
                     container.innerHTML = html;
                     document.querySelectorAll('.emp-check').forEach(cb => cb.addEventListener('change', actualizarTablaNomina));
+                    
                     let detalleHtml = '';
                     if (quincenal.length > 0) {
                         detalleHtml += `<tr style="background:#f0f7ff; font-weight:bold;"><td colspan="5">📅 Quincenales</td></tr>`;
@@ -564,14 +704,20 @@
                             </tr>
                         `).join('');
                     }
-                    detalleContainer.innerHTML = detalleHtml; inputsContainer.style.display = 'block'; actualizarTablaNomina();
+                    detalleContainer.innerHTML = detalleHtml;
+                    inputsContainer.style.display = 'block';
+                    actualizarTablaNomina();
                 }
-            } catch (e) { container.innerHTML = `<p style='color: red; font-weight: bold;'>❌ Error al cargar empleados: ${e.message}</p>`; console.error(e); }
+            } catch (e) {
+                container.innerHTML = `<p style='color: red; font-weight: bold;'>❌ Error al cargar empleados: ${e.message}</p>`;
+                console.error(e);
+            }
         }
 
         function actualizarTablaNomina() {
             const checkboxes = document.querySelectorAll('.emp-check');
-            const rows = document.querySelectorAll('#cuerpo_detalle_nomina tr'); let empIdx = 0;
+            const rows = document.querySelectorAll('#cuerpo_detalle_nomina tr');
+            let empIdx = 0;
             rows.forEach(row => {
                 if(row.hasAttribute('data-cedula')) {
                     if(empIdx < checkboxes.length) {
@@ -582,6 +728,9 @@
             });
         }
 
+        // ============================================
+        // CÁLCULO DE NÓMINA
+        // ============================================
         async function calcularNomina() {
             const tipo = document.getElementById('tipo').value;
             const fecha_inicio = document.getElementById('fecha_inicio').value;
@@ -591,8 +740,16 @@
             const split_60_40 = document.getElementById('split_60_40').checked;
             const calcular_solo_bono = document.getElementById('calcular_solo_bono').checked;
             const ids = Array.from(document.querySelectorAll('.emp-check:checked')).map(c => parseInt(c.value));
-            if(!ids.length) { Swal.fire('Atención', 'Selecciona al menos un empleado.', 'warning'); return; }
-            const faltas = {}; const horas_extras = {}; const bonos = {};
+            
+            if(!ids.length) {
+                Swal.fire('Atención', 'Selecciona al menos un empleado.', 'warning');
+                return;
+            }
+            
+            const faltas = {};
+            const horas_extras = {};
+            const bonos = {};
+            
             document.querySelectorAll('#cuerpo_detalle_nomina tr').forEach(row => {
                 if(row.hasAttribute('data-cedula') && row.style.display !== 'none') {
                     const cedula = row.getAttribute('data-cedula');
@@ -605,39 +762,57 @@
                     if (bono_val > 0) bonos[cedula] = bono_val;
                 }
             });
+            
             try {
                 const res = await secureFetch(`${API_URL}/api/calcular_nomina`, {
                     method: 'POST',
-                    body: JSON.stringify({ 
-                        tipo, fecha_inicio, fecha_fin, descripcion, 
-                        empleados_ids: ids, faltas, horas_extras, bonos, 
+                    body: JSON.stringify({
+                        tipo, fecha_inicio, fecha_fin, descripcion,
+                        empleados_ids: ids, faltas, horas_extras, bonos,
                         aplicar_deducciones, split_60_40, calcular_solo_bono
                     })
                 });
                 if (!res) return;
                 const data = await res.json();
-                if(data.error) { Swal.fire('Error', data.error, 'error'); return; }
-                let total_usd = 0; let total_bs = 0;
-                data.resultados.forEach(r => { total_usd += r.neto_pagar_usd; total_bs += r.neto_pagar_bs; });
+                if(data.error) {
+                    Swal.fire('Error', data.error, 'error');
+                    return;
+                }
+                
+                let total_usd = 0;
+                let total_bs = 0;
+                data.resultados.forEach(r => {
+                    total_usd += r.neto_pagar_usd;
+                    total_bs += r.neto_pagar_bs;
+                });
+                
                 if (split_60_40) {
                     let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
                     html += `<table><tr><th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trab.</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Bono Comp.</th><th>Asign.</th><th>Deducc.</th><th>Pago 60% (Cta) USD</th><th>Pago 40% (Efec) USD</th><th>Pago 60% (Cta) Bs</th><th>Pago 40% (Efec) Bs</th></tr>`;
-                    data.resultados.forEach(r => html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td><td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.bono_complementario_usd.toFixed(2)}</td><td>$${r.total_asignaciones_base_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.pago_60_usd.toFixed(2)}</b></td><td><b>$${r.pago_40_usd.toFixed(2)}</b></td><td><b>Bs. ${r.pago_60_bs.toFixed(2)}</b></td><td><b>Bs. ${r.pago_40_bs.toFixed(2)}</b></td></tr>`);
+                    data.resultados.forEach(r => {
+                        html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td><td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.bono_complementario_usd.toFixed(2)}</td><td>$${r.total_asignaciones_base_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.pago_60_usd.toFixed(2)}</b></td><td><b>$${r.pago_40_usd.toFixed(2)}</b></td><td><b>Bs. ${r.pago_60_bs.toFixed(2)}</b></td><td><b>Bs. ${r.pago_40_bs.toFixed(2)}</b></td></tr>`;
+                    });
                     html += `<tr class="lote-total-row"><td colspan="10" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td><td><strong>$${total_usd.toFixed(2)}</strong></td><td></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td><td></td></tr></table>`;
                     document.getElementById('resultado_content').innerHTML = html;
                 } else {
                     let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
                     html += `<table><tr><th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trab.</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Bono Comp.</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr>`;
-                    data.resultados.forEach(r => html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td><td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.bono_complementario_usd.toFixed(2)}</td><td>$${r.total_asignaciones_base_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td><td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td></tr>`);
+                    data.resultados.forEach(r => {
+                        html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td><td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.bono_complementario_usd.toFixed(2)}</td><td>$${r.total_asignaciones_base_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td><td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td></tr>`;
+                    });
                     html += `<tr class="lote-total-row"><td colspan="10" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td><td><strong>$${total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr></table>`;
                     document.getElementById('resultado_content').innerHTML = html;
                 }
-                Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success'); cargarLotes();
-            } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+                Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success');
+                cargarLotes();
+            } catch(e) {
+                console.error(e);
+                Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+            }
         }
 
         // ============================================
-        // 🆕 CESTATICKET FUNCTIONS
+        // CESTATICKET FUNCTIONS
         // ============================================
         async function cargarEmpleadosCesta() {
             try {
@@ -649,13 +824,20 @@
                 if(!res.ok) throw new Error("Error al obtener empleados");
                 const data = await res.json();
                 
-                if(data.length === 0) container.innerHTML = "<p style='color: #888;'>No hay empleados registrados.</p>";
-                else {
+                if(data.length === 0) {
+                    container.innerHTML = "<p style='color: #888;'>No hay empleados registrados.</p>";
+                } else {
                     const quincenal = data.filter(e => e.tipo_pago === 'Quincenal');
                     const semanal = data.filter(e => e.tipo_pago === 'Semanal');
                     let html = '';
-                    if (quincenal.length > 0) html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#007bff;">📅 Pago Quincenal</div>` + quincenal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
-                    if (semanal.length > 0) html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#856404;">📅 Pago Semanal</div>` + semanal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                    if (quincenal.length > 0) {
+                        html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#007bff;">📅 Pago Quincenal</div>`;
+                        html += quincenal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                    }
+                    if (semanal.length > 0) {
+                        html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#856404;">📅 Pago Semanal</div>`;
+                        html += semanal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                    }
                     container.innerHTML = html;
                 }
             } catch (e) { console.error(e); }
@@ -666,7 +848,10 @@
             const fecha_fin = document.getElementById('cesta_fecha_fin').value;
             const descripcion = document.getElementById('cesta_descripcion').value;
             const ids = Array.from(document.querySelectorAll('#lista_empleados_cesta input.cesta-check:checked')).map(c => parseInt(c.value));
-            if(!ids.length) { Swal.fire('Atención', 'Selecciona al menos un empleado para calcular el Cestaticket.', 'warning'); return; }
+            if(!ids.length) {
+                Swal.fire('Atención', 'Selecciona al menos un empleado para calcular el Cestaticket.', 'warning');
+                return;
+            }
 
             try {
                 const res = await secureFetch(`${API_URL}/api/calcular_cestaticket`, {
@@ -675,17 +860,26 @@
                 });
                 if (!res) return;
                 const data = await res.json();
-                if(data.error) { Swal.fire('Error', data.error, 'error'); return; }
+                if(data.error) {
+                    Swal.fire('Error', data.error, 'error');
+                    return;
+                }
 
                 let total_bs = 0;
                 let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
                 html += `<table><tr><th>Empleado</th><th>Días Pagados</th><th>Valor Día USD</th><th>Total USD</th><th>Total Bs</th></tr>`;
-                data.resultados.forEach(r => { total_bs += r.total_bs; html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_pagados}</td><td>$${r.valor_diario_usd.toFixed(2)}</td><td>$${r.total_usd.toFixed(2)}</td><td><b>Bs. ${r.total_bs.toFixed(2)}</b></td></tr>`; });
+                data.resultados.forEach(r => {
+                    total_bs += r.total_bs;
+                    html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_pagados}</td><td>$${r.valor_diario_usd.toFixed(2)}</td><td>$${r.total_usd.toFixed(2)}</td><td><b>Bs. ${r.total_bs.toFixed(2)}</b></td></tr>`;
+                });
                 html += `<tr class="lote-total-row"><td colspan="4" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr></table>`;
                 document.getElementById('resultado_cesta').innerHTML = html;
                 Swal.fire('¡Éxito!', `Cestaticket guardado como Lote #${data.lote_id}`, 'success');
                 cargarLotesCestaticket();
-            } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+            } catch(e) {
+                console.error(e);
+                Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+            }
         }
 
         async function cargarLotesCestaticket() {
@@ -699,22 +893,28 @@
                 if (!res) return;
                 if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const lotes = await res.json();
-                if(lotes.length === 0) tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No hay lotes de Cestaticket registrados.</td></tr>';
-                else tableBody.innerHTML = lotes.map(l => `
-                    <tr>
-                        <td><strong>#${l.id_lote}</strong></td>
-                        <td><strong>${l.descripcion || 'Sin descripción'}</strong></td>
-                        <td>${l.fecha_calculo}</td>
-                        <td>${l.cantidad_empleados_lote} empleados</td>
-                        <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
-                        <td>
-                            <button class="btn-success" onclick="generarArchivoCestaticket(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">💳 TXT</button>
-                            <button class="btn-warning" onclick="abrirModalDetalleCesta(${l.id_lote})">📂 Ver Detalle</button>
-                            <button class="btn-danger" onclick="eliminarLoteCestaticket(${l.id_lote})">🗑️</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch(e) { tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; font-weight:bold;">Error al cargar historial de cestaticket: ${e.message}</td></tr>`; console.error(e); }
+                if(lotes.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No hay lotes de Cestaticket registrados.</td></tr>';
+                } else {
+                    tableBody.innerHTML = lotes.map(l => `
+                        <tr>
+                            <td><strong>#${l.id_lote}</strong></td>
+                            <td><strong>${l.descripcion || 'Sin descripción'}</strong></td>
+                            <td>${l.fecha_calculo}</td>
+                            <td>${l.cantidad_empleados_lote} empleados</td>
+                            <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
+                            <td>
+                                <button class="btn-success" onclick="generarArchivoCestaticket(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">💳 TXT</button>
+                                <button class="btn-warning" onclick="abrirModalDetalleCesta(${l.id_lote})">📂 Ver Detalle</button>
+                                <button class="btn-danger" onclick="eliminarLoteCestaticket(${l.id_lote})">🗑️</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch(e) {
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; font-weight:bold;">Error al cargar historial de cestaticket: ${e.message}</td></tr>`;
+                console.error(e);
+            }
         }
 
         async function generarArchivoCestaticket(id) {
@@ -743,7 +943,9 @@
             const modal = document.getElementById('modalDetalleCesta');
             const header = document.getElementById('cesta_header_info');
             const body = document.getElementById('cuerpo_detalle_cesta');
-            header.innerHTML = '<p class="loading">Cargando datos del lote...</p>'; body.innerHTML = ''; modal.style.display = 'flex';
+            header.innerHTML = '<p class="loading">Cargando datos del lote...</p>';
+            body.innerHTML = '';
+            modal.style.display = 'flex';
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`);
                 if (!res) return;
@@ -752,11 +954,22 @@
                     try {
                         const errorData = await res.json();
                         if (errorData.error) errorMsg = errorData.error;
-                    } catch (parseError) { /* Ignorar si no es JSON */ }
+                    } catch (parseError) {}
                     throw new Error(errorMsg);
                 }
                 const lote = await res.json();
-                header.innerHTML = `<div style="display:flex; justify-content:space-between;"><div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'} <br><small>Generado el ${lote.fecha_calculo}</small></div><div style="text-align:right;"><div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div></div></div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>`;
+                header.innerHTML = `
+                    <div style="display:flex; justify-content:space-between;">
+                        <div>
+                            <strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'}
+                            <br><small>Generado el ${lote.fecha_calculo}</small>
+                        </div>
+                        <div style="text-align:right;">
+                            <div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div>
+                        </div>
+                    </div>
+                    <br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>
+                `;
                 body.innerHTML = lote.nominas.map(n => `
                     <tr>
                         <td>${n.nombres} ${n.apellidos}</td>
@@ -775,18 +988,46 @@
             }
         }
 
-        function cerrarModalDetalleCesta() { document.getElementById('modalDetalleCesta').style.display = 'none'; }
-        window.onclick = function(event) { const modal = document.getElementById('modalDetalleCesta'); if (event.target == modal) { cerrarModalDetalleCesta(); } }
+        function cerrarModalDetalleCesta() {
+            document.getElementById('modalDetalleCesta').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalDetalleCesta');
+            if (event.target == modal) {
+                cerrarModalDetalleCesta();
+            }
+            const modalLote = document.getElementById('modalDetalleLote');
+            if (event.target == modalLote) {
+                cerrarModalDetalle();
+            }
+        }
 
         async function eliminarLoteCestaticket(id) {
-            const result = await Swal.fire({ title: '⚠️ ¿Estás seguro?', text: "Esta acción eliminará TODO el lote de Cestaticket y todos sus registros asociados. No se puede deshacer.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar lote', cancelButtonText: 'Cancelar' });
+            const result = await Swal.fire({
+                title: '⚠️ ¿Estás seguro?',
+                text: "Esta acción eliminará TODO el lote de Cestaticket y todos sus registros asociados. No se puede deshacer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar lote',
+                cancelButtonText: 'Cancelar'
+            });
             if (result.isConfirmed) {
                 try {
                     const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const resp = await res.json();
-                    if(res.ok) { Swal.fire('¡Eliminado!', 'El lote de Cestaticket ha sido eliminado.', 'success'); cargarLotesCestaticket(); } else { Swal.fire('Error', resp.error || 'No se pudo eliminar el lote.', 'error'); }
-                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+                    if(res.ok) {
+                        Swal.fire('¡Eliminado!', 'El lote de Cestaticket ha sido eliminado.', 'success');
+                        cargarLotesCestaticket();
+                    } else {
+                        Swal.fire('Error', resp.error || 'No se pudo eliminar el lote.', 'error');
+                    }
+                } catch (e) {
+                    Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+                }
             }
         }
 
@@ -801,7 +1042,10 @@
             const salario_mensual = parseFloat(document.getElementById('pasivos_salario').value) || 0;
             const dias = parseInt(document.getElementById('pasivos_dias').value) || 30;
             const usar_base_60 = document.getElementById('pasivos_60').checked;
-            if(salario_mensual <= 0) { Swal.fire('Atención', 'Ingresa un salario mensual base válido en USD.', 'warning'); return; }
+            if(salario_mensual <= 0) {
+                Swal.fire('Atención', 'Ingresa un salario mensual base válido en USD.', 'warning');
+                return;
+            }
             try {
                 const res = await secureFetch(`${API_URL}/api/calcular_pasivos`, {
                     method: 'POST',
@@ -809,11 +1053,28 @@
                 });
                 if (!res) return;
                 const data = await res.json();
-                if(data.error) { Swal.fire('Error', data.error, 'error'); return; }
-                let html = `<h4>Resultado del Cálculo</h4><div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;"><div><strong>Días calculados:</strong> ${data.dias}</div><div><strong>Base utilizada:</strong> ${data.base_usada}</div><div><strong>Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(2)}</div></div><div style="margin-top:20px; font-size: 1.3em; padding: 20px; background: #e9f7ef; border-radius: 8px; text-align: center;"><div><strong>Total a Pagar en USD:</strong> <span style="color:#0056b3;">$${data.total_usd.toFixed(2)}</span></div><div><strong>Total a Pagar en Bs (a tasa BCV):</strong> <span style="color:#0056b3;">Bs. ${data.total_bs.toFixed(2)}</span></div></div>`;
+                if(data.error) {
+                    Swal.fire('Error', data.error, 'error');
+                    return;
+                }
+                let html = `
+                    <h4>Resultado del Cálculo</h4>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                        <div><strong>Días calculados:</strong> ${data.dias}</div>
+                        <div><strong>Base utilizada:</strong> ${data.base_usada}</div>
+                        <div><strong>Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(2)}</div>
+                    </div>
+                    <div style="margin-top:20px; font-size: 1.3em; padding: 20px; background: #e9f7ef; border-radius: 8px; text-align: center;">
+                        <div><strong>Total a Pagar en USD:</strong> <span style="color:#0056b3;">$${data.total_usd.toFixed(2)}</span></div>
+                        <div><strong>Total a Pagar en Bs (a tasa BCV):</strong> <span style="color:#0056b3;">Bs. ${data.total_bs.toFixed(2)}</span></div>
+                    </div>
+                `;
                 document.getElementById('resultado_pasivos').innerHTML = html;
                 document.getElementById('alert_pasivos').innerHTML = `<div class="alert alert-success">✅ Cálculo de pasivos realizado correctamente.</div>`;
-            } catch(e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+            } catch(e) {
+                console.error(e);
+                Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+            }
         }
 
         async function actualizarBCV(silencioso = false) {
@@ -835,6 +1096,12 @@
                 }
             }
         }
+
+        // ============================================
+        // GESTIÓN DE EMPLEADOS (ADMIN)
+        // ============================================
+        let editingEmployeeId = null;
+        let editingUserId = null;
 
         function cancelarEdicion() {
             editingEmployeeId = null;
@@ -870,12 +1137,12 @@
         }
 
         async function guardarEmpleado() {
-            const data = { 
-                cedula: document.getElementById('emp_cedula').value, 
+            const data = {
+                cedula: document.getElementById('emp_cedula').value,
                 nombres: document.getElementById('emp_nombres').value,
-                apellidos: document.getElementById('emp_apellidos').value, 
+                apellidos: document.getElementById('emp_apellidos').value,
                 cargo: document.getElementById('emp_cargo').value,
-                departamento: document.getElementById('emp_depto').value, 
+                departamento: document.getElementById('emp_depto').value,
                 salario_mensual_usd: parseFloat(document.getElementById('emp_salario').value) || 0,
                 sucursal_id: parseInt(document.getElementById('emp_sucursal').value) || null,
                 fecha_nacimiento: document.getElementById('emp_fecha_nacimiento').value || null,
@@ -895,20 +1162,25 @@
             try {
                 const res = await secureFetch(url, { method: method, body: JSON.stringify(data) });
                 if (!res) return;
-                let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor respondió con HTML" }; }
+                let resp;
+                try {
+                    resp = await res.json();
+                } catch {
+                    resp = { error: "El servidor respondió con HTML" };
+                }
                 const alertBox = document.getElementById('alert_emp');
-                if(res.ok) { 
+                if(res.ok) {
                     alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`;
                     Swal.fire('¡Éxito!', resp.mensaje, 'success');
                     cancelarEdicion();
                     cargarEmpleadosAdmin();
-                } else { 
+                } else {
                     alertBox.innerHTML = `<div class="alert alert-danger">Error: ${resp.error}</div>`;
-                    Swal.fire('Error', resp.error, 'error'); 
+                    Swal.fire('Error', resp.error, 'error');
                 }
-            } catch (error) { 
+            } catch (error) {
                 document.getElementById('alert_emp').innerHTML = `<div class="alert alert-danger">Error de red: ${error.message}</div>`;
-                Swal.fire('Error de red', error.message, 'error'); 
+                Swal.fire('Error de red', error.message, 'error');
             }
         }
 
@@ -918,16 +1190,19 @@
             try {
                 const searchText = document.getElementById('search_empleado').value;
                 const filterSucursal = document.getElementById('filter_sucursal').value;
-                let url = `${API_URL}/api/empleados`; const params = [];
+                let url = `${API_URL}/api/empleados`;
+                const params = [];
                 if (searchText) params.push(`search=${encodeURIComponent(searchText)}`);
                 if (filterSucursal) params.push(`sucursal_id=${encodeURIComponent(filterSucursal)}`);
                 if (params.length > 0) url += '?' + params.join('&');
+                
                 const res = await secureFetch(url);
                 if (!res) return;
                 if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const empleados = await res.json();
-                if(empleados.length === 0) tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No se encontraron empleados con esos filtros.</td></tr>';
-                else {
+                if(empleados.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No se encontraron empleados con esos filtros.</td></tr>';
+                } else {
                     tableBody.innerHTML = empleados.map(e => `
                         <tr>
                             <td>${e.id_empleado}</td>
@@ -944,29 +1219,53 @@
                         </tr>
                     `).join('');
                 }
+                
                 const resSuc = await secureFetch(`${API_URL}/api/sucursales`);
                 if (resSuc && resSuc.ok) {
                     const sucs = await resSuc.json();
                     document.getElementById('emp_sucursal').innerHTML = '<option value="">Seleccione una sucursal...</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
-                    const selectSucFilter = document.getElementById('filter_sucursal'); const cVal = selectSucFilter.value;
+                    const selectSucFilter = document.getElementById('filter_sucursal');
+                    const cVal = selectSucFilter.value;
                     selectSucFilter.innerHTML = '<option value="">Ver todas las sucursales</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
                     selectSucFilter.value = cVal;
                 }
-            } catch(e) { tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar empleados: ${e.message}</td></tr>`; console.error(e); }
+            } catch(e) {
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar empleados: ${e.message}</td></tr>`;
+                console.error(e);
+            }
         }
 
         async function eliminarEmpleado(id) {
-            const result = await Swal.fire({ title: '¿Estás seguro?', text: "El empleado será inactivo.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: "El empleado será inactivo.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
             if (result.isConfirmed) {
                 try {
                     const res = await secureFetch(`${API_URL}/api/empleados/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const resp = await res.json();
-                    if(res.ok) { cargarEmpleadosAdmin(); Swal.fire('Eliminado', 'El empleado ha sido eliminado.', 'success'); } else { Swal.fire('Error', resp.error, 'error'); }
-                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+                    if(res.ok) {
+                        cargarEmpleadosAdmin();
+                        Swal.fire('Eliminado', 'El empleado ha sido eliminado.', 'success');
+                    } else {
+                        Swal.fire('Error', resp.error, 'error');
+                    }
+                } catch (e) {
+                    Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+                }
             }
         }
 
+        // ============================================
+        // GESTIÓN DE SUCURSALES
+        // ============================================
         async function cargarSucursales() {
             const tableBody = document.getElementById('tabla_sucursales');
             tableBody.innerHTML = '<tr><td colspan="3" class="loading">Cargando sucursales...</td></tr>';
@@ -974,39 +1273,96 @@
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
                 if (!res) return;
                 if(!res.ok) throw new Error(`Error del servidor: ${res.status}`);
-                let data; const contentType = res.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) data = await res.json();
-                else { const text = await res.text(); throw new Error(`HTML recibido. ${text.substring(0,80)}...`); }
-                if(data.length === 0) tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">No hay sucursales creadas.</td></tr>';
-                else tableBody.innerHTML = data.map(s => `<tr><td>${s.id_sucursal}</td><td>${s.nombre}</td><td><button class="btn-danger" onclick="eliminarSucursal(${s.id_sucursal})">🗑️ Eliminar</button></td></tr>`).join('');
-            } catch(e) { tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`; console.error(e); }
+                let data;
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    throw new Error(`HTML recibido. ${text.substring(0,80)}...`);
+                }
+                if(data.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">No hay sucursales creadas.</td></tr>';
+                } else {
+                    tableBody.innerHTML = data.map(s => `
+                        <tr>
+                            <td>${s.id_sucursal}</td>
+                            <td>${s.nombre}</td>
+                            <td><button class="btn-danger" onclick="eliminarSucursal(${s.id_sucursal})">🗑️ Eliminar</button></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch(e) {
+                tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`;
+                console.error(e);
+            }
         }
 
         async function crearSucursal() {
             const nombre = document.getElementById('suc_nombre').value;
-            if(!nombre) { Swal.fire('Atención', 'El nombre no puede estar vacío.', 'warning'); return; }
+            if(!nombre) {
+                Swal.fire('Atención', 'El nombre no puede estar vacío.', 'warning');
+                return;
+            }
             try {
-                const res = await secureFetch(`${API_URL}/api/sucursales`, { method: 'POST', body: JSON.stringify({nombre}) });
+                const res = await secureFetch(`${API_URL}/api/sucursales`, {
+                    method: 'POST',
+                    body: JSON.stringify({nombre})
+                });
                 if (!res) return;
-                let resp; try { resp = await res.json(); } catch { resp = { error: "El servidor no respondió con JSON" }; }
+                let resp;
+                try {
+                    resp = await res.json();
+                } catch {
+                    resp = { error: "El servidor no respondió con JSON" };
+                }
                 const alertBox = document.getElementById('alert_suc');
-                if(res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; document.getElementById('suc_nombre').value = ''; cargarSucursales(); Swal.fire('¡Éxito!', resp.mensaje, 'success'); } 
-                else { alertBox.innerHTML = `<div class="alert alert-danger">⚠️ Error: ${resp.error || 'Error desconocido'}</div>`; Swal.fire('Error', resp.error || 'Error desconocido', 'error'); }
-            } catch (error) { document.getElementById('alert_suc').innerHTML = `<div class="alert alert-danger">❌ Error de red: ${error.message}</div>`; Swal.fire('Error de red', error.message, 'error'); }
+                if(res.ok) {
+                    alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`;
+                    document.getElementById('suc_nombre').value = '';
+                    cargarSucursales();
+                    Swal.fire('¡Éxito!', resp.mensaje, 'success');
+                } else {
+                    alertBox.innerHTML = `<div class="alert alert-danger">⚠️ Error: ${resp.error || 'Error desconocido'}</div>`;
+                    Swal.fire('Error', resp.error || 'Error desconocido', 'error');
+                }
+            } catch (error) {
+                document.getElementById('alert_suc').innerHTML = `<div class="alert alert-danger">❌ Error de red: ${error.message}</div>`;
+                Swal.fire('Error de red', error.message, 'error');
+            }
         }
 
         async function eliminarSucursal(id) {
-            const result = await Swal.fire({ title: '¿Estás seguro?', text: "Esta acción eliminará la sucursal.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción eliminará la sucursal.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
             if (result.isConfirmed) {
                 try {
                     const res = await secureFetch(`${API_URL}/api/sucursales/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const resp = await res.json();
-                    if(res.ok) { cargarSucursales(); Swal.fire('Eliminado', 'Sucursal eliminada.', 'success'); } else { Swal.fire('Error', resp.error, 'error'); }
-                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+                    if(res.ok) {
+                        cargarSucursales();
+                        Swal.fire('Eliminado', 'Sucursal eliminada.', 'success');
+                    } else {
+                        Swal.fire('Error', resp.error, 'error');
+                    }
+                } catch (e) {
+                    Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+                }
             }
         }
 
+        // ============================================
+        // PARÁMETROS
+        // ============================================
         async function cargarParametros() {
             try {
                 const res = await secureFetch(`${API_URL}/api/parametros`);
@@ -1022,7 +1378,10 @@
                 document.getElementById('param_cuenta_empresa').value = params.cuenta_empresa || '';
                 document.getElementById('param_nombre_cuenta_empresa').value = params.nombre_cuenta_empresa || '';
                 document.getElementById('param_codigo_banco').value = params.codigo_banco_defecto || '';
-            } catch (e) { console.error(e); Swal.fire('Error', 'No se pudieron cargar los parámetros.', 'error'); }
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', 'No se pudieron cargar los parámetros.', 'error');
+            }
         }
 
         async function guardarParametros() {
@@ -1037,14 +1396,21 @@
                 { clave: 'nombre_cuenta_empresa', valor: document.getElementById('param_nombre_cuenta_empresa').value.trim() },
                 { clave: 'codigo_banco_defecto', valor: document.getElementById('param_codigo_banco').value.trim() }
             ];
+            
             let errores = 0;
             for (const param of parametros) {
                 try {
-                    const res = await secureFetch(`${API_URL}/api/parametros`, { method: 'PUT', body: JSON.stringify(param) });
+                    const res = await secureFetch(`${API_URL}/api/parametros`, {
+                        method: 'PUT',
+                        body: JSON.stringify(param)
+                    });
                     if (!res) return;
                     if (!res.ok) errores++;
-                } catch (e) { errores++; }
+                } catch (e) {
+                    errores++;
+                }
             }
+            
             if (errores === 0) {
                 Swal.fire('¡Actualizado!', 'Todos los parámetros (Nómina y Empresa) se han guardado.', 'success');
                 document.getElementById('alert_params').innerHTML = `<div class="alert alert-success">✅ Parámetros actualizados correctamente.</div>`;
@@ -1054,6 +1420,9 @@
             }
         }
 
+        // ============================================
+        // FUNCIONES DE ARCHIVOS Y DESCARGAS
+        // ============================================
         async function generarArchivoPago(id, tipo) {
             try {
                 const res = await secureFetch(`${API_URL}/api/generar_archivo_pago/${id}?tipo=${tipo}`);
@@ -1104,45 +1473,79 @@
             downloadFile(`${API_URL}/api/generar_recibo/${id}`, `recibo_${id}.pdf`);
         }
 
+        // ============================================
+        // HISTORIAL DE NÓMINAS - CORREGIDO
+        // ============================================
         async function cargarLotes() {
             const tableBody = document.getElementById('tabla_historial');
-            tableBody.innerHTML = '<tr><td colspan="8" class="loading">Cargando lotes...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="8" class="loading">🔄 Cargando lotes...</td></tr>';
             try {
                 const searchText = document.getElementById('search_historial').value;
                 let url = `${API_URL}/api/lotes`;
                 if (searchText) url += `?search=${encodeURIComponent(searchText)}`;
+                
+                console.log(`🔍 Fetching lotes desde: ${url}`);
+                
                 const res = await secureFetch(url);
-                if (!res) return;
-                if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
+                if (!res) {
+                    throw new Error("No se pudo conectar con el servidor. Verifica tu conexión.");
+                }
+                
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error(`❌ Error response:`, errorText);
+                    throw new Error(`Error ${res.status}: ${errorText || 'Error desconocido'}`);
+                }
+                
                 const lotes = await res.json();
-                if(lotes.length === 0) tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No hay lotes registrados.</td></tr>';
-                else tableBody.innerHTML = lotes.map(l => `
+                console.log(`✅ Lotes cargados: ${lotes.length}`);
+                
+                if(lotes.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">📭 No hay lotes registrados.</td></tr>';
+                } else {
+                    tableBody.innerHTML = lotes.map(l => `
+                        <tr>
+                            <td><strong>#${l.id_lote}</strong></td>
+                            <td><strong>${l.descripcion || 'Sin descripción'}</strong></td>
+                            <td>${l.fecha_calculo}</td>
+                            <td>${l.cantidad_empleados_lote} empleados</td>
+                            <td><small>${l.sucursales_involucradas || 'Sin sucursal'}</small></td>
+                            <td><strong>$${l.total_usd.toFixed(2)}</strong></td>
+                            <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
+                            <td>
+                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 60%</button>
+                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 100%</button>
+                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 40%</button>
+                                <button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">📄 Lote PDF</button>
+                                <button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})">📂 Ver Detalle</button>
+                                <button class="btn-danger" onclick="eliminarLote(${l.id_lote})">🗑️</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch(e) {
+                console.error('❌ Error en cargarLotes:', e);
+                tableBody.innerHTML = `
                     <tr>
-                        <td><strong>#${l.id_lote}</strong></td>
-                        <td><strong>${l.descripcion || 'Sin descripción'}</strong></td>
-                        <td>${l.fecha_calculo}</td>
-                        <td>${l.cantidad_empleados_lote} empleados</td>
-                        <td><small>${l.sucursales_involucradas}</small></td>
-                        <td><strong>$${l.total_usd.toFixed(2)}</strong></td>
-                        <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
-                        <td>
-                            <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 60%</button>
-                            <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 100%</button>
-                            <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 40%</button>
-                            <button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">📄 Lote PDF</button>
-                            <button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})">📂 Ver Detalle</button>
-                            <button class="btn-danger" onclick="eliminarLote(${l.id_lote})">🗑️</button>
+                        <td colspan="8" style="text-align:center; color:red; font-weight:bold;">
+                            ❌ Error al cargar historial: ${e.message}
+                            <br><small>Verifica que el backend esté corriendo en ${API_URL}</small>
                         </td>
                     </tr>
-                `).join('');
-            } catch(e) { tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar historial: ${e.message}</td></tr>`; console.error(e); }
+                `;
+            }
         }
 
+        // ============================================
+        // DETALLE DE LOTE
+        // ============================================
         async function abrirModalDetalleLote(id) {
             const modal = document.getElementById('modalDetalleLote');
             const header = document.getElementById('lote_header_info');
             const body = document.getElementById('cuerpo_detalle_lote');
-            header.innerHTML = '<p class="loading">Cargando datos del lote...</p>'; body.innerHTML = ''; modal.style.display = 'flex';
+            header.innerHTML = '<p class="loading">Cargando datos del lote...</p>';
+            body.innerHTML = '';
+            modal.style.display = 'flex';
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes/${id}`);
                 if (!res) return;
@@ -1151,16 +1554,28 @@
                     try {
                         const errorData = await res.json();
                         if (errorData.error) errorMsg = errorData.error;
-                    } catch (parseError) { /* Ignorar si no es JSON */ }
+                    } catch (parseError) {}
                     throw new Error(errorMsg);
                 }
                 const lote = await res.json();
-                header.innerHTML = `<div style="display:flex; justify-content:space-between;"><div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'} <br><small>Generado el ${lote.fecha_calculo}</small></div><div style="text-align:right;"><div><strong>Total Lote:</strong> $${lote.total_usd.toFixed(2)}</div><div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div></div></div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>`;
+                header.innerHTML = `
+                    <div style="display:flex; justify-content:space-between;">
+                        <div>
+                            <strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'}
+                            <br><small>Generado el ${lote.fecha_calculo}</small>
+                        </div>
+                        <div style="text-align:right;">
+                            <div><strong>Total Lote:</strong> $${lote.total_usd.toFixed(2)}</div>
+                            <div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div>
+                        </div>
+                    </div>
+                    <br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>
+                `;
                 body.innerHTML = lote.nominas.map(n => `
                     <tr>
                         <td>${n.nombres} ${n.apellidos}</td>
                         <td>$${(n.salario_base_usd || 0).toFixed(2)}</td>
-                        <td><small>$${(n.base_incidencia_60_usd || 0).toFixed(2)}</small></td>
+                        <td><small>$${(n.salario_base_usd * 0.6 || 0).toFixed(2)}</small></td>
                         <td>$${(n.horas_extras_usd || 0).toFixed(2)}</td>
                         <td>$${(n.bono_complementario_usd || 0).toFixed(2)}</td>
                         <td>$${(n.total_asignaciones_usd || 0).toFixed(2)}</td>
@@ -1179,17 +1594,35 @@
             }
         }
 
-        function cerrarModalDetalle() { document.getElementById('modalDetalleLote').style.display = 'none'; }
-        window.onclick = function(event) { const modal = document.getElementById('modalDetalleLote'); if (event.target == modal) { cerrarModalDetalle(); } }
+        function cerrarModalDetalle() {
+            document.getElementById('modalDetalleLote').style.display = 'none';
+        }
+
         async function eliminarLote(id) {
-            const result = await Swal.fire({ title: '⚠️ ¿Estás seguro?', text: "Esta acción eliminará TODO el lote de nómina y todos sus registros asociados. No se puede deshacer.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar lote', cancelButtonText: 'Cancelar' });
+            const result = await Swal.fire({
+                title: '⚠️ ¿Estás seguro?',
+                text: "Esta acción eliminará TODO el lote de nómina y todos sus registros asociados. No se puede deshacer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar lote',
+                cancelButtonText: 'Cancelar'
+            });
             if (result.isConfirmed) {
                 try {
                     const res = await secureFetch(`${API_URL}/api/lotes/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const resp = await res.json();
-                    if(res.ok) { Swal.fire('¡Eliminado!', 'El lote de nómina ha sido eliminado.', 'success'); cargarLotes(); } else { Swal.fire('Error', resp.error || 'No se pudo eliminar el lote.', 'error'); }
-                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+                    if(res.ok) {
+                        Swal.fire('¡Eliminado!', 'El lote de nómina ha sido eliminado.', 'success');
+                        cargarLotes();
+                    } else {
+                        Swal.fire('Error', resp.error || 'No se pudo eliminar el lote.', 'error');
+                    }
+                } catch (e) {
+                    Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+                }
             }
         }
     </script>
