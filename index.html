@@ -9,7 +9,7 @@
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
         .header-title { text-align: center; color: #2c3e50; margin-bottom: 15px; font-size: 28px; }
         .top-navbar { display: flex; justify-content: flex-end; align-items: center; padding: 10px 25px; background: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .user-profile { display: flex; align-items: center; gap: 15px; }
+        .user-profile { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .user-profile span { font-weight: bold; color: #007bff; }
         .btn-logout { background: #dc3545; color: white; border: none; padding: 6px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
         .btn-logout:hover { background: #c82333; }
@@ -234,7 +234,6 @@
             </div>
             <div><label>Seleccionar empleados:</label><div id="lista_empleados_cesta" class="loading">Cargando empleados...</div></div>
             
-            <!-- Tabla de faltas para Cestaticket -->
             <div id="cesta_faltas_container" style="display:none; margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px;">
                 <h4 style="margin-top:0;">📝 Faltas por Empleado</h4>
                 <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
@@ -903,13 +902,11 @@
                     if (cuerpoFaltas) cuerpoFaltas.innerHTML = faltasHtml;
                     if (faltasContainer) faltasContainer.style.display = 'block';
                     
-                    // Establecer texto de días base
                     const diasText = document.getElementById('cesta_dias_text');
                     if (diasText) {
                         diasText.innerHTML = `📅 <strong>Base de cálculo:</strong> 30 días (Ley Cestaticket) | <span style="color:#0056b3;">$40 USD mensuales</span>`;
                     }
                     
-                    // Eventos
                     document.querySelectorAll('.cesta-check').forEach(cb => {
                         cb.addEventListener('change', actualizarFaltasCesta);
                     });
@@ -957,7 +954,6 @@
                 return;
             }
 
-            // Obtener faltas por empleado
             const faltas = {};
             document.querySelectorAll('#cuerpo_detalle_cesta_faltas tr').forEach(row => {
                 if (row.style.display !== 'none') {
@@ -968,6 +964,8 @@
                     }
                 }
             });
+
+            console.log('📤 Enviando faltas:', faltas);
 
             try {
                 const res = await secureFetch(`${API_URL}/api/calcular_cestaticket`, {
@@ -1056,8 +1054,8 @@
                 Swal.fire('¡Éxito!', `Cestaticket guardado como Lote #${data.lote_id}`, 'success');
                 cargarLotesCestaticket();
             } catch(e) {
-                console.error(e);
-                Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+                console.error('❌ Error en calcularCestaticket:', e);
+                Swal.fire('Error de red', 'No se pudo conectar con el servidor. Verifica la consola para más detalles.', 'error');
             }
         }
 
