@@ -59,6 +59,8 @@
         }
         .status-online { background: #d4edda; color: #155724; }
         .status-offline { background: #f8d7da; color: #721c24; }
+        .cesta-falta { width: 80px; text-align: center; padding: 5px; }
+        .cesta-dias-pagar { font-weight: bold; color: #0056b3; text-align: center; }
     </style>
 </head>
 <body>
@@ -231,6 +233,26 @@
                 <div><label>Descripción:</label><input type="text" id="cesta_descripcion" placeholder="Ej: Cestaticket 1ra Quincena Agosto 2026"></div>
             </div>
             <div><label>Seleccionar empleados:</label><div id="lista_empleados_cesta" class="loading">Cargando empleados...</div></div>
+            
+            <!-- Tabla de faltas para Cestaticket -->
+            <div id="cesta_faltas_container" style="display:none; margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px;">
+                <h4 style="margin-top:0;">📝 Faltas por Empleado</h4>
+                <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+                    Ingresa los días de falta para cada empleado. Se restará <strong>$1.3333</strong> por cada día faltante (valor diario = $40 ÷ 30).
+                </div>
+                <div id="cesta_dias_info" style="background: #e8f4fd; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                    <span id="cesta_dias_text">📅 <strong>Base de cálculo:</strong> 30 días (Ley Cestaticket) | <span style="color:#0056b3;">$40 USD mensuales</span></span>
+                </div>
+                <table id="tabla_detalle_cesta_faltas">
+                    <thead><tr>
+                        <th>Empleado</th>
+                        <th style="width:120px;">Días de Falta</th>
+                        <th style="width:120px;">Días a Pagar</th>
+                    </tr></thead>
+                    <tbody id="cuerpo_detalle_cesta_faltas"></tbody>
+                </table>
+            </div>
+
             <br><button class="btn-primary" onclick="calcularCestaticket()">🍽️ Calcular Cestaticket</button>
             <div id="resultado_cesta"></div>
             
@@ -399,7 +421,13 @@
         }
 
         // ============================================
-        // FUNCIONES EXISTENTES (con correcciones)
+        // VARIABLES GLOBALES
+        // ============================================
+        let editingEmployeeId = null;
+        let editingUserId = null;
+
+        // ============================================
+        // FUNCIONES DE AUTENTICACIÓN
         // ============================================
         function toggleSoloBono() {
             const isSoloBono = document.getElementById('calcular_solo_bono').checked;
@@ -413,7 +441,6 @@
 
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                // Verificar autenticación
                 const res = await secureFetch(`${API_URL}/api/check_auth`);
                 if (!res) return;
                 const data = await res.json();
@@ -423,7 +450,6 @@
                     document.getElementById('username_display').textContent = `👤 ${data.username}`;
                 }
                 
-                // Verificar salud del backend
                 const healthOk = await checkBackendHealth();
                 if (!healthOk) {
                     Swal.fire({
@@ -436,12 +462,10 @@
                     });
                 }
 
-                // Cargar tasa BCV automáticamente
                 setTimeout(() => {
                     actualizarBCV(true);
                 }, 0);
 
-                // Eventos de tabs
                 document.querySelectorAll('.tab-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const tabId = this.getAttribute('data-target');
@@ -503,6 +527,9 @@
             }
         }
 
+        // ============================================
+        // FUNCIONES DE USUARIOS
+        // ============================================
         function cancelarEdicionUsuario() {
             editingUserId = null;
             document.getElementById('seg_new_user').value = '';
@@ -812,12 +839,16 @@
         }
 
         // ============================================
-        // CESTATICKET FUNCTIONS
+        // CESTATICKET FUNCTIONS - CORREGIDAS
         // ============================================
         async function cargarEmpleadosCesta() {
             try {
                 const container = document.getElementById('lista_empleados_cesta');
+                const faltasContainer = document.getElementById('cesta_faltas_container');
+                const cuerpoFaltas = document.getElementById('cuerpo_detalle_cesta_faltas');
+                
                 container.innerHTML = '<p class="loading">Cargando empleados...</p>';
+                if (faltasContainer) faltasContainer.style.display = 'none';
                 
                 const res = await secureFetch(`${API_URL}/api/empleados`);
                 if (!res) return;
@@ -830,17 +861,89 @@
                     const quincenal = data.filter(e => e.tipo_pago === 'Quincenal');
                     const semanal = data.filter(e => e.tipo_pago === 'Semanal');
                     let html = '';
+                    let faltasHtml = '';
+                    
                     if (quincenal.length > 0) {
                         html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#007bff;">📅 Pago Quincenal</div>`;
-                        html += quincenal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                        html += quincenal.map(e => 
+                            `<label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> 
+                                ${e.cedula} - ${e.nombres} ${e.apellidos}
+                            </label>`
+                        ).join('');
+                        
+                        faltasHtml += quincenal.map(e => `
+                            <tr data-emp-id="${e.id_empleado}">
+                                <td>${e.nombres} ${e.apellidos}</td>
+                                <td><input type="number" class="cesta-falta" min="0" max="30" value="0"></td>
+                                <td class="cesta-dias-pagar">30 días</td>
+                            </tr>
+                        `).join('');
                     }
+                    
                     if (semanal.length > 0) {
                         html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#856404;">📅 Pago Semanal</div>`;
-                        html += semanal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                        html += semanal.map(e => 
+                            `<label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> 
+                                ${e.cedula} - ${e.nombres} ${e.apellidos}
+                            </label>`
+                        ).join('');
+                        
+                        faltasHtml += semanal.map(e => `
+                            <tr data-emp-id="${e.id_empleado}">
+                                <td>${e.nombres} ${e.apellidos}</td>
+                                <td><input type="number" class="cesta-falta" min="0" max="30" value="0"></td>
+                                <td class="cesta-dias-pagar">30 días</td>
+                            </tr>
+                        `).join('');
                     }
+                    
                     container.innerHTML = html;
+                    if (cuerpoFaltas) cuerpoFaltas.innerHTML = faltasHtml;
+                    if (faltasContainer) faltasContainer.style.display = 'block';
+                    
+                    // Establecer texto de días base
+                    const diasText = document.getElementById('cesta_dias_text');
+                    if (diasText) {
+                        diasText.innerHTML = `📅 <strong>Base de cálculo:</strong> 30 días (Ley Cestaticket) | <span style="color:#0056b3;">$40 USD mensuales</span>`;
+                    }
+                    
+                    // Eventos
+                    document.querySelectorAll('.cesta-check').forEach(cb => {
+                        cb.addEventListener('change', actualizarFaltasCesta);
+                    });
+                    document.querySelectorAll('.cesta-falta').forEach(input => {
+                        input.addEventListener('input', actualizarFaltasCesta);
+                    });
+                    
+                    actualizarFaltasCesta();
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e); 
+            }
+        }
+
+        function actualizarFaltasCesta() {
+            const checks = document.querySelectorAll('.cesta-check');
+            const rows = document.querySelectorAll('#cuerpo_detalle_cesta_faltas tr');
+            const DIAS_BASE = 30;
+            
+            rows.forEach(row => {
+                const empId = row.getAttribute('data-emp-id');
+                const isChecked = Array.from(checks).some(cb => cb.value == empId && cb.checked);
+                
+                if (isChecked) {
+                    row.style.display = 'table-row';
+                    const faltasInput = row.querySelector('.cesta-falta');
+                    const diasPagarCell = row.querySelector('.cesta-dias-pagar');
+                    const faltas = parseInt(faltasInput.value) || 0;
+                    const diasPagar = Math.max(0, DIAS_BASE - faltas);
+                    diasPagarCell.textContent = `${diasPagar} días`;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
 
         async function calcularCestaticket() {
@@ -848,15 +951,34 @@
             const fecha_fin = document.getElementById('cesta_fecha_fin').value;
             const descripcion = document.getElementById('cesta_descripcion').value;
             const ids = Array.from(document.querySelectorAll('#lista_empleados_cesta input.cesta-check:checked')).map(c => parseInt(c.value));
+            
             if(!ids.length) {
                 Swal.fire('Atención', 'Selecciona al menos un empleado para calcular el Cestaticket.', 'warning');
                 return;
             }
 
+            // Obtener faltas por empleado
+            const faltas = {};
+            document.querySelectorAll('#cuerpo_detalle_cesta_faltas tr').forEach(row => {
+                if (row.style.display !== 'none') {
+                    const empId = row.getAttribute('data-emp-id');
+                    const faltasVal = parseInt(row.querySelector('.cesta-falta').value) || 0;
+                    if (faltasVal > 0) {
+                        faltas[empId] = faltasVal;
+                    }
+                }
+            });
+
             try {
                 const res = await secureFetch(`${API_URL}/api/calcular_cestaticket`, {
                     method: 'POST',
-                    body: JSON.stringify({ fecha_inicio, fecha_fin, descripcion, empleados_ids: ids })
+                    body: JSON.stringify({ 
+                        fecha_inicio, 
+                        fecha_fin, 
+                        descripcion, 
+                        empleados_ids: ids,
+                        faltas: faltas
+                    })
                 });
                 if (!res) return;
                 const data = await res.json();
@@ -866,13 +988,70 @@
                 }
 
                 let total_bs = 0;
-                let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
-                html += `<table><tr><th>Empleado</th><th>Días Pagados</th><th>Valor Día USD</th><th>Total USD</th><th>Total Bs</th></tr>`;
+                let total_usd = 0;
+                
+                let html = `
+                    <h3>🍽️ Cálculo de Cestaticket</h3>
+                    <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                            <div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div>
+                            <div><strong>💰 Valor Mensual:</strong> $${data.valor_mensual_usd.toFixed(2)}</div>
+                            <div><strong>📅 Valor por Día:</strong> $${data.valor_diario_usd.toFixed(4)}</div>
+                            <div><strong>📆 Días hábiles del período:</strong> ${data.total_working_days}</div>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.9em; color: #555; background: #f8f9fa; padding: 8px; border-radius: 4px;">
+                            ℹ️ <strong>Fórmula:</strong> $${data.valor_mensual_usd.toFixed(2)} - (Faltas × $${data.valor_diario_usd.toFixed(4)}) × Tasa BCV
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table style="min-width: 800px;">
+                            <thead>
+                                <tr>
+                                    <th>Empleado</th>
+                                    <th>Monto Base (USD)</th>
+                                    <th>Valor Día (USD)</th>
+                                    <th>Faltas</th>
+                                    <th>Descuento (USD)</th>
+                                    <th>Total USD</th>
+                                    <th>Total Bs</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
                 data.resultados.forEach(r => {
+                    total_usd += r.total_usd;
                     total_bs += r.total_bs;
-                    html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_pagados}</td><td>$${r.valor_diario_usd.toFixed(2)}</td><td>$${r.total_usd.toFixed(2)}</td><td><b>Bs. ${r.total_bs.toFixed(2)}</b></td></tr>`;
+                    html += `
+                        <tr>
+                            <td><strong>${r.nombre_completo}</strong></td>
+                            <td>$${r.valor_mensual_usd.toFixed(2)}</td>
+                            <td>$${r.valor_diario_usd.toFixed(4)}</td>
+                            <td style="color:${r.faltas > 0 ? 'red' : 'green'}; font-weight:bold; text-align:center;">${r.faltas}</td>
+                            <td style="color:red;">$${r.descuento_usd.toFixed(2)}</td>
+                            <td><strong>$${r.total_usd.toFixed(2)}</strong></td>
+                            <td><strong style="color:#0056b3;">Bs. ${r.total_bs.toFixed(2)}</strong></td>
+                        </tr>
+                    `;
                 });
-                html += `<tr class="lote-total-row"><td colspan="4" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr></table>`;
+                
+                html += `
+                            </tbody>
+                            <tfoot>
+                                <tr class="lote-total-row">
+                                    <td colspan="5" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td>
+                                    <td><strong>$${total_usd.toFixed(2)}</strong></td>
+                                    <td><strong style="color:#0056b3;">Bs. ${total_bs.toFixed(2)}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div style="margin-top: 15px; font-size: 0.9em; color: #666; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                        <strong>📌 Lote ID:</strong> #${data.lote_id} | 
+                        <strong>📅 Fecha de cálculo:</strong> ${new Date().toLocaleDateString()}
+                    </div>
+                `;
+                
                 document.getElementById('resultado_cesta').innerHTML = html;
                 Swal.fire('¡Éxito!', `Cestaticket guardado como Lote #${data.lote_id}`, 'success');
                 cargarLotesCestaticket();
@@ -882,6 +1061,9 @@
             }
         }
 
+        // ============================================
+        // HISTORIAL CESTATICKET
+        // ============================================
         async function cargarLotesCestaticket() {
             const tableBody = document.getElementById('tabla_historial_cesta');
             tableBody.innerHTML = '<tr><td colspan="6" class="loading">Cargando lotes de cestaticket...</td></tr>';
@@ -992,17 +1174,6 @@
             document.getElementById('modalDetalleCesta').style.display = 'none';
         }
 
-        window.onclick = function(event) {
-            const modal = document.getElementById('modalDetalleCesta');
-            if (event.target == modal) {
-                cerrarModalDetalleCesta();
-            }
-            const modalLote = document.getElementById('modalDetalleLote');
-            if (event.target == modalLote) {
-                cerrarModalDetalle();
-            }
-        }
-
         async function eliminarLoteCestaticket(id) {
             const result = await Swal.fire({
                 title: '⚠️ ¿Estás seguro?',
@@ -1100,9 +1271,6 @@
         // ============================================
         // GESTIÓN DE EMPLEADOS (ADMIN)
         // ============================================
-        let editingEmployeeId = null;
-        let editingUserId = null;
-
         function cancelarEdicion() {
             editingEmployeeId = null;
             document.getElementById('form_title').innerText = 'Agregar Nuevo Empleado';
@@ -1474,7 +1642,7 @@
         }
 
         // ============================================
-        // HISTORIAL DE NÓMINAS - CORREGIDO
+        // HISTORIAL DE NÓMINAS
         // ============================================
         async function cargarLotes() {
             const tableBody = document.getElementById('tabla_historial');
@@ -1623,6 +1791,18 @@
                 } catch (e) {
                     Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
                 }
+            }
+        }
+
+        // Eventos para cerrar modales con click fuera
+        window.onclick = function(event) {
+            const modalCesta = document.getElementById('modalDetalleCesta');
+            if (event.target == modalCesta) {
+                cerrarModalDetalleCesta();
+            }
+            const modalLote = document.getElementById('modalDetalleLote');
+            if (event.target == modalLote) {
+                cerrarModalDetalle();
             }
         }
     </script>
