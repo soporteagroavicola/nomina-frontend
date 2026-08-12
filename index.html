@@ -1119,6 +1119,9 @@
             }
         }
 
+        // ============================================
+        // ✅ FUNCIÓN CORREGIDA: abrirModalDetalleCesta
+        // ============================================
         async function abrirModalDetalleCesta(id) {
             const modal = document.getElementById('modalDetalleCesta');
             const header = document.getElementById('cesta_header_info');
@@ -1138,31 +1141,46 @@
                     throw new Error(errorMsg);
                 }
                 const lote = await res.json();
+                
+                // Calcular el total en USD a partir de los datos
+                let total_usd_lote = 0;
+                if (lote.nominas && lote.nominas.length > 0) {
+                    lote.nominas.forEach(n => {
+                        total_usd_lote += (n.total_usd || 0);
+                    });
+                }
+                
                 header.innerHTML = `
-                    <div style="display:flex; justify-content:space-between;">
+                    <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
                         <div>
                             <strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'}
                             <br><small>Generado el ${lote.fecha_calculo}</small>
                         </div>
                         <div style="text-align:right;">
-                            <div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div>
+                            <div><strong>Total Lote:</strong> Bs. ${(lote.total_bs || 0).toFixed(2)}</div>
+                            <div><small>Total USD: $${total_usd_lote.toFixed(2)}</small></div>
                         </div>
                     </div>
-                    <br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>
+                    <br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas ? lote.nominas.length : 0}</small>
                 `;
-                body.innerHTML = lote.nominas.map(n => `
-                    <tr>
-                        <td>${n.nombres} ${n.apellidos}</td>
-                        <td>${n.dias_pagados}</td>
-                        <td>$${(n.total_usd || 0).toFixed(2)}</td>
-                        <td><strong>Bs. ${(n.total_bs || 0).toFixed(2)}</strong></td>
-                        <td>
-                            <button class="btn-warning" onclick="generarReciboCestaticket(${n.id})" style="font-size: 12px; padding: 4px 10px;">📄 Recibo</button>
-                        </td>
-                    </tr>
-                `).join('');
+                
+                if (lote.nominas && lote.nominas.length > 0) {
+                    body.innerHTML = lote.nominas.map(n => `
+                        <tr>
+                            <td><strong>${n.nombres || ''} ${n.apellidos || ''}</strong></td>
+                            <td>${n.dias_pagados || 0}</td>
+                            <td>$${(n.total_usd || 0).toFixed(2)}</td>
+                            <td><strong>Bs. ${(n.total_bs || 0).toFixed(2)}</strong></td>
+                            <td>
+                                <button class="btn-warning" onclick="generarReciboCestaticket(${n.id})" style="font-size: 12px; padding: 4px 10px;">📄 Recibo</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    body.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">No hay empleados en este lote.</td></tr>';
+                }
             } catch (e) {
-                console.error(e);
+                console.error('❌ Error en abrirModalDetalleCesta:', e);
                 Swal.fire('Error', `No se pudo cargar el detalle del lote de cestaticket: ${e.message}`, 'error');
                 modal.style.display = 'none';
             }
@@ -1200,7 +1218,6 @@
             }
         }
 
-        // ✅ CORREGIDO: Función generarReciboCestaticket
         function generarReciboCestaticket(id) {
             downloadFile(`${API_URL}/api/generar_recibo_cestaticket/${id}`, `recibo_cesta_${id}.pdf`);
         }
@@ -1618,7 +1635,8 @@
                     credentials: 'include'
                 });
                 if (!res.ok) {
-                    throw new Error(`Error ${res.status}: ${res.statusText}`);
+                    const errorText = await res.text();
+                    throw new Error(`Error ${res.status}: ${errorText || 'Error desconocido al descargar el archivo'}`);
                 }
                 const blob = await res.blob();
                 const a = document.createElement('a');
