@@ -1085,119 +1085,153 @@
             </div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- 🍽️ MÓDULO: CESTATICKET -->
-        <!-- ============================================ -->
-        <div id="cestaticket" class="tab-content">
-            <div class="module-header">
-                <div>
-                    <h2 class="module-title">🍽️ Cestaticket</h2>
-                    <p class="module-subtitle">Cálculo del bono de alimentación según Ley</p>
-                </div>
-            </div>
+       <!-- ============================================ -->
+<!-- 🍽️ MÓDULO: CESTATICKET CON FILTROS Y GRUPOS -->
+<!-- ============================================ -->
+<div id="cestaticket" class="tab-content">
+    <div class="module-header">
+        <div>
+            <h2 class="module-title">🍽️ Cestaticket</h2>
+            <p class="module-subtitle">Cálculo del bono de alimentación según Ley</p>
+        </div>
+        <span class="module-badge" id="cesta_total_empleados_badge">0 empleados</span>
+    </div>
 
-            <div class="config-grid">
-                <div class="config-card">
-                    <div class="config-card-icon">📌</div>
-                    <div class="config-card-content">
-                        <label class="config-label">Fecha Inicio</label>
-                        <input type="date" id="cesta_fecha_inicio" class="config-input">
-                    </div>
-                </div>
-                <div class="config-card">
-                    <div class="config-card-icon">📌</div>
-                    <div class="config-card-content">
-                        <label class="config-label">Fecha Fin</label>
-                        <input type="date" id="cesta_fecha_fin" class="config-input">
-                    </div>
-                </div>
-                <div class="config-card">
-                    <div class="config-card-icon">📝</div>
-                    <div class="config-card-content">
-                        <label class="config-label">Descripción</label>
-                        <input type="text" id="cesta_descripcion" class="config-input" placeholder="Ej: Cestaticket 1ra Quincena">
-                    </div>
-                </div>
-            </div>
-
-            <div style="border:1px solid #e8ecf1; border-radius:10px; overflow:hidden; margin-top:20px;">
-                <div style="padding:12px 20px; background:#f8f9fc; border-bottom:1px solid #e8ecf1;">
-                    <span style="font-weight:600;">👥 Seleccionar empleados</span>
-                </div>
-                <div id="lista_empleados_cesta" style="padding:15px 20px;">
-                    <div class="loading">🔄 Cargando empleados...</div>
-                </div>
-            </div>
-
-            <div id="cesta_faltas_container" style="display:none; margin-top:15px; border:1px solid #e8ecf1; border-radius:10px; overflow:hidden;">
-                <div style="padding:12px 20px; background:#f8f9fc; border-bottom:1px solid #e8ecf1;">
-                    <h4 style="margin:0; font-size:15px; color:#1a2a6c;">📝 Faltas por Empleado</h4>
-                </div>
-                <div style="padding:12px 20px; background:#e8f4fd; font-size:13px; color:#555; border-bottom:1px solid #e8ecf1;">
-                    ℹ️ Ingresa los días de falta. Se restará <strong>$1.3333</strong> por cada día (valor diario = $40 ÷ 30).
-                    <div id="cesta_dias_info" style="margin-top:8px; font-weight:600; color:#1a2a6c;">
-                        <span id="cesta_dias_text">📅 Base: 30 días (Ley) | $40 USD mensuales</span>
-                    </div>
-                </div>
-                <div style="overflow-x:auto;">
-                    <table style="width:100%; border-collapse:collapse;">
-                        <thead>
-                            <tr>
-                                <th style="padding:10px 15px; background:#f8f9fc; border-bottom:2px solid #e8ecf1; text-align:left;">Empleado</th>
-                                <th style="padding:10px 15px; background:#f8f9fc; border-bottom:2px solid #e8ecf1; text-align:center; width:120px;">Días de Falta</th>
-                                <th style="padding:10px 15px; background:#f8f9fc; border-bottom:2px solid #e8ecf1; text-align:center; width:120px;">Días a Pagar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cuerpo_detalle_cesta_faltas"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div style="display:flex; gap:15px; margin-top:25px; flex-wrap:wrap;">
-                <button class="btn-primary" onclick="calcularCestaticket()" style="display:inline-flex; align-items:center; gap:10px; padding:14px 35px; font-size:16px;">
-                    <span style="font-size:20px;">🍽️</span> Calcular Cestaticket
-                </button>
-            </div>
-
-            <div id="resultado_cesta" class="results-container"></div>
-
-            <hr style="margin:40px 0; border:1px solid #e8ecf1;">
-
-            <div class="module-header" style="background:linear-gradient(135deg, #2d4373, #1a2a6c); margin-bottom:20px;">
-                <div>
-                    <h2 class="module-title">📋 Historial de Cestaticket</h2>
-                </div>
-            </div>
-
-            <div id="alert_hist_cesta"></div>
-
-            <div class="filters-modern">
-                <div class="filter-group">
-                    <div class="filter-item">
-                        <label class="filter-label">🔍 Buscar</label>
-                        <input type="text" id="search_historial_cesta" placeholder="Buscar por descripción o ID..." oninput="cargarLotesCestaticket()" class="form-input">
-                    </div>
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table-modern">
-                    <thead>
-                        <tr>
-                            <th>ID Lote</th>
-                            <th>Descripción</th>
-                            <th>Fecha Cálculo</th>
-                            <th>Empleados</th>
-                            <th>Total Bs</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla_historial_cesta">
-                        <tr><td colspan="6" class="loading">🔄 Cargando lotes de cestaticket...</td></tr>
-                    </tbody>
-                </table>
+    <!-- Configuración -->
+    <div class="config-grid">
+        <div class="config-card">
+            <div class="config-card-icon">📌</div>
+            <div class="config-card-content">
+                <label class="config-label">Fecha Inicio</label>
+                <input type="date" id="cesta_fecha_inicio" class="config-input">
             </div>
         </div>
+        <div class="config-card">
+            <div class="config-card-icon">📌</div>
+            <div class="config-card-content">
+                <label class="config-label">Fecha Fin</label>
+                <input type="date" id="cesta_fecha_fin" class="config-input">
+            </div>
+        </div>
+        <div class="config-card">
+            <div class="config-card-icon">📝</div>
+            <div class="config-card-content">
+                <label class="config-label">Descripción</label>
+                <input type="text" id="cesta_descripcion" class="config-input" placeholder="Ej: Cestaticket 1ra Quincena">
+            </div>
+        </div>
+    </div>
+
+    <!-- 🆕 FILTROS -->
+    <div class="filters-modern">
+        <div class="filter-group">
+            <div class="filter-item">
+                <label class="filter-label">🏢 Sucursal</label>
+                <select id="cesta_filter_sucursal" class="filter-select" onchange="cargarEmpleadosCestaFiltrados()">
+                    <option value="">Todas las sucursales</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label class="filter-label">💳 Tipo de Pago</label>
+                <select id="cesta_filter_tipo" class="filter-select" onchange="cargarEmpleadosCestaFiltrados()">
+                    <option value="">Todos</option>
+                    <option value="Quincenal">Quincenal</option>
+                    <option value="Semanal">Semanal</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label class="filter-label">🔍 Buscar</label>
+                <input type="text" id="cesta_search_empleado" class="form-input" placeholder="Buscar por cédula o nombre..." oninput="cargarEmpleadosCestaFiltrados()">
+            </div>
+        </div>
+        <div class="options-group" style="border-top: none; padding-top: 0; margin-top: 5px;">
+            <button class="btn-select-all" onclick="seleccionarTodosCesta()" style="padding:4px 14px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; background:#dbeafe; color:#1a2a6c;">✅ Seleccionar Todos</button>
+            <button class="btn-deselect-all" onclick="deseleccionarTodosCesta()" style="padding:4px 14px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; background:#fee2e2; color:#991b1b;">❌ Deseleccionar Todos</button>
+            <span style="font-size:12px; color:#6b7a8f; margin-left:10px;" id="cesta_seleccionados_count">0 empleados seleccionados</span>
+        </div>
+    </div>
+
+    <!-- Lista de empleados agrupados por sucursal -->
+    <div style="border:1px solid #e8ecf1; border-radius:10px; overflow:hidden; margin-top:10px;">
+        <div style="padding:12px 20px; background:#f8f9fc; border-bottom:1px solid #e8ecf1;">
+            <span style="font-weight:600;">👥 Seleccionar empleados</span>
+        </div>
+        <div id="lista_empleados_cesta" style="padding:15px 20px; max-height:400px; overflow-y:auto;">
+            <div class="loading">🔄 Cargando empleados...</div>
+        </div>
+    </div>
+
+    <!-- Tabla de faltas -->
+    <div id="cesta_faltas_container" style="display:none; margin-top:15px; border:1px solid #e8ecf1; border-radius:10px; overflow:hidden;">
+        <div style="padding:12px 20px; background:#f8f9fc; border-bottom:1px solid #e8ecf1;">
+            <h4 style="margin:0; font-size:15px; color:#1a2a6c;">📝 Faltas por Empleado</h4>
+        </div>
+        <div style="padding:12px 20px; background:#e8f4fd; font-size:13px; color:#555; border-bottom:1px solid #e8ecf1;">
+            ℹ️ Ingresa los días de falta. Se restará <strong>$1.3333</strong> por cada día (valor diario = $40 ÷ 30).
+            <div id="cesta_dias_info" style="margin-top:8px; font-weight:600; color:#1a2a6c;">
+                <span id="cesta_dias_text">📅 Base: 30 días (Ley) | $40 USD mensuales</span>
+            </div>
+        </div>
+        <div style="overflow-x:auto; max-height:300px; overflow-y:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr>
+                        <th style="padding:10px 15px; background:#f8f9fc; border-bottom:2px solid #e8ecf1; text-align:left; position:sticky; top:0; background:#f8f9fc; z-index:1;">Empleado</th>
+                        <th style="padding:10px 15px; background:#f8f9fc; border-bottom:2px solid #e8ecf1; text-align:center; width:120px; position:sticky; top:0; background:#f8f9fc; z-index:1;">Días de Falta</th>
+                        <th style="padding:10px 15px; background:#f8f9fc; border-bottom:2px solid #e8ecf1; text-align:center; width:120px; position:sticky; top:0; background:#f8f9fc; z-index:1;">Días a Pagar</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo_detalle_cesta_faltas"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Botón calcular -->
+    <div style="display:flex; gap:15px; margin-top:25px; flex-wrap:wrap;">
+        <button class="btn-primary" onclick="calcularCestaticket()" style="display:inline-flex; align-items:center; gap:10px; padding:14px 35px; font-size:16px;">
+            <span style="font-size:20px;">🍽️</span> Calcular Cestaticket
+        </button>
+    </div>
+
+    <div id="resultado_cesta" class="results-container"></div>
+
+    <hr style="margin:40px 0; border:1px solid #e8ecf1;">
+
+    <div class="module-header" style="background:linear-gradient(135deg, #2d4373, #1a2a6c); margin-bottom:20px;">
+        <div>
+            <h2 class="module-title">📋 Historial de Cestaticket</h2>
+        </div>
+    </div>
+
+    <div id="alert_hist_cesta"></div>
+
+    <div class="filters-modern">
+        <div class="filter-group">
+            <div class="filter-item">
+                <label class="filter-label">🔍 Buscar</label>
+                <input type="text" id="search_historial_cesta" placeholder="Buscar por descripción o ID..." oninput="cargarLotesCestaticket()" class="form-input">
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table-modern">
+            <thead>
+                <tr>
+                    <th>ID Lote</th>
+                    <th>Descripción</th>
+                    <th>Fecha Cálculo</th>
+                    <th>Empleados</th>
+                    <th>Total Bs</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tabla_historial_cesta">
+                <tr><td colspan="6" class="loading">🔄 Cargando lotes de cestaticket...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
         <!-- ============================================ -->
         <!-- 📋 MÓDULO: HISTORIAL -->
@@ -1475,6 +1509,158 @@
     </div>
 
     <script>
+        // ============================================
+// 🍽️ CESTATICKET - CON FILTROS Y GRUPOS
+// ============================================
+
+// Variables para almacenar los empleados cargados
+let empleadosCesta = [];
+let empleadosFiltradosCesta = [];
+
+// Cargar empleados con filtros
+async function cargarEmpleadosCestaFiltrados() {
+    const sucursal_id = document.getElementById('cesta_filter_sucursal').value;
+    const tipo_pago = document.getElementById('cesta_filter_tipo').value;
+    const search = document.getElementById('cesta_search_empleado').value;
+    
+    const container = document.getElementById('lista_empleados_cesta');
+    container.innerHTML = '<div class="loading">🔄 Cargando empleados...</div>';
+    
+    try {
+        let url = `${API_URL}/api/empleados_con_sucursal?`;
+        const params = [];
+        if (sucursal_id) params.push(`sucursal_id=${encodeURIComponent(sucursal_id)}`);
+        if (tipo_pago) params.push(`tipo_pago=${encodeURIComponent(tipo_pago)}`);
+        if (search) params.push(`search=${encodeURIComponent(search)}`);
+        url += params.join('&');
+        
+        const res = await secureFetch(url);
+        if (!res) return;
+        const data = await res.json();
+        
+        empleadosCesta = data;
+        empleadosFiltradosCesta = data;
+        
+        if (data.length === 0) {
+            container.innerHTML = "<p style='color:#6b7a8f; text-align:center; padding:20px;'>📭 No hay empleados con esos filtros.</p>";
+            return;
+        }
+        
+        renderizarEmpleadosCesta(data);
+        actualizarContadorCesta();
+        
+    } catch (e) {
+        console.error('❌ Error cargando empleados:', e);
+        container.innerHTML = `<p style="color:red; text-align:center; padding:20px;">❌ Error al cargar empleados: ${e.message}</p>`;
+    }
+}
+
+// Renderizar empleados agrupados por sucursal
+function renderizarEmpleadosCesta(empleados) {
+    const container = document.getElementById('lista_empleados_cesta');
+    
+    // Agrupar por sucursal
+    const grupos = {};
+    empleados.forEach(emp => {
+        const key = emp.sucursal_id || 'sin_sucursal';
+        const nombre = emp.sucursal_nombre || 'Sin sucursal';
+        if (!grupos[key]) {
+            grupos[key] = { nombre: nombre, empleados: [] };
+        }
+        grupos[key].empleados.push(emp);
+    });
+    
+    let html = '';
+    
+    // Ordenar grupos por nombre
+    const keysOrdenadas = Object.keys(grupos).sort((a, b) => {
+        if (a === 'sin_sucursal') return 1;
+        if (b === 'sin_sucursal') return -1;
+        return grupos[a].nombre.localeCompare(grupos[b].nombre);
+    });
+    
+    keysOrdenadas.forEach(key => {
+        const grupo = grupos[key];
+        html += `<div style="margin-bottom:10px;">`;
+        html += `<div style="font-weight:700; color:#1a2a6c; padding:6px 0 4px 0; border-bottom:1px solid #e8ecf1; display:flex; justify-content:space-between; align-items:center;">
+            <span>🏢 ${grupo.nombre}</span>
+            <span style="font-size:12px; color:#6b7a8f; font-weight:400;">${grupo.empleados.length} empleados</span>
+        </div>`;
+        
+        grupo.empleados.forEach(emp => {
+            const badgeColor = emp.tipo_pago === 'Quincenal' ? '#dbeafe' : '#fef3c7';
+            const badgeText = emp.tipo_pago === 'Quincenal' ? 'Quincenal' : 'Semanal';
+            const badgeTextColor = emp.tipo_pago === 'Quincenal' ? '#1a2a6c' : '#92400e';
+            
+            html += `
+                <div style="display:flex; align-items:center; gap:10px; padding:4px 8px; border-radius:4px; transition:background 0.2s; cursor:pointer;" 
+                     onmouseover="this.style.background='#f1f4f9'" 
+                     onmouseout="this.style.background='transparent'">
+                    <input type="checkbox" class="cesta-check" value="${emp.id_empleado}" checked 
+                           onchange="actualizarFaltasCesta(); actualizarContadorCesta();" 
+                           style="width:16px; height:16px; cursor:pointer; accent-color:#1a2a6c;">
+                    <span><strong>${emp.cedula}</strong> - ${emp.nombres} ${emp.apellidos}</span>
+                    <span style="font-size:10px; background:${badgeColor}; color:${badgeTextColor}; padding:1px 8px; border-radius:12px; font-weight:600; margin-left:auto;">
+                        ${badgeText}
+                    </span>
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+    });
+    
+    container.innerHTML = html;
+    
+    // Actualizar tabla de faltas
+    actualizarFaltasCesta();
+}
+
+// Actualizar contador de empleados seleccionados
+function actualizarContadorCesta() {
+    const total = document.querySelectorAll('#lista_empleados_cesta .cesta-check:checked').length;
+    const badge = document.getElementById('cesta_total_empleados_badge');
+    const contador = document.getElementById('cesta_seleccionados_count');
+    
+    if (badge) badge.textContent = `${total} empleados`;
+    if (contador) contador.textContent = `${total} empleados seleccionados`;
+}
+
+// Seleccionar todos los empleados visibles
+function seleccionarTodosCesta() {
+    document.querySelectorAll('#lista_empleados_cesta .cesta-check').forEach(cb => cb.checked = true);
+    actualizarFaltasCesta();
+    actualizarContadorCesta();
+}
+
+// Deseleccionar todos los empleados visibles
+function deseleccionarTodosCesta() {
+    document.querySelectorAll('#lista_empleados_cesta .cesta-check').forEach(cb => cb.checked = false);
+    actualizarFaltasCesta();
+    actualizarContadorCesta();
+}
+
+// Cargar sucursales en el filtro
+async function cargarSucursalesCesta() {
+    try {
+        const res = await secureFetch(`${API_URL}/api/sucursales`);
+        if (!res) return;
+        const data = await res.json();
+        const select = document.getElementById('cesta_filter_sucursal');
+        select.innerHTML = '<option value="">Todas las sucursales</option>';
+        data.forEach(s => {
+            select.innerHTML += `<option value="${s.id_sucursal}">${s.nombre}</option>`;
+        });
+    } catch (e) {
+        console.error('❌ Error cargando sucursales para Cestaticket:', e);
+    }
+}
+
+// Inicializar el módulo Cestaticket
+function initCestaticket() {
+    cargarSucursalesCesta();
+    cargarEmpleadosCestaFiltrados();
+}
         // ============================================
         // ✅ CONFIGURACIÓN - URL DEL BACKEND
         // ============================================
