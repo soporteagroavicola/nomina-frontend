@@ -6,61 +6,1001 @@
     <title>Nómina Agroavícola del Llano</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
-        .header-title { text-align: center; color: #2c3e50; margin-bottom: 15px; font-size: 28px; }
-        .top-navbar { display: flex; justify-content: flex-end; align-items: center; padding: 10px 25px; background: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .user-profile { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .user-profile span { font-weight: bold; color: #007bff; }
-        .btn-logout { background: #dc3545; color: white; border: none; padding: 6px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
-        .btn-logout:hover { background: #c82333; }
-        .tab-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .tabs { border-bottom: 2px solid #ddd; display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .tab-btn { padding: 10px 20px; border: none; background: #e9ecef; cursor: pointer; border-radius: 5px 5px 0 0; font-weight: bold; transition: 0.2s; }
-        .tab-btn:hover { background: #dde0e3; }
-        .tab-btn.active { background: #007bff; color: white; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .form-group { margin-bottom: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .form-group-3cols { margin-bottom: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
-        input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f8f9fa; }
-        .btn-primary { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-danger { background: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-success { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-warning { background: #ffc107; color: #212529; padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; }
-        .alert { padding: 10px; border-radius: 5px; margin: 10px 0; }
-        .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
-        .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
-        .loading { color: #666; font-style: italic; margin: 10px 0; }
-        .input-detalle { width: 80px; text-align: center; }
-        .filters-container { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        .filters-container input, .filters-container select { width: auto; min-width: 200px; padding: 8px; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 10px; width: 900px; max-width: 95%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 15px; }
-        .modal-header h3 { margin: 0; }
-        .close-btn { font-size: 24px; font-weight: bold; cursor: pointer; }
-        .close-btn:hover { color: red; }
-        .badge-quincenal { background: #e3f2fd; color: #0056b3; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 5px; }
-        .badge-semanal { background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 5px; }
-        .lote-total-row { background-color: #e9ecef; font-weight: bold; border-top: 2px solid #0056b3; }
-        .fecha-label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 0.9rem; color: #333; }
-        .param-card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; background: #fafafa; }
-        .pasivos-card { border: 1px solid #003366; padding: 20px; border-radius: 8px; background: #e6f2ff; }
-        .connection-status { 
-            display: inline-block; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 12px; 
+        /* ============================================
+           ESTILOS BASE
+           ============================================ */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        
+        .header-title {
+            text-align: center;
+            color: #1a2a6c;
+            margin-bottom: 15px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .top-navbar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 12px 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .user-profile span {
+            font-weight: 600;
+            color: #1a2a6c;
+        }
+        
+        .btn-logout {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        
+        .btn-logout:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+        
+        .tab-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .tabs {
+            border-bottom: 2px solid #e8ecf1;
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 10px 22px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: #6b7a8f;
+            transition: 0.3s;
+        }
+        
+        .tab-btn:hover {
+            background: #f1f4f9;
+            color: #1a2a6c;
+        }
+        
+        .tab-btn.active {
+            background: #1a2a6c;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .form-group-3cols {
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px 12px;
+            box-sizing: border-box;
+            border: 1px solid #dce1e8;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1a2a6c;
+            box-shadow: 0 0 0 3px rgba(26, 42, 108, 0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            border: 1px solid #e8ecf1;
+            padding: 10px 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f8f9fc;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .btn-primary {
+            background: #1a2a6c;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background: #2d4373;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 42, 108, 0.25);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 5px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+            padding: 5px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .loading {
+            color: #6b7a8f;
+            font-style: italic;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .input-detalle {
+            width: 70px;
+            text-align: center;
+            padding: 6px 8px;
+            border: 1px solid #dce1e8;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .input-detalle:focus {
+            outline: none;
+            border-color: #1a2a6c;
+        }
+        
+        .filters-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filters-container input,
+        .filters-container select {
+            width: auto;
+            min-width: 200px;
+            padding: 8px 12px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 900px;
+            max-width: 95%;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e8ecf1;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: #1a2a6c;
+        }
+        
+        .close-btn {
+            font-size: 28px;
             font-weight: bold;
+            cursor: pointer;
+            color: #6b7a8f;
+            transition: 0.2s;
+        }
+        
+        .close-btn:hover {
+            color: #dc3545;
+        }
+        
+        .badge-quincenal {
+            background: #dbeafe;
+            color: #1a2a6c;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-semanal {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .lote-total-row {
+            background-color: #e9ecef;
+            font-weight: bold;
+            border-top: 2px solid #1a2a6c;
+        }
+        
+        .fecha-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 0.85rem;
+            color: #2d3748;
+        }
+        
+        .param-card {
+            border: 1px solid #e8ecf1;
+            padding: 20px;
+            border-radius: 8px;
+            background: #fafbfc;
+            margin-bottom: 15px;
+        }
+        
+        .pasivos-card {
+            border: 1px solid #1a2a6c;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f0f4ff;
+        }
+        
+        .connection-status {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
             margin-left: 10px;
         }
-        .status-online { background: #d4edda; color: #155724; }
-        .status-offline { background: #f8d7da; color: #721c24; }
-        .cesta-falta { width: 80px; text-align: center; padding: 5px; }
-        .cesta-dias-pagar { font-weight: bold; color: #0056b3; text-align: center; }
+        
+        .status-online {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .cesta-falta {
+            width: 80px;
+            text-align: center;
+            padding: 5px;
+            border: 1px solid #dce1e8;
+            border-radius: 4px;
+        }
+        
+        .cesta-dias-pagar {
+            font-weight: bold;
+            color: #1a2a6c;
+            text-align: center;
+        }
+
+        /* ============================================
+           🏢 ESTILOS PROFESIONALES - CÁLCULO DE NÓMINA
+           ============================================ */
+
+        /* HEADER MODERNO */
+        .calc-header-modern {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 20px 25px;
+            background: linear-gradient(135deg, #1a2a6c, #2d4373);
+            border-radius: 12px;
+            margin-bottom: 25px;
+            color: white;
+        }
+
+        .calc-title-modern {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            color: white;
+        }
+
+        .calc-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+            margin: 5px 0 0 0;
+        }
+
+        .badge-modern {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        /* CONFIGURACIÓN - TARJETAS */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .config-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            border: 1px solid #e8ecf1;
+            transition: all 0.3s ease;
+        }
+
+        .config-card:hover {
+            border-color: #1a2a6c;
+            box-shadow: 0 4px 15px rgba(26, 42, 108, 0.08);
+        }
+
+        .config-card-icon {
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .config-card-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .config-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #6b7a8f;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .config-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #dce1e8;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            transition: border-color 0.3s;
+            cursor: pointer;
+        }
+
+        .config-select:focus {
+            outline: none;
+            border-color: #1a2a6c;
+        }
+
+        .config-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #dce1e8;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: #1a2a6c;
+        }
+
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .date-input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid #dce1e8;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .date-separator {
+            color: #6b7a8f;
+            font-weight: bold;
+        }
+
+        /* FILTROS MODERNOS */
+        .filters-modern {
+            background: #f8f9fc;
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin-bottom: 20px;
+            border: 1px solid #e8ecf1;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .filter-item {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .filter-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5a6e;
+            margin-bottom: 4px;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #dce1e8;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+        }
+
+        .options-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding-top: 12px;
+            border-top: 1px solid #e8ecf1;
+        }
+
+        .option-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #2d3748;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .option-checkbox input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkbox-custom {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #cbd5e0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .option-checkbox input:checked + .checkbox-custom {
+            background: #1a2a6c;
+            border-color: #1a2a6c;
+        }
+
+        .option-checkbox input:checked + .checkbox-custom::after {
+            content: "✓";
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .option-highlight {
+            background: #eef2ff;
+            padding: 4px 12px 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #c7d2fe;
+        }
+
+        /* EMPLEADOS - SECCIÓN */
+        .employees-section {
+            margin-top: 20px;
+            border: 1px solid #e8ecf1;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 15px 20px;
+            background: #f8f9fc;
+            border-bottom: 1px solid #e8ecf1;
+        }
+
+        .section-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            font-size: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a2a6c;
+            margin: 0;
+        }
+
+        .section-header-right {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-select-all,
+        .btn-deselect-all {
+            padding: 5px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-select-all {
+            background: #dbeafe;
+            color: #1a2a6c;
+        }
+
+        .btn-select-all:hover {
+            background: #bfdbfe;
+        }
+
+        .btn-deselect-all {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-deselect-all:hover {
+            background: #fecaca;
+        }
+
+        .employees-grid {
+            padding: 15px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 6px;
+        }
+
+        .employees-grid .emp-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .employees-grid .emp-item:hover {
+            background: #f1f4f9;
+        }
+
+        .employees-grid .emp-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #1a2a6c;
+        }
+
+        .emp-badge-quincenal {
+            font-size: 10px;
+            background: #dbeafe;
+            color: #1a2a6c;
+            padding: 1px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .emp-badge-semanal {
+            font-size: 10px;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 1px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .emp-group-header {
+            grid-column: 1 / -1;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1a2a6c;
+            padding: 10px 0 4px 0;
+            border-bottom: 2px solid #e8ecf1;
+            margin-bottom: 4px;
+        }
+
+        /* TABLA MODERNA */
+        .details-section {
+            border: 1px solid #e8ecf1;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 15px 20px;
+            background: #f8f9fc;
+            border-bottom: 1px solid #e8ecf1;
+        }
+
+        .details-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .details-icon {
+            font-size: 20px;
+        }
+
+        .details-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a2a6c;
+            margin: 0;
+        }
+
+        .details-hint {
+            font-size: 12px;
+            color: #6b7a8f;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            padding: 0;
+        }
+
+        .table-modern {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .table-modern thead th {
+            padding: 12px 15px;
+            background: #f8f9fc;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e8ecf1;
+            text-align: left;
+        }
+
+        .table-modern tbody td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f1f4f9;
+            vertical-align: middle;
+        }
+
+        .table-modern tbody tr:hover {
+            background: #f8fafd;
+        }
+
+        .table-modern .input-detalle {
+            width: 70px;
+            padding: 6px 8px;
+            border: 1px solid #dce1e8;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 13px;
+            transition: border-color 0.3s;
+        }
+
+        .table-modern .input-detalle:focus {
+            outline: none;
+            border-color: #1a2a6c;
+        }
+
+        .th-empleado { min-width: 180px; }
+        .th-faltas { min-width: 100px; }
+        .th-horas { min-width: 100px; }
+        .th-valor { min-width: 120px; }
+        .th-bono { min-width: 130px; }
+
+        .group-row-quincenal {
+            background: #f0f7ff;
+            font-weight: 700;
+            color: #1a2a6c;
+        }
+        
+        .group-row-semanal {
+            background: #fffbe6;
+            font-weight: 700;
+            color: #856404;
+        }
+
+        /* BOTONES DE ACCIÓN */
+        .calc-action {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn-calc-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 35px;
+            background: linear-gradient(135deg, #1a2a6c, #2d4373);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(26, 42, 108, 0.25);
+        }
+
+        .btn-calc-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(26, 42, 108, 0.35);
+        }
+
+        .btn-calc-primary .btn-icon {
+            font-size: 20px;
+        }
+
+        .btn-calc-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 25px;
+            background: #f1f4f9;
+            color: #2d3748;
+            border: 1px solid #dce1e8;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-calc-secondary:hover {
+            background: #e8ecf1;
+        }
+
+        /* RESULTADOS */
+        .results-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            border: 1px solid #e8ecf1;
+            min-height: 80px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .calc-header-modern {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 16px 20px;
+            }
+            
+            .calc-title-modern {
+                font-size: 20px;
+            }
+            
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .date-range {
+                flex-wrap: wrap;
+            }
+            
+            .filters-modern {
+                padding: 14px 16px;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .options-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .section-header-right {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+            
+            .employees-grid {
+                grid-template-columns: 1fr;
+                padding: 10px 15px;
+            }
+            
+            .calc-action {
+                flex-direction: column;
+            }
+            
+            .btn-calc-primary,
+            .btn-calc-secondary {
+                justify-content: center;
+                width: 100%;
+            }
+            
+            .table-modern {
+                font-size: 12px;
+            }
+            
+            .table-modern .input-detalle {
+                width: 55px;
+                font-size: 12px;
+                padding: 4px 6px;
+            }
+            
+            .modal-content {
+                padding: 15px;
+                width: 98%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -86,60 +1026,168 @@
             <button class="tab-btn" data-target="seguridad">🔐 Usuarios</button>
         </div>
 
+        <!-- ============================================ -->
+        <!-- 🏢 CALCULADORA DE NÓMINA - VERSIÓN PROFESIONAL -->
+        <!-- ============================================ -->
         <div id="calculadora" class="tab-content active">
-            <h2>Calcular Nómina</h2>
-            <div class="form-group">
-                <div><label>Tipo:</label><select id="tipo"><option value="Quincenal">Quincenal</option><option value="Semanal">Semanal</option></select></div>
-                <div><label>Fecha Inicio:</label><input type="date" id="fecha_inicio"></div>
-                <div><label>Fecha Fin:</label><input type="date" id="fecha_fin"></div>
-            </div>
-            <div class="form-group">
-                <div><label>Filtrar por Sucursal:</label><select id="calc_sucursal"><option value="">Todas las sucursales</option></select></div>
-                <div><label>Filtrar por Tipo de Pago:</label><select id="calc_tipo_pago"><option value="">Todos</option><option value="Quincenal">Quincenal</option><option value="Semanal">Semanal</option></select></div>
-                <div><label>Descripción:</label><input type="text" id="calc_descripcion" placeholder="Ej: Nómina 1ra Quincena Agosto 2026"></div>
-            </div>
-            <div class="form-group" style="display: flex; flex-direction: column; gap: 10px; margin-top: -5px; margin-bottom: 15px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="checkbox" id="aplicar_deducciones" checked style="width: 20px; height: 20px; cursor: pointer;">
-                    <label for="aplicar_deducciones" style="width: auto; margin: 0; font-weight: bold; cursor: pointer;">Aplicar deducciones (IVSS, RPE, FAOV)</label>
+            <div class="calc-header-modern">
+                <div class="calc-header-left">
+                    <h2 class="calc-title-modern">📊 Cálculo de Nómina</h2>
+                    <p class="calc-subtitle">Gestión completa de liquidación de sueldos y beneficios</p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="checkbox" id="split_60_40" style="width: 20px; height: 20px; cursor: pointer;">
-                    <label for="split_60_40" style="width: auto; margin: 0; font-weight: bold; cursor: pointer;">Dividir pago en dos partes (60% Cuenta / 40% Efectivo)</label>
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px; border: 1px solid #ccc; padding: 10px; border-radius: 5px; background: #f1f8ff;">
-                    <input type="checkbox" id="calcular_solo_bono" style="width: 20px; height: 20px; cursor: pointer;" onchange="toggleSoloBono()">
-                    <label for="calcular_solo_bono" style="width: auto; margin: 0; font-weight: bold; cursor: pointer;">🔘 Calcular solo Bono (Ignorar sueldo base, faltas y horas extras)</label>
+                <div class="calc-header-right">
+                    <span class="badge-modern" id="empleados_seleccionados_badge">0 empleados seleccionados</span>
                 </div>
             </div>
-            <div><label>Seleccionar empleados:</label><div id="lista_empleados" class="loading">Cargando empleados...</div></div>
-            <div id="nomina_inputs_container" style="display:none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
-                <h4 style="margin-top:0;">📝 Detalles de Nómina por Empleado</h4>
-                <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Ingresa los días de falta, horas extras, valor de hora y bono complementario en USD.</div>
-                <table id="tabla_detalle_nomina">
-                    <thead><tr>
-                        <th>Empleado</th>
-                        <th style="width:80px;">Faltas (Días)</th>
-                        <th style="width:80px;">Horas Extras</th>
-                        <th style="width:100px;">Valor Hora (USD)</th>
-                        <th style="width:100px;">Bono Comp. (USD)</th>
-                    </tr></thead>
-                    <tbody id="cuerpo_detalle_nomina"></tbody>
-                </table>
+
+            <!-- Tarjetas de configuración -->
+            <div class="config-grid">
+                <!-- Tarjeta: Tipo de Pago -->
+                <div class="config-card">
+                    <div class="config-card-icon">📅</div>
+                    <div class="config-card-content">
+                        <label class="config-label">Tipo de Pago</label>
+                        <select id="tipo" class="config-select">
+                            <option value="Quincenal">📆 Quincenal</option>
+                            <option value="Semanal">📅 Semanal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tarjeta: Período -->
+                <div class="config-card">
+                    <div class="config-card-icon">📌</div>
+                    <div class="config-card-content">
+                        <label class="config-label">Período de Pago</label>
+                        <div class="date-range">
+                            <input type="date" id="fecha_inicio" class="config-input date-input">
+                            <span class="date-separator">→</span>
+                            <input type="date" id="fecha_fin" class="config-input date-input">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta: Descripción -->
+                <div class="config-card">
+                    <div class="config-card-icon">📝</div>
+                    <div class="config-card-content">
+                        <label class="config-label">Descripción</label>
+                        <input type="text" id="calc_descripcion" class="config-input" placeholder="Ej: Nómina 1ra Quincena Agosto 2026">
+                    </div>
+                </div>
             </div>
-            <br><button class="btn-primary" onclick="calcularNomina()">📊 Calcular Nómina</button>
-            <div id="resultado_content"></div>
+
+            <!-- Filtros y opciones -->
+            <div class="filters-modern">
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label class="filter-label">🏢 Sucursal</label>
+                        <select id="calc_sucursal" class="filter-select">
+                            <option value="">Todas las sucursales</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label class="filter-label">💳 Tipo de Pago</label>
+                        <select id="calc_tipo_pago" class="filter-select">
+                            <option value="">Todos</option>
+                            <option value="Quincenal">Quincenal</option>
+                            <option value="Semanal">Semanal</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="options-group">
+                    <label class="option-checkbox">
+                        <input type="checkbox" id="aplicar_deducciones" checked>
+                        <span class="checkbox-custom"></span>
+                        Aplicar deducciones (IVSS, RPE, FAOV)
+                    </label>
+                    <label class="option-checkbox">
+                        <input type="checkbox" id="split_60_40">
+                        <span class="checkbox-custom"></span>
+                        Dividir pago (60% Cuenta / 40% Efectivo)
+                    </label>
+                    <label class="option-checkbox option-highlight">
+                        <input type="checkbox" id="calcular_solo_bono" onchange="toggleSoloBono()">
+                        <span class="checkbox-custom"></span>
+                        🔘 Calcular solo Bono
+                    </label>
+                </div>
+            </div>
+
+            <!-- Lista de empleados con diseño mejorado -->
+            <div class="employees-section">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <span class="section-icon">👥</span>
+                        <h3 class="section-title">Empleados Seleccionados</h3>
+                    </div>
+                    <div class="section-header-right">
+                        <button class="btn-select-all" onclick="seleccionarTodosEmpleados()">✅ Seleccionar Todos</button>
+                        <button class="btn-deselect-all" onclick="deseleccionarTodosEmpleados()">❌ Deseleccionar Todos</button>
+                    </div>
+                </div>
+                <div id="lista_empleados" class="employees-grid loading">🔄 Cargando empleados...</div>
+            </div>
+
+            <!-- Tabla de detalles de nómina -->
+            <div id="nomina_inputs_container" style="display:none; margin-top: 25px;">
+                <div class="details-section">
+                    <div class="details-header">
+                        <div class="details-header-left">
+                            <span class="details-icon">📋</span>
+                            <h3 class="details-title">Detalles de Nómina por Empleado</h3>
+                        </div>
+                        <div class="details-header-right">
+                            <span class="details-hint">💡 Ingresa los días de falta, horas extras y bonos</span>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table-modern" id="tabla_detalle_nomina">
+                            <thead>
+                                <tr>
+                                    <th class="th-empleado">Empleado</th>
+                                    <th class="th-faltas">Faltas (Días)</th>
+                                    <th class="th-horas">Horas Extras</th>
+                                    <th class="th-valor">Valor Hora (USD)</th>
+                                    <th class="th-bono">Bono Comp. (USD)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cuerpo_detalle_nomina"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón de cálculo y resultados -->
+            <div class="calc-action">
+                <button class="btn-calc-primary" onclick="calcularNomina()">
+                    <span class="btn-icon">📊</span>
+                    Calcular Nómina
+                </button>
+                <button class="btn-calc-secondary" onclick="limpiarCamposNomina()">
+                    <span class="btn-icon">🔄</span>
+                    Limpiar Campos
+                </button>
+            </div>
+
+            <div id="resultado_content" class="results-container"></div>
         </div>
 
+        <!-- ============================================ -->
+        <!-- EMPLEADOS -->
+        <!-- ============================================ -->
         <div id="empleados" class="tab-content">
             <h2>Gestión de Empleados</h2>
             <div id="alert_emp"></div>
-            <div style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px; background: #f9f9f9;">
+            <div style="border: 1px solid #e8ecf1; padding: 15px; border-radius: 8px; margin-bottom: 20px; background: #f8f9fc;">
                 <h4 id="form_title">Agregar Nuevo Empleado</h4>
                 <div class="form-group-3cols">
-                    <input placeholder="Cédula" id="emp_cedula"><input placeholder="Nombres" id="emp_nombres">
-                    <input placeholder="Apellidos" id="emp_apellidos"><input placeholder="Cargo" id="emp_cargo">
-                    <input placeholder="Departamento" id="emp_depto"><input type="number" step="0.01" placeholder="Salario USD" id="emp_salario">
+                    <input placeholder="Cédula" id="emp_cedula">
+                    <input placeholder="Nombres" id="emp_nombres">
+                    <input placeholder="Apellidos" id="emp_apellidos">
+                    <input placeholder="Cargo" id="emp_cargo">
+                    <input placeholder="Departamento" id="emp_depto">
+                    <input type="number" step="0.01" placeholder="Salario USD" id="emp_salario">
                 </div>
                 <div class="form-group-3cols">
                     <div><label class="fecha-label">Fecha Nacimiento:</label><input type="date" id="emp_fecha_nacimiento"></div>
@@ -159,20 +1207,26 @@
             <table><thead><tr><th>ID</th><th>Cédula</th><th>Nombre</th><th>Cargo</th><th>Salario USD</th><th>Pago</th><th>Fec. Ingreso</th><th>Acciones</th></tr></thead><tbody id="tabla_empleados"></tbody></table>
         </div>
 
+        <!-- ============================================ -->
+        <!-- SUCURSALES -->
+        <!-- ============================================ -->
         <div id="sucursales" class="tab-content">
             <h2>Gestión de Sucursales</h2>
             <div id="alert_suc"></div>
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
                 <input id="suc_nombre" placeholder="Nombre de la nueva sucursal" style="width: 300px;">
                 <button class="btn-success" onclick="crearSucursal()">➕ Agregar Sucursal</button>
             </div>
             <table><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="tabla_sucursales"></tbody></table>
         </div>
 
+        <!-- ============================================ -->
+        <!-- PARÁMETROS -->
+        <!-- ============================================ -->
         <div id="parametros" class="tab-content">
             <h2>⚙️ Configuración de Parámetros de Nómina</h2>
             <div id="alert_params"></div>
-            <div class="param-card" style="margin-bottom: 20px;">
+            <div class="param-card">
                 <h4 style="margin-top:0;">📊 Parámetros de Cálculo (LOTTT)</h4>
                 <div class="form-group-3cols">
                     <div><label>Tasa BCV (USD -> Bs):</label><input type="number" step="0.0001" id="param_tasa_bcv" placeholder="Ej: 755.1552"></div>
@@ -183,7 +1237,7 @@
                     <div><label>% FAOV (Deducciones):</label><input type="number" step="0.01" id="param_faov" placeholder="Ej: 0.01"></div>
                     <div><label>Cestaticket (USD x Día):</label><input type="number" step="0.01" id="param_cestaticket" placeholder="Ej: 40.00"></div>
                     <div style="display: flex; align-items: center; gap: 10px; padding-top: 10px;">
-                        <button class="btn-warning" onclick="actualizarBCV()" style="width:100%;">🔄 Actualizar Tasa BCV Ahora</button>
+                        <button class="btn-warning" onclick="actualizarBCV()" style="width:100%; padding: 10px;">🔄 Actualizar Tasa BCV Ahora</button>
                     </div>
                 </div>
             </div>
@@ -205,6 +1259,9 @@
             </div>
         </div>
 
+        <!-- ============================================ -->
+        <!-- PASIVOS LABORALES -->
+        <!-- ============================================ -->
         <div id="pasivos" class="tab-content">
             <h2>📄 Pasivos Laborales (Utilidades, Aguinaldo, Vacaciones)</h2>
             <div id="alert_pasivos"></div>
@@ -225,6 +1282,9 @@
             </div>
         </div>
 
+        <!-- ============================================ -->
+        <!-- CESTATICKET -->
+        <!-- ============================================ -->
         <div id="cestaticket" class="tab-content">
             <h2>🍽️ Calcular Cestaticket (Bono de Alimentación)</h2>
             <div class="form-group">
@@ -267,6 +1327,9 @@
             </table>
         </div>
 
+        <!-- ============================================ -->
+        <!-- HISTORIAL -->
+        <!-- ============================================ -->
         <div id="historial" class="tab-content">
             <h2>📋 Historial de Nóminas</h2>
             <div id="alert_hist"></div>
@@ -288,6 +1351,9 @@
             </table>
         </div>
 
+        <!-- ============================================ -->
+        <!-- SEGURIDAD -->
+        <!-- ============================================ -->
         <div id="seguridad" class="tab-content">
             <h2>🔐 Gestión de Usuarios y Seguridad</h2>
             <div id="alert_seg"></div>
@@ -354,6 +1420,12 @@
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
 
         // ============================================
+        // VARIABLES GLOBALES
+        // ============================================
+        let editingEmployeeId = null;
+        let editingUserId = null;
+
+        // ============================================
         // ✅ FUNCIÓN: Verificar conexión al backend
         // ============================================
         async function checkBackendHealth() {
@@ -418,12 +1490,6 @@
                 throw e;
             }
         }
-
-        // ============================================
-        // VARIABLES GLOBALES
-        // ============================================
-        let editingEmployeeId = null;
-        let editingUserId = null;
 
         // ============================================
         // FUNCIONES DE AUTENTICACIÓN
@@ -661,12 +1727,44 @@
             } catch(e) { console.error(e); }
         }
 
+        // ============================================
+        // 🆕 FUNCIONES PARA LA NUEVA VISTA DE NÓMINA
+        // ============================================
+        function seleccionarTodosEmpleados() {
+            document.querySelectorAll('.emp-check').forEach(cb => cb.checked = true);
+            actualizarTablaNomina();
+            actualizarBadgeEmpleados();
+        }
+
+        function deseleccionarTodosEmpleados() {
+            document.querySelectorAll('.emp-check').forEach(cb => cb.checked = false);
+            actualizarTablaNomina();
+            actualizarBadgeEmpleados();
+        }
+
+        function actualizarBadgeEmpleados() {
+            const total = document.querySelectorAll('.emp-check:checked').length;
+            const badge = document.getElementById('empleados_seleccionados_badge');
+            if (badge) {
+                badge.textContent = `${total} empleados seleccionados`;
+            }
+        }
+
+        function limpiarCamposNomina() {
+            document.querySelectorAll('#cuerpo_detalle_nomina .input-detalle').forEach(input => input.value = 0);
+            document.getElementById('resultado_content').innerHTML = '';
+            Swal.fire('🧹 Limpiado', 'Todos los campos de detalles han sido reiniciados.', 'info');
+        }
+
+        // ============================================
+        // CARGAR EMPLEADOS - VERSIÓN MEJORADA
+        // ============================================
         async function cargarEmpleadosCalc(sucursal_id = '', tipo_pago = '') {
             try {
                 const container = document.getElementById('lista_empleados');
                 const detalleContainer = document.getElementById('cuerpo_detalle_nomina');
                 const inputsContainer = document.getElementById('nomina_inputs_container');
-                container.innerHTML = '<p class="loading">Cargando empleados...</p>';
+                container.innerHTML = '<div class="loading">🔄 Cargando empleados...</div>';
                 inputsContainer.style.display = 'none';
                 
                 let url = `${API_URL}/api/empleados`;
@@ -689,28 +1787,45 @@
                 }
 
                 if(data.length === 0) {
-                    container.innerHTML = "<p style='color: #888;'>No hay empleados con esos filtros.</p>";
+                    container.innerHTML = "<p style='color: #6b7a8f; text-align:center; padding: 20px;'>📭 No hay empleados con esos filtros.</p>";
                 } else {
                     const quincenal = data.filter(e => e.tipo_pago === 'Quincenal');
                     const semanal = data.filter(e => e.tipo_pago === 'Semanal');
+                    
                     let html = '';
+                    
                     if (quincenal.length > 0) {
-                        html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#007bff;">📅 Pago Quincenal</div>`;
-                        html += quincenal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="emp-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                        html += `<div class="emp-group-header">📅 Quincenales</div>`;
+                        html += quincenal.map(e => `
+                            <div class="emp-item">
+                                <input type="checkbox" class="emp-check" value="${e.id_empleado}" checked onchange="actualizarTablaNomina(); actualizarBadgeEmpleados();">
+                                <span><strong>${e.cedula}</strong> - ${e.nombres} ${e.apellidos}</span>
+                                <span class="emp-badge-quincenal">Quincenal</span>
+                            </div>
+                        `).join('');
                     }
+                    
                     if (semanal.length > 0) {
-                        html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#856404;">📅 Pago Semanal</div>`;
-                        html += semanal.map(e => `<label style="display:block; margin-bottom:4px;"><input type="checkbox" class="emp-check" value="${e.id_empleado}" checked> ${e.cedula} - ${e.nombres} ${e.apellidos}</label>`).join('');
+                        html += `<div class="emp-group-header">📅 Semanales</div>`;
+                        html += semanal.map(e => `
+                            <div class="emp-item">
+                                <input type="checkbox" class="emp-check" value="${e.id_empleado}" checked onchange="actualizarTablaNomina(); actualizarBadgeEmpleados();">
+                                <span><strong>${e.cedula}</strong> - ${e.nombres} ${e.apellidos}</span>
+                                <span class="emp-badge-semanal">Semanal</span>
+                            </div>
+                        `).join('');
                     }
+                    
                     container.innerHTML = html;
-                    document.querySelectorAll('.emp-check').forEach(cb => cb.addEventListener('change', actualizarTablaNomina));
+                    actualizarBadgeEmpleados();
                     
                     let detalleHtml = '';
+                    
                     if (quincenal.length > 0) {
-                        detalleHtml += `<tr style="background:#f0f7ff; font-weight:bold;"><td colspan="5">📅 Quincenales</td></tr>`;
+                        detalleHtml += `<tr class="group-row-quincenal"><td colspan="5">📅 Quincenales</td></tr>`;
                         detalleHtml += quincenal.map(e => `
                             <tr data-cedula="${e.cedula}" style="display:table-row;">
-                                <td>${e.nombres} ${e.apellidos}</td>
+                                <td><strong>${e.nombres} ${e.apellidos}</strong></td>
                                 <td><input type="number" class="input-detalle input_faltas" min="0" value="0"></td>
                                 <td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0"></td>
                                 <td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0"></td>
@@ -718,11 +1833,12 @@
                             </tr>
                         `).join('');
                     }
+                    
                     if (semanal.length > 0) {
-                        detalleHtml += `<tr style="background:#fffbe6; font-weight:bold;"><td colspan="5">📅 Semanales</td></tr>`;
+                        detalleHtml += `<tr class="group-row-semanal"><td colspan="5">📅 Semanales</td></tr>`;
                         detalleHtml += semanal.map(e => `
                             <tr data-cedula="${e.cedula}" style="display:table-row;">
-                                <td>${e.nombres} ${e.apellidos}</td>
+                                <td><strong>${e.nombres} ${e.apellidos}</strong></td>
                                 <td><input type="number" class="input-detalle input_faltas" min="0" value="0"></td>
                                 <td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0"></td>
                                 <td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0"></td>
@@ -730,12 +1846,13 @@
                             </tr>
                         `).join('');
                     }
+                    
                     detalleContainer.innerHTML = detalleHtml;
                     inputsContainer.style.display = 'block';
                     actualizarTablaNomina();
                 }
             } catch (e) {
-                container.innerHTML = `<p style='color: red; font-weight: bold;'>❌ Error al cargar empleados: ${e.message}</p>`;
+                container.innerHTML = `<p style='color: #dc3545; font-weight: bold; text-align:center; padding: 20px;'>❌ Error al cargar empleados: ${e.message}</p>`;
                 console.error(e);
             }
         }
@@ -812,23 +1929,95 @@
                     total_bs += r.neto_pagar_bs;
                 });
                 
+                let html = `<h3 style="color:#1a2a6c;">📊 Resultado del Cálculo</h3>`;
+                html += `<div style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                        <div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div>
+                        <div><strong>📋 Lote ID:</strong> #${data.lote_id}</div>
+                        <div><strong>👥 Empleados:</strong> ${data.resultados.length}</div>
+                    </div>
+                </div>`;
+                
                 if (split_60_40) {
-                    let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
-                    html += `<table><tr><th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trab.</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Bono Comp.</th><th>Asign.</th><th>Deducc.</th><th>Pago 60% (Cta) USD</th><th>Pago 40% (Efec) USD</th><th>Pago 60% (Cta) Bs</th><th>Pago 40% (Efec) Bs</th></tr>`;
+                    html += `<div style="overflow-x: auto;">
+                        <table style="min-width: 800px; font-size: 13px;">
+                            <thead>
+                                <tr>
+                                    <th>Empleado</th>
+                                    <th>Días Trab.</th>
+                                    <th>Base Full</th>
+                                    <th>Hrs Extras</th>
+                                    <th>Bono Comp.</th>
+                                    <th>Asign.</th>
+                                    <th>Deducc.</th>
+                                    <th>Pago 60%</th>
+                                    <th>Pago 40%</th>
+                                    <th>Total Bs</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
                     data.resultados.forEach(r => {
-                        html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td><td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.bono_complementario_usd.toFixed(2)}</td><td>$${r.total_asignaciones_base_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.pago_60_usd.toFixed(2)}</b></td><td><b>$${r.pago_40_usd.toFixed(2)}</b></td><td><b>Bs. ${r.pago_60_bs.toFixed(2)}</b></td><td><b>Bs. ${r.pago_40_bs.toFixed(2)}</b></td></tr>`;
+                        html += `<tr>
+                            <td><strong>${r.empleado.nombre_completo}</strong></td>
+                            <td>${r.dias_reales_trabajados}</td>
+                            <td>$${r.salario_base_full_usd.toFixed(2)}</td>
+                            <td>$${r.horas_extras_usd.toFixed(2)}</td>
+                            <td>$${r.bono_complementario_usd.toFixed(2)}</td>
+                            <td>$${r.total_asignaciones_base_usd.toFixed(2)}</td>
+                            <td>$${r.total_deducciones_usd.toFixed(2)}</td>
+                            <td>$${r.pago_60_usd.toFixed(2)}</td>
+                            <td>$${r.pago_40_usd.toFixed(2)}</td>
+                            <td><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td>
+                        </tr>`;
                     });
-                    html += `<tr class="lote-total-row"><td colspan="10" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td><td><strong>$${total_usd.toFixed(2)}</strong></td><td></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td><td></td></tr></table>`;
-                    document.getElementById('resultado_content').innerHTML = html;
+                    html += `<tr class="lote-total-row">
+                        <td colspan="6" style="text-align: right;"><strong>TOTAL</strong></td>
+                        <td><strong>$${total_usd.toFixed(2)}</strong></td>
+                        <td colspan="2"></td>
+                        <td><strong>Bs. ${total_bs.toFixed(2)}</strong></td>
+                    </tr>`;
+                    html += `</tbody></table></div>`;
                 } else {
-                    let html = `<h3>Tasa BCV: Bs. ${data.tasa_bcv.toFixed(2)} (Lote ID: ${data.lote_id})</h3>`;
-                    html += `<table><tr><th>Empleado</th><th>Días Totales</th><th>Descanso</th><th>Días Trab.</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Bono Comp.</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th></tr>`;
+                    html += `<div style="overflow-x: auto;">
+                        <table style="min-width: 700px; font-size: 13px;">
+                            <thead>
+                                <tr>
+                                    <th>Empleado</th>
+                                    <th>Días Trab.</th>
+                                    <th>Base Full</th>
+                                    <th>Hrs Extras</th>
+                                    <th>Bono Comp.</th>
+                                    <th>Asign.</th>
+                                    <th>Deducc.</th>
+                                    <th>Neto USD</th>
+                                    <th>Neto Bs</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
                     data.resultados.forEach(r => {
-                        html += `<tr><td>${r.empleado.nombre_completo}</td><td>${r.dias_totales_periodo}</td><td>${r.dias_descanso}</td><td>${r.dias_reales_trabajados}</td><td>$${r.salario_base_full_usd.toFixed(2)}</td><td><small>$${r.base_incidencia_60_usd.toFixed(2)}</small></td><td>$${r.horas_extras_usd.toFixed(2)}</td><td>$${r.bono_complementario_usd.toFixed(2)}</td><td>$${r.total_asignaciones_base_usd.toFixed(2)}</td><td>$${r.total_deducciones_usd.toFixed(2)}</td><td><b>$${r.neto_pagar_usd.toFixed(2)}</b></td><td><b>Bs. ${r.neto_pagar_bs.toFixed(2)}</b></td></tr>`;
+                        html += `<tr>
+                            <td><strong>${r.empleado.nombre_completo}</strong></td>
+                            <td>${r.dias_reales_trabajados}</td>
+                            <td>$${r.salario_base_full_usd.toFixed(2)}</td>
+                            <td>$${r.horas_extras_usd.toFixed(2)}</td>
+                            <td>$${r.bono_complementario_usd.toFixed(2)}</td>
+                            <td>$${r.total_asignaciones_base_usd.toFixed(2)}</td>
+                            <td>$${r.total_deducciones_usd.toFixed(2)}</td>
+                            <td><strong>$${r.neto_pagar_usd.toFixed(2)}</strong></td>
+                            <td><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td>
+                        </tr>`;
                     });
-                    html += `<tr class="lote-total-row"><td colspan="10" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td><td><strong>$${total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr></table>`;
-                    document.getElementById('resultado_content').innerHTML = html;
+                    html += `<tr class="lote-total-row">
+                        <td colspan="5" style="text-align: right;"><strong>TOTAL</strong></td>
+                        <td>$${total_usd.toFixed(2)}</td>
+                        <td></td>
+                        <td><strong>$${total_usd.toFixed(2)}</strong></td>
+                        <td><strong>Bs. ${total_bs.toFixed(2)}</strong></td>
+                    </tr>`;
+                    html += `</tbody></table></div>`;
                 }
+                
+                document.getElementById('resultado_content').innerHTML = html;
                 Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success');
                 cargarLotes();
             } catch(e) {
@@ -838,7 +2027,7 @@
         }
 
         // ============================================
-        // CESTATICKET FUNCTIONS - CORREGIDAS
+        // CESTATICKET FUNCTIONS
         // ============================================
         async function cargarEmpleadosCesta() {
             try {
@@ -846,7 +2035,7 @@
                 const faltasContainer = document.getElementById('cesta_faltas_container');
                 const cuerpoFaltas = document.getElementById('cuerpo_detalle_cesta_faltas');
                 
-                container.innerHTML = '<p class="loading">Cargando empleados...</p>';
+                container.innerHTML = '<div class="loading">🔄 Cargando empleados...</div>';
                 if (faltasContainer) faltasContainer.style.display = 'none';
                 
                 const res = await secureFetch(`${API_URL}/api/empleados`);
@@ -855,7 +2044,7 @@
                 const data = await res.json();
                 
                 if(data.length === 0) {
-                    container.innerHTML = "<p style='color: #888;'>No hay empleados registrados.</p>";
+                    container.innerHTML = "<p style='color: #6b7a8f; text-align:center; padding: 20px;'>📭 No hay empleados registrados.</p>";
                 } else {
                     const quincenal = data.filter(e => e.tipo_pago === 'Quincenal');
                     const semanal = data.filter(e => e.tipo_pago === 'Semanal');
@@ -863,9 +2052,9 @@
                     let faltasHtml = '';
                     
                     if (quincenal.length > 0) {
-                        html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#007bff;">📅 Pago Quincenal</div>`;
+                        html += `<div style="font-weight:bold; color:#1a2a6c; padding: 8px 0 4px 0;">📅 Quincenales</div>`;
                         html += quincenal.map(e => 
-                            `<label style="display:block; margin-bottom:4px;">
+                            `<label style="display:block; padding: 4px 0;">
                                 <input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> 
                                 ${e.cedula} - ${e.nombres} ${e.apellidos}
                             </label>`
@@ -881,9 +2070,9 @@
                     }
                     
                     if (semanal.length > 0) {
-                        html += `<div style="margin:10px 0 5px 0; font-weight:bold; color:#856404;">📅 Pago Semanal</div>`;
+                        html += `<div style="font-weight:bold; color:#856404; padding: 8px 0 4px 0;">📅 Semanales</div>`;
                         html += semanal.map(e => 
-                            `<label style="display:block; margin-bottom:4px;">
+                            `<label style="display:block; padding: 4px 0;">
                                 <input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> 
                                 ${e.cedula} - ${e.nombres} ${e.apellidos}
                             </label>`
@@ -1064,7 +2253,7 @@
         // ============================================
         async function cargarLotesCestaticket() {
             const tableBody = document.getElementById('tabla_historial_cesta');
-            tableBody.innerHTML = '<tr><td colspan="6" class="loading">Cargando lotes de cestaticket...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" class="loading">🔄 Cargando lotes de cestaticket...</td></tr>';
             try {
                 const searchText = document.getElementById('search_historial_cesta').value;
                 let url = `${API_URL}/api/lotes_cestaticket`;
@@ -1074,12 +2263,12 @@
                 if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const lotes = await res.json();
                 if(lotes.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No hay lotes de Cestaticket registrados.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">📭 No hay lotes de Cestaticket registrados.</td></tr>';
                 } else {
                     tableBody.innerHTML = lotes.map(l => `
                         <tr>
                             <td><strong>#${l.id_lote}</strong></td>
-                            <td><strong>${l.descripcion || 'Sin descripción'}</strong></td>
+                            <td>${l.descripcion || 'Sin descripción'}</td>
                             <td>${l.fecha_calculo}</td>
                             <td>${l.cantidad_empleados_lote} empleados</td>
                             <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
@@ -1092,7 +2281,7 @@
                     `).join('');
                 }
             } catch(e) {
-                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; font-weight:bold;">Error al cargar historial de cestaticket: ${e.message}</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; font-weight:bold;">❌ Error al cargar historial de cestaticket: ${e.message}</td></tr>`;
                 console.error(e);
             }
         }
@@ -1126,7 +2315,7 @@
             const modal = document.getElementById('modalDetalleCesta');
             const header = document.getElementById('cesta_header_info');
             const body = document.getElementById('cuerpo_detalle_cesta');
-            header.innerHTML = '<p class="loading">Cargando datos del lote...</p>';
+            header.innerHTML = '<div class="loading">🔄 Cargando datos del lote...</div>';
             body.innerHTML = '';
             modal.style.display = 'flex';
             try {
@@ -1142,7 +2331,6 @@
                 }
                 const lote = await res.json();
                 
-                // Calcular el total en USD a partir de los datos
                 let total_usd_lote = 0;
                 if (lote.nominas && lote.nominas.length > 0) {
                     lote.nominas.forEach(n => {
@@ -1245,15 +2433,15 @@
                     return;
                 }
                 let html = `
-                    <h4>Resultado del Cálculo</h4>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-                        <div><strong>Días calculados:</strong> ${data.dias}</div>
-                        <div><strong>Base utilizada:</strong> ${data.base_usada}</div>
-                        <div><strong>Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(2)}</div>
+                    <h4>📊 Resultado del Cálculo</h4>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; background: #f8f9fc; padding: 15px; border-radius: 8px;">
+                        <div><strong>📅 Días calculados:</strong> ${data.dias}</div>
+                        <div><strong>📌 Base utilizada:</strong> ${data.base_usada}</div>
+                        <div><strong>💱 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(2)}</div>
                     </div>
-                    <div style="margin-top:20px; font-size: 1.3em; padding: 20px; background: #e9f7ef; border-radius: 8px; text-align: center;">
-                        <div><strong>Total a Pagar en USD:</strong> <span style="color:#0056b3;">$${data.total_usd.toFixed(2)}</span></div>
-                        <div><strong>Total a Pagar en Bs (a tasa BCV):</strong> <span style="color:#0056b3;">Bs. ${data.total_bs.toFixed(2)}</span></div>
+                    <div style="margin-top:20px; font-size: 1.3em; padding: 20px; background: #d4edda; border-radius: 8px; text-align: center; border: 1px solid #c3e6cb;">
+                        <div><strong>Total a Pagar en USD:</strong> <span style="color:#1a2a6c;">$${data.total_usd.toFixed(2)}</span></div>
+                        <div><strong>Total a Pagar en Bs (a tasa BCV):</strong> <span style="color:#1a2a6c;">Bs. ${data.total_bs.toFixed(2)}</span></div>
                     </div>
                 `;
                 document.getElementById('resultado_pasivos').innerHTML = html;
@@ -1370,7 +2558,7 @@
 
         async function cargarEmpleadosAdmin() {
             const tableBody = document.getElementById('tabla_empleados');
-            tableBody.innerHTML = '<tr><td colspan="8" class="loading">Cargando empleados...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="8" class="loading">🔄 Cargando empleados...</td></tr>';
             try {
                 const searchText = document.getElementById('search_empleado').value;
                 const filterSucursal = document.getElementById('filter_sucursal').value;
@@ -1385,7 +2573,7 @@
                 if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const empleados = await res.json();
                 if(empleados.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">No se encontraron empleados con esos filtros.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">📭 No se encontraron empleados con esos filtros.</td></tr>';
                 } else {
                     tableBody.innerHTML = empleados.map(e => `
                         <tr>
@@ -1394,11 +2582,11 @@
                             <td>${e.nombres} ${e.apellidos}</td>
                             <td>${e.cargo}</td>
                             <td>$${e.salario_mensual_usd}</td>
-                            <td>${e.tipo_pago}</td>
+                            <td><span class="${e.tipo_pago === 'Quincenal' ? 'badge-quincenal' : 'badge-semanal'}">${e.tipo_pago}</span></td>
                             <td>${e.fecha_ingreso || '-'}</td>
                             <td>
-                                <button class="btn-warning" onclick="cargarFormularioEditar(${e.id_empleado}, '${e.cedula}', '${e.nombres}', '${e.apellidos}', '${e.cargo}', '${e.departamento}', ${e.salario_mensual_usd}, ${e.sucursal_id || ''}, '${e.fecha_nacimiento || ''}', '${e.fecha_ingreso || ''}', '${e.cuenta_bancaria || ''}', '${e.tipo_pago}')">✏️ Editar</button>
-                                <button class="btn-danger" onclick="eliminarEmpleado(${e.id_empleado})">🗑️ Eliminar</button>
+                                <button class="btn-warning" onclick="cargarFormularioEditar(${e.id_empleado}, '${e.cedula}', '${e.nombres}', '${e.apellidos}', '${e.cargo}', '${e.departamento}', ${e.salario_mensual_usd}, ${e.sucursal_id || ''}, '${e.fecha_nacimiento || ''}', '${e.fecha_ingreso || ''}', '${e.cuenta_bancaria || ''}', '${e.tipo_pago}')">✏️</button>
+                                <button class="btn-danger" onclick="eliminarEmpleado(${e.id_empleado})">🗑️</button>
                             </td>
                         </tr>
                     `).join('');
@@ -1414,7 +2602,7 @@
                     selectSucFilter.value = cVal;
                 }
             } catch(e) {
-                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">Error al cargar empleados: ${e.message}</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">❌ Error al cargar empleados: ${e.message}</td></tr>`;
                 console.error(e);
             }
         }
@@ -1452,7 +2640,7 @@
         // ============================================
         async function cargarSucursales() {
             const tableBody = document.getElementById('tabla_sucursales');
-            tableBody.innerHTML = '<tr><td colspan="3" class="loading">Cargando sucursales...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="3" class="loading">🔄 Cargando sucursales...</td></tr>';
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
                 if (!res) return;
@@ -1466,13 +2654,13 @@
                     throw new Error(`HTML recibido. ${text.substring(0,80)}...`);
                 }
                 if(data.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">No hay sucursales creadas.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">📭 No hay sucursales creadas.</td></tr>';
                 } else {
                     tableBody.innerHTML = data.map(s => `
                         <tr>
                             <td>${s.id_sucursal}</td>
                             <td>${s.nombre}</td>
-                            <td><button class="btn-danger" onclick="eliminarSucursal(${s.id_sucursal})">🗑️ Eliminar</button></td>
+                            <td><button class="btn-danger" onclick="eliminarSucursal(${s.id_sucursal})">🗑️</button></td>
                         </tr>
                     `).join('');
                 }
@@ -1692,19 +2880,19 @@
                     tableBody.innerHTML = lotes.map(l => `
                         <tr>
                             <td><strong>#${l.id_lote}</strong></td>
-                            <td><strong>${l.descripcion || 'Sin descripción'}</strong></td>
+                            <td>${l.descripcion || 'Sin descripción'}</td>
                             <td>${l.fecha_calculo}</td>
                             <td>${l.cantidad_empleados_lote} empleados</td>
                             <td><small>${l.sucursales_involucradas || 'Sin sucursal'}</small></td>
                             <td><strong>$${l.total_usd.toFixed(2)}</strong></td>
                             <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
                             <td>
-                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 60%</button>
-                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 100%</button>
-                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size: 12px; padding: 4px 10px;">💳 TXT 40%</button>
-                                <button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">📄 Lote PDF</button>
-                                <button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})">📂 Ver Detalle</button>
-                                <button class="btn-danger" onclick="eliminarLote(${l.id_lote})">🗑️</button>
+                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size: 11px; padding: 4px 8px;">💳 60%</button>
+                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size: 11px; padding: 4px 8px;">💳 100%</button>
+                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size: 11px; padding: 4px 8px;">💳 40%</button>
+                                <button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size: 11px; padding: 4px 8px;">📄 PDF</button>
+                                <button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})" style="font-size: 11px; padding: 4px 8px;">📂 Ver</button>
+                                <button class="btn-danger" onclick="eliminarLote(${l.id_lote})" style="font-size: 11px; padding: 4px 8px;">🗑️</button>
                             </td>
                         </tr>
                     `).join('');
@@ -1729,7 +2917,7 @@
             const modal = document.getElementById('modalDetalleLote');
             const header = document.getElementById('lote_header_info');
             const body = document.getElementById('cuerpo_detalle_lote');
-            header.innerHTML = '<p class="loading">Cargando datos del lote...</p>';
+            header.innerHTML = '<div class="loading">🔄 Cargando datos del lote...</div>';
             body.innerHTML = '';
             modal.style.display = 'flex';
             try {
@@ -1745,7 +2933,7 @@
                 }
                 const lote = await res.json();
                 header.innerHTML = `
-                    <div style="display:flex; justify-content:space-between;">
+                    <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
                         <div>
                             <strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'}
                             <br><small>Generado el ${lote.fecha_calculo}</small>
@@ -1769,7 +2957,7 @@
                         <td><strong>$${(n.neto_pagar_usd || 0).toFixed(2)}</strong></td>
                         <td><strong>Bs. ${(n.neto_pagar_bs || 0).toFixed(2)}</strong></td>
                         <td>
-                            <button class="btn-warning" onclick="generarRecibo(${n.id_nomina})" style="font-size: 12px; padding: 4px 10px;">📄 Recibo</button>
+                            <button class="btn-warning" onclick="generarRecibo(${n.id_nomina})" style="font-size: 11px; padding: 4px 8px;">📄 Recibo</button>
                         </td>
                     </tr>
                 `).join('');
