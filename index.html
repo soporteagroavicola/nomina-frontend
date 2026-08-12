@@ -113,115 +113,11 @@
             display: block;
         }
         
-        .form-group {
-            margin-bottom: 15px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        
-        .form-group-3cols {
-            margin-bottom: 15px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 8px 12px;
-            box-sizing: border-box;
-            border: 1px solid #dce1e8;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: #1a2a6c;
-            box-shadow: 0 0 0 3px rgba(26, 42, 108, 0.1);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        
-        th, td {
-            border: 1px solid #e8ecf1;
-            padding: 10px 12px;
-            text-align: left;
-        }
-        
-        th {
-            background-color: #f8f9fc;
-            font-weight: 600;
-            color: #2d3748;
-        }
-        
-        .btn-primary {
-            background: #1a2a6c;
-            color: white;
-            padding: 10px 24px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-        
-        .btn-primary:hover {
-            background: #2d4373;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(26, 42, 108, 0.25);
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-            padding: 5px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: 0.2s;
-        }
-        
-        .btn-danger:hover {
-            background: #c82333;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-            padding: 10px 24px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-        
-        .btn-success:hover {
-            background: #218838;
-            transform: translateY(-2px);
-        }
-        
-        .btn-warning {
-            background: #ffc107;
-            color: #212529;
-            padding: 5px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: 0.2s;
-        }
-        
-        .btn-warning:hover {
-            background: #e0a800;
+        .loading {
+            color: #6b7a8f;
+            font-style: italic;
+            padding: 20px;
+            text-align: center;
         }
         
         .alert {
@@ -242,27 +138,6 @@
             color: #721c24;
         }
         
-        .loading {
-            color: #6b7a8f;
-            font-style: italic;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .input-detalle {
-            width: 70px;
-            text-align: center;
-            padding: 6px 8px;
-            border: 1px solid #dce1e8;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-        
-        .input-detalle:focus {
-            outline: none;
-            border-color: #1a2a6c;
-        }
-        
         .filters-container {
             display: flex;
             gap: 15px;
@@ -275,6 +150,15 @@
             width: auto;
             min-width: 200px;
             padding: 8px 12px;
+            border: 1px solid #dce1e8;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .filters-container input:focus,
+        .filters-container select:focus {
+            outline: none;
+            border-color: #1a2a6c;
         }
         
         .modal {
@@ -328,51 +212,10 @@
             color: #dc3545;
         }
         
-        .badge-quincenal {
-            background: #dbeafe;
-            color: #1a2a6c;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        
-        .badge-semanal {
-            background: #fef3c7;
-            color: #92400e;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        
         .lote-total-row {
             background-color: #e9ecef;
             font-weight: bold;
             border-top: 2px solid #1a2a6c;
-        }
-        
-        .fecha-label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 4px;
-            font-size: 0.85rem;
-            color: #2d3748;
-        }
-        
-        .param-card {
-            border: 1px solid #e8ecf1;
-            padding: 20px;
-            border-radius: 8px;
-            background: #fafbfc;
-            margin-bottom: 15px;
-        }
-        
-        .pasivos-card {
-            border: 1px solid #1a2a6c;
-            padding: 20px;
-            border-radius: 8px;
-            background: #f0f4ff;
         }
         
         .connection-status {
@@ -394,6 +237,396 @@
             color: #721c24;
         }
         
+        /* ============================================
+           ESTILOS PROFESIONALES - TODOS LOS MÓDULOS
+           ============================================ */
+        
+        /* HEADER MODERNO */
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 18px 25px;
+            background: linear-gradient(135deg, #1a2a6c, #2d4373);
+            border-radius: 12px;
+            margin-bottom: 25px;
+            color: white;
+        }
+        
+        .module-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            color: white;
+        }
+        
+        .module-subtitle {
+            font-size: 13px;
+            opacity: 0.8;
+            margin: 4px 0 0 0;
+        }
+        
+        .module-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 16px;
+            border-radius: 25px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        
+        /* TARJETAS DE CONFIGURACIÓN */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+        
+        .config-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            border: 1px solid #e8ecf1;
+            transition: all 0.3s ease;
+        }
+        
+        .config-card:hover {
+            border-color: #1a2a6c;
+            box-shadow: 0 4px 15px rgba(26, 42, 108, 0.08);
+        }
+        
+        .config-card-icon {
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+        
+        .config-card-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .config-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #6b7a8f;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        
+        .config-select,
+        .config-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #dce1e8;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            transition: border-color 0.3s;
+        }
+        
+        .config-select:focus,
+        .config-input:focus {
+            outline: none;
+            border-color: #1a2a6c;
+        }
+        
+        /* FILTROS MODERNOS */
+        .filters-modern {
+            background: #f8f9fc;
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin-bottom: 20px;
+            border: 1px solid #e8ecf1;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        
+        .filter-item {
+            flex: 1;
+            min-width: 180px;
+        }
+        
+        .filter-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5a6e;
+            margin-bottom: 4px;
+        }
+        
+        .filter-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #dce1e8;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+        }
+        
+        .options-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding-top: 12px;
+            border-top: 1px solid #e8ecf1;
+        }
+        
+        .option-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #2d3748;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .option-checkbox input[type="checkbox"] {
+            display: none;
+        }
+        
+        .checkbox-custom {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #cbd5e0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .option-checkbox input:checked + .checkbox-custom {
+            background: #1a2a6c;
+            border-color: #1a2a6c;
+        }
+        
+        .option-checkbox input:checked + .checkbox-custom::after {
+            content: "✓";
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .option-highlight {
+            background: #eef2ff;
+            padding: 4px 12px 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #c7d2fe;
+        }
+        
+        /* BOTONES */
+        .btn-primary {
+            background: #1a2a6c;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background: #2d4373;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 42, 108, 0.25);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 5px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+            padding: 5px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: #1a2a6c;
+            padding: 8px 18px;
+            border: 2px solid #1a2a6c;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        
+        .btn-outline:hover {
+            background: #1a2a6c;
+            color: white;
+        }
+        
+        /* TABLA MODERNA */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .table-modern {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        .table-modern thead th {
+            padding: 12px 15px;
+            background: #f8f9fc;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e8ecf1;
+            text-align: left;
+        }
+        
+        .table-modern tbody td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f1f4f9;
+            vertical-align: middle;
+        }
+        
+        .table-modern tbody tr:hover {
+            background: #f8fafd;
+        }
+        
+        /* TARJETAS DE ACCIÓN */
+        .action-card {
+            border: 1px solid #e8ecf1;
+            padding: 20px;
+            border-radius: 10px;
+            background: #fafbfc;
+            margin-bottom: 20px;
+        }
+        
+        .action-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a2a6c;
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .action-card-title .icon {
+            font-size: 20px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-grid .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5a6e;
+            margin-bottom: 4px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #dce1e8;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #1a2a6c;
+        }
+        
+        /* BADGES */
+        .badge-quincenal {
+            background: #dbeafe;
+            color: #1a2a6c;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-semanal {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        /* RESULTADOS */
+        .results-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            border: 1px solid #e8ecf1;
+            min-height: 80px;
+        }
+        
+        /* CESTATICKET */
         .cesta-falta {
             width: 80px;
             text-align: center;
@@ -407,542 +640,22 @@
             color: #1a2a6c;
             text-align: center;
         }
-
-        /* ============================================
-           🏢 ESTILOS PROFESIONALES - CÁLCULO DE NÓMINA
-           ============================================ */
-
-        /* HEADER MODERNO */
-        .calc-header-modern {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            padding: 20px 25px;
-            background: linear-gradient(135deg, #1a2a6c, #2d4373);
-            border-radius: 12px;
-            margin-bottom: 25px;
-            color: white;
-        }
-
-        .calc-title-modern {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0;
-            color: white;
-        }
-
-        .calc-subtitle {
-            font-size: 14px;
-            opacity: 0.8;
-            margin: 5px 0 0 0;
-        }
-
-        .badge-modern {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 18px;
-            border-radius: 25px;
-            font-size: 13px;
-            font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-
-        /* CONFIGURACIÓN - TARJETAS */
-        .config-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 18px;
-            margin-bottom: 20px;
-        }
-
-        .config-card {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px 20px;
-            background: #f8f9fc;
-            border-radius: 10px;
-            border: 1px solid #e8ecf1;
-            transition: all 0.3s ease;
-        }
-
-        .config-card:hover {
-            border-color: #1a2a6c;
-            box-shadow: 0 4px 15px rgba(26, 42, 108, 0.08);
-        }
-
-        .config-card-icon {
-            font-size: 28px;
-            flex-shrink: 0;
-        }
-
-        .config-card-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .config-label {
-            display: block;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: #6b7a8f;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .config-select {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #dce1e8;
-            border-radius: 6px;
-            font-size: 14px;
-            background: white;
-            transition: border-color 0.3s;
-            cursor: pointer;
-        }
-
-        .config-select:focus {
-            outline: none;
-            border-color: #1a2a6c;
-        }
-
-        .config-input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #dce1e8;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-
-        .config-input:focus {
-            outline: none;
-            border-color: #1a2a6c;
-        }
-
-        .date-range {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .date-input {
-            flex: 1;
-            padding: 8px 10px;
-            border: 1px solid #dce1e8;
-            border-radius: 6px;
-            font-size: 13px;
-        }
-
-        .date-separator {
-            color: #6b7a8f;
-            font-weight: bold;
-        }
-
-        /* FILTROS MODERNOS */
-        .filters-modern {
-            background: #f8f9fc;
-            border-radius: 10px;
-            padding: 18px 22px;
-            margin-bottom: 20px;
-            border: 1px solid #e8ecf1;
-        }
-
-        .filter-group {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-
-        .filter-item {
-            flex: 1;
-            min-width: 180px;
-        }
-
-        .filter-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: #4a5a6e;
-            margin-bottom: 4px;
-        }
-
-        .filter-select {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #dce1e8;
-            border-radius: 6px;
-            font-size: 13px;
-            background: white;
-        }
-
-        .options-group {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            padding-top: 12px;
-            border-top: 1px solid #e8ecf1;
-        }
-
-        .option-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: #2d3748;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .option-checkbox input[type="checkbox"] {
-            display: none;
-        }
-
-        .checkbox-custom {
-            width: 18px;
-            height: 18px;
-            border: 2px solid #cbd5e0;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-
-        .option-checkbox input:checked + .checkbox-custom {
-            background: #1a2a6c;
-            border-color: #1a2a6c;
-        }
-
-        .option-checkbox input:checked + .checkbox-custom::after {
-            content: "✓";
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .option-highlight {
-            background: #eef2ff;
-            padding: 4px 12px 4px 10px;
-            border-radius: 6px;
-            border: 1px solid #c7d2fe;
-        }
-
-        /* EMPLEADOS - SECCIÓN */
-        .employees-section {
-            margin-top: 20px;
-            border: 1px solid #e8ecf1;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            padding: 15px 20px;
-            background: #f8f9fc;
-            border-bottom: 1px solid #e8ecf1;
-        }
-
-        .section-header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-icon {
-            font-size: 20px;
-        }
-
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1a2a6c;
-            margin: 0;
-        }
-
-        .section-header-right {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-select-all,
-        .btn-deselect-all {
-            padding: 5px 14px;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-select-all {
-            background: #dbeafe;
-            color: #1a2a6c;
-        }
-
-        .btn-select-all:hover {
-            background: #bfdbfe;
-        }
-
-        .btn-deselect-all {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .btn-deselect-all:hover {
-            background: #fecaca;
-        }
-
-        .employees-grid {
-            padding: 15px 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 6px;
-        }
-
-        .employees-grid .emp-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 6px 10px;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
-
-        .employees-grid .emp-item:hover {
-            background: #f1f4f9;
-        }
-
-        .employees-grid .emp-item input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            accent-color: #1a2a6c;
-        }
-
-        .emp-badge-quincenal {
-            font-size: 10px;
-            background: #dbeafe;
-            color: #1a2a6c;
-            padding: 1px 8px;
-            border-radius: 12px;
-            font-weight: 600;
-            margin-left: auto;
-        }
-
-        .emp-badge-semanal {
-            font-size: 10px;
-            background: #fef3c7;
-            color: #92400e;
-            padding: 1px 8px;
-            border-radius: 12px;
-            font-weight: 600;
-            margin-left: auto;
-        }
-
-        .emp-group-header {
-            grid-column: 1 / -1;
-            font-size: 13px;
-            font-weight: 700;
-            color: #1a2a6c;
-            padding: 10px 0 4px 0;
-            border-bottom: 2px solid #e8ecf1;
-            margin-bottom: 4px;
-        }
-
-        /* TABLA MODERNA */
-        .details-section {
-            border: 1px solid #e8ecf1;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .details-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            padding: 15px 20px;
-            background: #f8f9fc;
-            border-bottom: 1px solid #e8ecf1;
-        }
-
-        .details-header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .details-icon {
-            font-size: 20px;
-        }
-
-        .details-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1a2a6c;
-            margin: 0;
-        }
-
-        .details-hint {
-            font-size: 12px;
-            color: #6b7a8f;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-            padding: 0;
-        }
-
-        .table-modern {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-
-        .table-modern thead th {
-            padding: 12px 15px;
-            background: #f8f9fc;
-            color: #2d3748;
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #e8ecf1;
-            text-align: left;
-        }
-
-        .table-modern tbody td {
-            padding: 10px 15px;
-            border-bottom: 1px solid #f1f4f9;
-            vertical-align: middle;
-        }
-
-        .table-modern tbody tr:hover {
-            background: #f8fafd;
-        }
-
-        .table-modern .input-detalle {
-            width: 70px;
-            padding: 6px 8px;
-            border: 1px solid #dce1e8;
-            border-radius: 4px;
-            text-align: center;
-            font-size: 13px;
-            transition: border-color 0.3s;
-        }
-
-        .table-modern .input-detalle:focus {
-            outline: none;
-            border-color: #1a2a6c;
-        }
-
-        .th-empleado { min-width: 180px; }
-        .th-faltas { min-width: 100px; }
-        .th-horas { min-width: 100px; }
-        .th-valor { min-width: 120px; }
-        .th-bono { min-width: 130px; }
-
-        .group-row-quincenal {
-            background: #f0f7ff;
-            font-weight: 700;
-            color: #1a2a6c;
-        }
         
-        .group-row-semanal {
-            background: #fffbe6;
-            font-weight: 700;
-            color: #856404;
-        }
-
-        /* BOTONES DE ACCIÓN */
-        .calc-action {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-            flex-wrap: wrap;
-        }
-
-        .btn-calc-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 14px 35px;
-            background: linear-gradient(135deg, #1a2a6c, #2d4373);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(26, 42, 108, 0.25);
-        }
-
-        .btn-calc-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(26, 42, 108, 0.35);
-        }
-
-        .btn-calc-primary .btn-icon {
-            font-size: 20px;
-        }
-
-        .btn-calc-secondary {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 25px;
-            background: #f1f4f9;
-            color: #2d3748;
-            border: 1px solid #dce1e8;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-calc-secondary:hover {
-            background: #e8ecf1;
-        }
-
-        /* RESULTADOS */
-        .results-container {
-            margin-top: 25px;
-            padding: 20px;
-            background: #f8f9fc;
-            border-radius: 10px;
-            border: 1px solid #e8ecf1;
-            min-height: 80px;
-        }
-
         /* RESPONSIVE */
         @media (max-width: 768px) {
-            .calc-header-modern {
+            .module-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 12px;
                 padding: 16px 20px;
             }
             
-            .calc-title-modern {
-                font-size: 20px;
+            .module-title {
+                font-size: 18px;
             }
             
             .config-grid {
                 grid-template-columns: 1fr;
-            }
-            
-            .date-range {
-                flex-wrap: wrap;
             }
             
             .filters-modern {
@@ -959,46 +672,22 @@
                 gap: 8px;
             }
             
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            .section-header-right {
-                width: 100%;
-                justify-content: flex-start;
-                flex-wrap: wrap;
-            }
-            
-            .employees-grid {
+            .form-grid {
                 grid-template-columns: 1fr;
-                padding: 10px 15px;
             }
             
-            .calc-action {
-                flex-direction: column;
-            }
-            
-            .btn-calc-primary,
-            .btn-calc-secondary {
-                justify-content: center;
-                width: 100%;
+            .modal-content {
+                padding: 15px;
+                width: 98%;
             }
             
             .table-modern {
                 font-size: 12px;
             }
             
-            .table-modern .input-detalle {
-                width: 55px;
-                font-size: 12px;
-                padding: 4px 6px;
-            }
-            
-            .modal-content {
-                padding: 15px;
-                width: 98%;
+            .table-modern thead th,
+            .table-modern tbody td {
+                padding: 6px 8px;
             }
         }
     </style>
@@ -1016,33 +705,29 @@
 
     <div id="app" class="tab-container">
         <div class="tabs">
-            <button class="tab-btn active" data-target="calculadora">🧮 Calculadora</button>
+            <button class="tab-btn active" data-target="calculadora">🧮 Nómina</button>
             <button class="tab-btn" data-target="empleados">👤 Empleados</button>
             <button class="tab-btn" data-target="sucursales">🏢 Sucursales</button>
             <button class="tab-btn" data-target="parametros">⚙️ Parámetros</button>
-            <button class="tab-btn" data-target="pasivos">📄 Pasivos Laborales</button>
+            <button class="tab-btn" data-target="pasivos">📄 Pasivos</button>
             <button class="tab-btn" data-target="cestaticket">🍽️ Cestaticket</button>
             <button class="tab-btn" data-target="historial">📋 Historial</button>
             <button class="tab-btn" data-target="seguridad">🔐 Usuarios</button>
         </div>
 
         <!-- ============================================ -->
-        <!-- 🏢 CALCULADORA DE NÓMINA - VERSIÓN PROFESIONAL -->
+        <!-- 🧮 MÓDULO: CALCULADORA DE NÓMINA -->
         <!-- ============================================ -->
         <div id="calculadora" class="tab-content active">
-            <div class="calc-header-modern">
-                <div class="calc-header-left">
-                    <h2 class="calc-title-modern">📊 Cálculo de Nómina</h2>
-                    <p class="calc-subtitle">Gestión completa de liquidación de sueldos y beneficios</p>
+            <div class="module-header">
+                <div>
+                    <h2 class="module-title">📊 Cálculo de Nómina</h2>
+                    <p class="module-subtitle">Gestión completa de liquidación de sueldos y beneficios</p>
                 </div>
-                <div class="calc-header-right">
-                    <span class="badge-modern" id="empleados_seleccionados_badge">0 empleados seleccionados</span>
-                </div>
+                <span class="module-badge" id="empleados_seleccionados_badge">0 empleados seleccionados</span>
             </div>
 
-            <!-- Tarjetas de configuración -->
             <div class="config-grid">
-                <!-- Tarjeta: Tipo de Pago -->
                 <div class="config-card">
                     <div class="config-card-icon">📅</div>
                     <div class="config-card-content">
@@ -1053,21 +738,17 @@
                         </select>
                     </div>
                 </div>
-
-                <!-- Tarjeta: Período -->
                 <div class="config-card">
                     <div class="config-card-icon">📌</div>
                     <div class="config-card-content">
                         <label class="config-label">Período de Pago</label>
-                        <div class="date-range">
-                            <input type="date" id="fecha_inicio" class="config-input date-input">
-                            <span class="date-separator">→</span>
-                            <input type="date" id="fecha_fin" class="config-input date-input">
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input type="date" id="fecha_inicio" class="config-input" style="flex:1;">
+                            <span style="color:#6b7a8f; font-weight:bold;">→</span>
+                            <input type="date" id="fecha_fin" class="config-input" style="flex:1;">
                         </div>
                     </div>
                 </div>
-
-                <!-- Tarjeta: Descripción -->
                 <div class="config-card">
                     <div class="config-card-icon">📝</div>
                     <div class="config-card-content">
@@ -1077,7 +758,6 @@
                 </div>
             </div>
 
-            <!-- Filtros y opciones -->
             <div class="filters-modern">
                 <div class="filter-group">
                     <div class="filter-item">
@@ -1114,42 +794,40 @@
                 </div>
             </div>
 
-            <!-- Lista de empleados con diseño mejorado -->
-            <div class="employees-section">
-                <div class="section-header">
-                    <div class="section-header-left">
-                        <span class="section-icon">👥</span>
-                        <h3 class="section-title">Empleados Seleccionados</h3>
+            <div style="border:1px solid #e8ecf1; border-radius:10px; overflow:hidden; margin-top:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; padding:12px 20px; background:#f8f9fc; border-bottom:1px solid #e8ecf1;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:20px;">👥</span>
+                        <h3 style="font-size:15px; font-weight:600; color:#1a2a6c; margin:0;">Empleados Seleccionados</h3>
                     </div>
-                    <div class="section-header-right">
-                        <button class="btn-select-all" onclick="seleccionarTodosEmpleados()">✅ Seleccionar Todos</button>
-                        <button class="btn-deselect-all" onclick="deseleccionarTodosEmpleados()">❌ Deseleccionar Todos</button>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-select-all" onclick="seleccionarTodosEmpleados()" style="padding:4px 14px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; background:#dbeafe; color:#1a2a6c;">✅ Seleccionar Todos</button>
+                        <button class="btn-deselect-all" onclick="deseleccionarTodosEmpleados()" style="padding:4px 14px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; background:#fee2e2; color:#991b1b;">❌ Deseleccionar</button>
                     </div>
                 </div>
-                <div id="lista_empleados" class="employees-grid loading">🔄 Cargando empleados...</div>
+                <div id="lista_empleados" style="padding:15px 20px; display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:6px;">
+                    <div class="loading">🔄 Cargando empleados...</div>
+                </div>
             </div>
 
-            <!-- Tabla de detalles de nómina -->
-            <div id="nomina_inputs_container" style="display:none; margin-top: 25px;">
-                <div class="details-section">
-                    <div class="details-header">
-                        <div class="details-header-left">
-                            <span class="details-icon">📋</span>
-                            <h3 class="details-title">Detalles de Nómina por Empleado</h3>
+            <div id="nomina_inputs_container" style="display:none; margin-top:25px;">
+                <div style="border:1px solid #e8ecf1; border-radius:10px; overflow:hidden;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; padding:12px 20px; background:#f8f9fc; border-bottom:1px solid #e8ecf1;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:20px;">📋</span>
+                            <h3 style="font-size:15px; font-weight:600; color:#1a2a6c; margin:0;">Detalles de Nómina por Empleado</h3>
                         </div>
-                        <div class="details-header-right">
-                            <span class="details-hint">💡 Ingresa los días de falta, horas extras y bonos</span>
-                        </div>
+                        <span style="font-size:12px; color:#6b7a8f;">💡 Ingresa días de falta, horas extras y bonos</span>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table-modern" id="tabla_detalle_nomina">
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; font-size:14px;">
                             <thead>
                                 <tr>
-                                    <th class="th-empleado">Empleado</th>
-                                    <th class="th-faltas">Faltas (Días)</th>
-                                    <th class="th-horas">Horas Extras</th>
-                                    <th class="th-valor">Valor Hora (USD)</th>
-                                    <th class="th-bono">Bono Comp. (USD)</th>
+                                    <th style="padding:10px 15px; background:#f8f9fc; color:#2d3748; font-weight:600; font-size:12px; text-transform:uppercase; border-bottom:2px solid #e8ecf1; text-align:left; min-width:180px;">Empleado</th>
+                                    <th style="padding:10px 15px; background:#f8f9fc; color:#2d3748; font-weight:600; font-size:12px; text-transform:uppercase; border-bottom:2px solid #e8ecf1; text-align:left; min-width:100px;">Faltas (Días)</th>
+                                    <th style="padding:10px 15px; background:#f8f9fc; color:#2d3748; font-weight:600; font-size:12px; text-transform:uppercase; border-bottom:2px solid #e8ecf1; text-align:left; min-width:100px;">Horas Extras</th>
+                                    <th style="padding:10px 15px; background:#f8f9fc; color:#2d3748; font-weight:600; font-size:12px; text-transform:uppercase; border-bottom:2px solid #e8ecf1; text-align:left; min-width:120px;">Valor Hora (USD)</th>
+                                    <th style="padding:10px 15px; background:#f8f9fc; color:#2d3748; font-weight:600; font-size:12px; text-transform:uppercase; border-bottom:2px solid #e8ecf1; text-align:left; min-width:130px;">Bono Comp. (USD)</th>
                                 </tr>
                             </thead>
                             <tbody id="cuerpo_detalle_nomina"></tbody>
@@ -1158,15 +836,12 @@
                 </div>
             </div>
 
-            <!-- Botón de cálculo y resultados -->
-            <div class="calc-action">
-                <button class="btn-calc-primary" onclick="calcularNomina()">
-                    <span class="btn-icon">📊</span>
-                    Calcular Nómina
+            <div style="display:flex; gap:15px; margin-top:25px; flex-wrap:wrap;">
+                <button class="btn-primary" onclick="calcularNomina()" style="display:inline-flex; align-items:center; gap:10px; padding:14px 35px; font-size:16px;">
+                    <span style="font-size:20px;">📊</span> Calcular Nómina
                 </button>
-                <button class="btn-calc-secondary" onclick="limpiarCamposNomina()">
-                    <span class="btn-icon">🔄</span>
-                    Limpiar Campos
+                <button onclick="limpiarCamposNomina()" style="display:inline-flex; align-items:center; gap:8px; padding:14px 25px; background:#f1f4f9; color:#2d3748; border:1px solid #dce1e8; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; transition:0.3s;">
+                    <span style="font-size:18px;">🔄</span> Limpiar Campos
                 </button>
             </div>
 
@@ -1174,85 +849,194 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- EMPLEADOS -->
+        <!-- 👤 MÓDULO: EMPLEADOS -->
         <!-- ============================================ -->
         <div id="empleados" class="tab-content">
-            <h2>Gestión de Empleados</h2>
+            <div class="module-header">
+                <div>
+                    <h2 class="module-title">👤 Gestión de Empleados</h2>
+                    <p class="module-subtitle">Administra la información de todos los trabajadores</p>
+                </div>
+                <span class="module-badge" id="total_empleados_badge">0 empleados</span>
+            </div>
+
             <div id="alert_emp"></div>
-            <div style="border: 1px solid #e8ecf1; padding: 15px; border-radius: 8px; margin-bottom: 20px; background: #f8f9fc;">
-                <h4 id="form_title">Agregar Nuevo Empleado</h4>
-                <div class="form-group-3cols">
-                    <input placeholder="Cédula" id="emp_cedula">
-                    <input placeholder="Nombres" id="emp_nombres">
-                    <input placeholder="Apellidos" id="emp_apellidos">
-                    <input placeholder="Cargo" id="emp_cargo">
-                    <input placeholder="Departamento" id="emp_depto">
-                    <input type="number" step="0.01" placeholder="Salario USD" id="emp_salario">
+
+            <div class="action-card">
+                <h4 class="action-card-title"><span class="icon">✏️</span> <span id="form_title">Agregar Nuevo Empleado</span></h4>
+                <div class="form-grid">
+                    <input placeholder="Cédula" id="emp_cedula" class="form-input">
+                    <input placeholder="Nombres" id="emp_nombres" class="form-input">
+                    <input placeholder="Apellidos" id="emp_apellidos" class="form-input">
+                    <input placeholder="Cargo" id="emp_cargo" class="form-input">
+                    <input placeholder="Departamento" id="emp_depto" class="form-input">
+                    <input type="number" step="0.01" placeholder="Salario USD" id="emp_salario" class="form-input">
                 </div>
-                <div class="form-group-3cols">
-                    <div><label class="fecha-label">Fecha Nacimiento:</label><input type="date" id="emp_fecha_nacimiento"></div>
-                    <div><label class="fecha-label">Fecha Ingreso:</label><input type="date" id="emp_fecha_ingreso"></div>
-                    <div><label class="fecha-label">Cuenta Bancaria:</label><input placeholder="Cuenta Bancaria" id="emp_cuenta_bancaria"></div>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">📅 Fecha Nacimiento</label>
+                        <input type="date" id="emp_fecha_nacimiento" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">📅 Fecha Ingreso</label>
+                        <input type="date" id="emp_fecha_ingreso" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">🏦 Cuenta Bancaria</label>
+                        <input placeholder="Cuenta Bancaria" id="emp_cuenta_bancaria" class="form-input">
+                    </div>
                 </div>
-                <div class="form-group-3cols">
-                    <select id="emp_sucursal"><option value="">Seleccione una sucursal...</option></select>
-                    <select id="emp_tipo_pago"><option value="Quincenal">Pago Quincenal</option><option value="Semanal">Pago Semanal</option></select>
+                <div class="form-grid">
+                    <select id="emp_sucursal" class="form-input">
+                        <option value="">Seleccione una sucursal...</option>
+                    </select>
+                    <select id="emp_tipo_pago" class="form-input">
+                        <option value="Quincenal">📆 Quincenal</option>
+                        <option value="Semanal">📅 Semanal</option>
+                    </select>
                     <button class="btn-success" id="btn_guardar_empleado" onclick="guardarEmpleado()">➕ Guardar Empleado</button>
                 </div>
             </div>
-            <div class="filters-container">
-                <input type="text" id="search_empleado" placeholder="🔍 Buscar por cédula o nombre..." oninput="cargarEmpleadosAdmin()">
-                <select id="filter_sucursal" onchange="cargarEmpleadosAdmin()"><option value="">Ver todas las sucursales</option></select>
-            </div>
-            <table><thead><tr><th>ID</th><th>Cédula</th><th>Nombre</th><th>Cargo</th><th>Salario USD</th><th>Pago</th><th>Fec. Ingreso</th><th>Acciones</th></tr></thead><tbody id="tabla_empleados"></tbody></table>
-        </div>
 
-        <!-- ============================================ -->
-        <!-- SUCURSALES -->
-        <!-- ============================================ -->
-        <div id="sucursales" class="tab-content">
-            <h2>Gestión de Sucursales</h2>
-            <div id="alert_suc"></div>
-            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-                <input id="suc_nombre" placeholder="Nombre de la nueva sucursal" style="width: 300px;">
-                <button class="btn-success" onclick="crearSucursal()">➕ Agregar Sucursal</button>
-            </div>
-            <table><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="tabla_sucursales"></tbody></table>
-        </div>
-
-        <!-- ============================================ -->
-        <!-- PARÁMETROS -->
-        <!-- ============================================ -->
-        <div id="parametros" class="tab-content">
-            <h2>⚙️ Configuración de Parámetros de Nómina</h2>
-            <div id="alert_params"></div>
-            <div class="param-card">
-                <h4 style="margin-top:0;">📊 Parámetros de Cálculo (LOTTT)</h4>
-                <div class="form-group-3cols">
-                    <div><label>Tasa BCV (USD -> Bs):</label><input type="number" step="0.0001" id="param_tasa_bcv" placeholder="Ej: 755.1552"></div>
-                    <div><label>% IVSS (Deducciones):</label><input type="number" step="0.01" id="param_ivss" placeholder="Ej: 0.04"></div>
-                    <div><label>% RPE (Deducciones):</label><input type="number" step="0.001" id="param_rpe" placeholder="Ej: 0.005"></div>
-                </div>
-                <div class="form-group-3cols" style="margin-top:10px;">
-                    <div><label>% FAOV (Deducciones):</label><input type="number" step="0.01" id="param_faov" placeholder="Ej: 0.01"></div>
-                    <div><label>Cestaticket (USD x Día):</label><input type="number" step="0.01" id="param_cestaticket" placeholder="Ej: 40.00"></div>
-                    <div style="display: flex; align-items: center; gap: 10px; padding-top: 10px;">
-                        <button class="btn-warning" onclick="actualizarBCV()" style="width:100%; padding: 10px;">🔄 Actualizar Tasa BCV Ahora</button>
+            <div class="filters-modern">
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label class="filter-label">🔍 Buscar</label>
+                        <input type="text" id="search_empleado" placeholder="Buscar por cédula o nombre..." oninput="cargarEmpleadosAdmin()" class="form-input">
+                    </div>
+                    <div class="filter-item">
+                        <label class="filter-label">🏢 Sucursal</label>
+                        <select id="filter_sucursal" onchange="cargarEmpleadosAdmin()" class="form-input">
+                            <option value="">Ver todas las sucursales</option>
+                        </select>
                     </div>
                 </div>
             </div>
 
-            <div class="param-card">
-                <h4 style="margin-top:0;">🏢 Datos de la Empresa para el Archivo Bancario (TXT)</h4>
-                <div class="form-group-3cols">
-                    <div><label>RIF Empresa:</label><input type="text" id="param_rif_empresa" placeholder="Ej: J409876136"></div>
-                    <div><label>N° Cuenta Empresa:</label><input type="text" id="param_cuenta_empresa" placeholder="Ej: 000102034732"></div>
-                    <div><label>Nombre de la Cuenta:</label><input type="text" id="param_nombre_cuenta_empresa" placeholder="Ej: CODIZULCA"></div>
+            <div class="table-responsive">
+                <table class="table-modern">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cédula</th>
+                            <th>Nombre</th>
+                            <th>Cargo</th>
+                            <th>Salario USD</th>
+                            <th>Pago</th>
+                            <th>Fec. Ingreso</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla_empleados">
+                        <tr><td colspan="8" class="loading">🔄 Cargando empleados...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- 🏢 MÓDULO: SUCURSALES -->
+        <!-- ============================================ -->
+        <div id="sucursales" class="tab-content">
+            <div class="module-header">
+                <div>
+                    <h2 class="module-title">🏢 Gestión de Sucursales</h2>
+                    <p class="module-subtitle">Administra las sucursales de la empresa</p>
                 </div>
-                <div class="form-group-3cols" style="margin-top:10px;">
-                    <div><label>Código de Banco:</label><input type="text" id="param_codigo_banco" placeholder="Ej: BSCHVECA"></div>
-                    <div></div>
-                    <div style="display: flex; align-items: flex-end;">
+            </div>
+
+            <div id="alert_suc"></div>
+
+            <div class="action-card">
+                <h4 class="action-card-title"><span class="icon">➕</span> Agregar Nueva Sucursal</h4>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <input id="suc_nombre" placeholder="Nombre de la nueva sucursal" class="form-input" style="flex:1; min-width:250px;">
+                    <button class="btn-success" onclick="crearSucursal()">➕ Agregar Sucursal</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table-modern">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla_sucursales">
+                        <tr><td colspan="3" class="loading">🔄 Cargando sucursales...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- ⚙️ MÓDULO: PARÁMETROS -->
+        <!-- ============================================ -->
+        <div id="parametros" class="tab-content">
+            <div class="module-header">
+                <div>
+                    <h2 class="module-title">⚙️ Configuración de Parámetros</h2>
+                    <p class="module-subtitle">Parámetros de cálculo y datos de la empresa</p>
+                </div>
+            </div>
+
+            <div id="alert_params"></div>
+
+            <div class="action-card">
+                <h4 class="action-card-title"><span class="icon">📊</span> Parámetros de Cálculo (LOTTT)</h4>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">💱 Tasa BCV (USD → Bs)</label>
+                        <input type="number" step="0.0001" id="param_tasa_bcv" placeholder="Ej: 755.1552" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">% IVSS (Deducciones)</label>
+                        <input type="number" step="0.01" id="param_ivss" placeholder="Ej: 0.04" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">% RPE (Deducciones)</label>
+                        <input type="number" step="0.001" id="param_rpe" placeholder="Ej: 0.005" class="form-input">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">% FAOV (Deducciones)</label>
+                        <input type="number" step="0.01" id="param_faov" placeholder="Ej: 0.01" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">🍽️ Cestaticket (USD x Día)</label>
+                        <input type="number" step="0.01" id="param_cestaticket" placeholder="Ej: 40.00" class="form-input">
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
+                        <button class="btn-warning" onclick="actualizarBCV()" style="width:100%; padding:10px;">🔄 Actualizar Tasa BCV</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-card">
+                <h4 class="action-card-title"><span class="icon">🏢</span> Datos de la Empresa</h4>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">RIF Empresa</label>
+                        <input type="text" id="param_rif_empresa" placeholder="Ej: J409876136" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">N° Cuenta Empresa</label>
+                        <input type="text" id="param_cuenta_empresa" placeholder="Ej: 000102034732" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Nombre de la Cuenta</label>
+                        <input type="text" id="param_nombre_cuenta_empresa" placeholder="Ej: CODIZULCA" class="form-input">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">Código de Banco</label>
+                        <input type="text" id="param_codigo_banco" placeholder="Ej: BSCHVECA" class="form-input">
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
                         <button class="btn-primary" onclick="guardarParametros()" style="width:100%;">💾 Guardar Todos los Parámetros</button>
                     </div>
                 </div>
@@ -1260,126 +1044,266 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- PASIVOS LABORALES -->
+        <!-- 📄 MÓDULO: PASIVOS LABORALES -->
         <!-- ============================================ -->
         <div id="pasivos" class="tab-content">
-            <h2>📄 Pasivos Laborales (Utilidades, Aguinaldo, Vacaciones)</h2>
+            <div class="module-header">
+                <div>
+                    <h2 class="module-title">📄 Pasivos Laborales</h2>
+                    <p class="module-subtitle">Cálculo de utilidades, aguinaldo y vacaciones</p>
+                </div>
+            </div>
+
             <div id="alert_pasivos"></div>
-            <div class="pasivos-card">
-                <div class="form-group-3cols">
-                    <div><label>Salario Mensual Base (USD):</label><input type="number" step="0.01" id="pasivos_salario" placeholder="Ej: 800.00"></div>
-                    <div><label>Días a Calcular (LOTTT):</label><select id="pasivos_dias"><option value="30">Mínimo Legal (30 días)</option><option value="60" selected>Promedio Frecuente (60 días)</option><option value="90">90 días (Negociado)</option><option value="120">Toque Máximo (120 días)</option></select></div>
-                    <div style="display: flex; align-items: flex-end;"><button class="btn-primary" onclick="calcularPasivos()" style="width:100%;">💸 Calcular Pasivos</button></div>
-                </div>
-                <div class="form-group-3cols" style="margin-top:10px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="pasivos_60" checked style="width: 20px; height: 20px; cursor: pointer;">
-                        <label for="pasivos_60" style="width: auto; margin: 0; font-weight: bold; cursor: pointer;">Calcular sobre Base de Incidencia (60%)</label>
+
+            <div class="action-card" style="background:#eef2ff; border-color:#c7d2fe;">
+                <h4 class="action-card-title"><span class="icon">💸</span> Calcular Pasivos Laborales</h4>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">💰 Salario Mensual Base (USD)</label>
+                        <input type="number" step="0.01" id="pasivos_salario" placeholder="Ej: 800.00" class="form-input">
                     </div>
-                    <div><small style="color:#666;">Si está activado: 60% del salario (Art. 104 LOTTT). Si desactivado: 100% del salario.</small></div>
+                    <div>
+                        <label class="form-label">📅 Días a Calcular (LOTTT)</label>
+                        <select id="pasivos_dias" class="form-input">
+                            <option value="30">Mínimo Legal (30 días)</option>
+                            <option value="60" selected>Promedio Frecuente (60 días)</option>
+                            <option value="90">90 días (Negociado)</option>
+                            <option value="120">Toque Máximo (120 días)</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
+                        <button class="btn-primary" onclick="calcularPasivos()" style="width:100%;">💸 Calcular Pasivos</button>
+                    </div>
                 </div>
-                <div id="resultado_pasivos" style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;"></div>
+                <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
+                    <input type="checkbox" id="pasivos_60" checked style="width:18px; height:18px; cursor:pointer; accent-color:#1a2a6c;">
+                    <label for="pasivos_60" style="font-size:13px; cursor:pointer;">Calcular sobre Base de Incidencia (60%) - Art. 104 LOTTT</label>
+                </div>
+                <div id="resultado_pasivos" style="margin-top:20px; border-top:1px solid #e8ecf1; padding-top:15px;"></div>
             </div>
         </div>
 
         <!-- ============================================ -->
-        <!-- CESTATICKET -->
+        <!-- 🍽️ MÓDULO: CESTATICKET -->
         <!-- ============================================ -->
         <div id="cestaticket" class="tab-content">
-            <h2>🍽️ Calcular Cestaticket (Bono de Alimentación)</h2>
-            <div class="form-group">
-                <div><label>Fecha Inicio:</label><input type="date" id="cesta_fecha_inicio"></div>
-                <div><label>Fecha Fin:</label><input type="date" id="cesta_fecha_fin"></div>
-                <div><label>Descripción:</label><input type="text" id="cesta_descripcion" placeholder="Ej: Cestaticket 1ra Quincena Agosto 2026"></div>
+            <div class="module-header">
+                <div>
+                    <h2 class="module-title">🍽️ Cestaticket</h2>
+                    <p class="module-subtitle">Cálculo del bono de alimentación según Ley</p>
+                </div>
             </div>
-            <div><label>Seleccionar empleados:</label><div id="lista_empleados_cesta" class="loading">Cargando empleados...</div></div>
-            
-            <div id="cesta_faltas_container" style="display:none; margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px;">
-                <h4 style="margin-top:0;">📝 Faltas por Empleado</h4>
-                <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
-                    Ingresa los días de falta para cada empleado. Se restará <strong>$1.3333</strong> por cada día faltante (valor diario = $40 ÷ 30).
+
+            <div class="config-grid">
+                <div class="config-card">
+                    <div class="config-card-icon">📌</div>
+                    <div class="config-card-content">
+                        <label class="config-label">Fecha Inicio</label>
+                        <input type="date" id="cesta_fecha_inicio" class="config-input">
+                    </div>
                 </div>
-                <div id="cesta_dias_info" style="background: #e8f4fd; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
-                    <span id="cesta_dias_text">📅 <strong>Base de cálculo:</strong> 30 días (Ley Cestaticket) | <span style="color:#0056b3;">$40 USD mensuales</span></span>
+                <div class="config-card">
+                    <div class="config-card-icon">📌</div>
+                    <div class="config-card-content">
+                        <label class="config-label">Fecha Fin</label>
+                        <input type="date" id="cesta_fecha_fin" class="config-input">
+                    </div>
                 </div>
-                <table id="tabla_detalle_cesta_faltas">
-                    <thead><tr>
-                        <th>Empleado</th>
-                        <th style="width:120px;">Días de Falta</th>
-                        <th style="width:120px;">Días a Pagar</th>
-                    </tr></thead>
-                    <tbody id="cuerpo_detalle_cesta_faltas"></tbody>
+                <div class="config-card">
+                    <div class="config-card-icon">📝</div>
+                    <div class="config-card-content">
+                        <label class="config-label">Descripción</label>
+                        <input type="text" id="cesta_descripcion" class="config-input" placeholder="Ej: Cestaticket 1ra Quincena">
+                    </div>
+                </div>
+            </div>
+
+            <div style="border:1px solid #e8ecf1; border-radius:10px; overflow:hidden; margin-top:20px;">
+                <div style="padding:12px 20px; background:#f8f9fc; border-bottom:1px solid #e8ecf1;">
+                    <span style="font-weight:600;">👥 Seleccionar empleados</span>
+                </div>
+                <div id="lista_empleados_cesta" style="padding:15px 20px;">
+                    <div class="loading">🔄 Cargando empleados...</div>
+                </div>
+            </div>
+
+            <div id="cesta_faltas_container" style="display:none; margin-top:15px; border:1px solid #e8ecf1; border-radius:10px; overflow:hidden;">
+                <div style="padding:12px 20px; background:#f8f9fc; border-bottom:1px solid #e8ecf1;">
+                    <h4 style="margin:0; font-size:15px; color:#1a2a6c;">📝 Faltas por Empleado</h4>
+                </div>
+                <div style="padding:12px 20px; background:#e8f4fd; font-size:13px; color:#555; border-bottom:1px solid #e8ecf1;">
+                    ℹ️ Ingresa los días de falta. Se restará <strong>$1.3333</strong> por cada día (valor diario = $40 ÷ 30).
+                    <div id="cesta_dias_info" style="margin-top:8px; font-weight:600; color:#1a2a6c;">
+                        <span id="cesta_dias_text">📅 Base: 30 días (Ley) | $40 USD mensuales</span>
+                    </div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr>
+                                <th style="padding:10px 15px; background:#f8f9fc; border-bottom:2px solid #e8ecf1; text-align:left;">Empleado</th>
+                                <th style="padding:10px 15px; background:#f8f9fc; border-bottom:2px solid #e8ecf1; text-align:center; width:120px;">Días de Falta</th>
+                                <th style="padding:10px 15px; background:#f8f9fc; border-bottom:2px solid #e8ecf1; text-align:center; width:120px;">Días a Pagar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpo_detalle_cesta_faltas"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:15px; margin-top:25px; flex-wrap:wrap;">
+                <button class="btn-primary" onclick="calcularCestaticket()" style="display:inline-flex; align-items:center; gap:10px; padding:14px 35px; font-size:16px;">
+                    <span style="font-size:20px;">🍽️</span> Calcular Cestaticket
+                </button>
+            </div>
+
+            <div id="resultado_cesta" class="results-container"></div>
+
+            <hr style="margin:40px 0; border:1px solid #e8ecf1;">
+
+            <div class="module-header" style="background:linear-gradient(135deg, #2d4373, #1a2a6c); margin-bottom:20px;">
+                <div>
+                    <h2 class="module-title">📋 Historial de Cestaticket</h2>
+                </div>
+            </div>
+
+            <div id="alert_hist_cesta"></div>
+
+            <div class="filters-modern">
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label class="filter-label">🔍 Buscar</label>
+                        <input type="text" id="search_historial_cesta" placeholder="Buscar por descripción o ID..." oninput="cargarLotesCestaticket()" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table-modern">
+                    <thead>
+                        <tr>
+                            <th>ID Lote</th>
+                            <th>Descripción</th>
+                            <th>Fecha Cálculo</th>
+                            <th>Empleados</th>
+                            <th>Total Bs</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla_historial_cesta">
+                        <tr><td colspan="6" class="loading">🔄 Cargando lotes de cestaticket...</td></tr>
+                    </tbody>
                 </table>
             </div>
-
-            <br><button class="btn-primary" onclick="calcularCestaticket()">🍽️ Calcular Cestaticket</button>
-            <div id="resultado_cesta"></div>
-            
-            <hr style="margin: 40px 0;">
-            <h2>📋 Historial de Cestaticket</h2>
-            <div id="alert_hist_cesta"></div>
-            <div class="filters-container">
-                <input type="text" id="search_historial_cesta" placeholder="🔍 Buscar por descripción o ID..." oninput="cargarLotesCestaticket()">
-            </div>
-            <table>
-                <thead><tr><th>ID Lote</th><th>Descripción</th><th>Fecha Cálculo</th><th>Empleados</th><th>Total Bs</th><th>Acciones</th></tr></thead>
-                <tbody id="tabla_historial_cesta"></tbody>
-            </table>
         </div>
 
         <!-- ============================================ -->
-        <!-- HISTORIAL -->
+        <!-- 📋 MÓDULO: HISTORIAL -->
         <!-- ============================================ -->
         <div id="historial" class="tab-content">
-            <h2>📋 Historial de Nóminas</h2>
+            <div class="module-header">
+                <div>
+                    <h2 class="module-title">📋 Historial de Nóminas</h2>
+                    <p class="module-subtitle">Registro de todas las nóminas procesadas</p>
+                </div>
+            </div>
+
             <div id="alert_hist"></div>
-            <div class="filters-container"><input type="text" id="search_historial" placeholder="🔍 Buscar por descripción o ID..." oninput="cargarLotes()"></div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID Lote</th>
-                        <th>Descripción</th>
-                        <th>Fecha Cálculo</th>
-                        <th>Empleados</th>
-                        <th>Sucursales</th>
-                        <th>Total USD</th>
-                        <th>Total Bs</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla_historial"></tbody>
-            </table>
+
+            <div class="filters-modern">
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label class="filter-label">🔍 Buscar</label>
+                        <input type="text" id="search_historial" placeholder="Buscar por descripción o ID..." oninput="cargarLotes()" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table-modern">
+                    <thead>
+                        <tr>
+                            <th>ID Lote</th>
+                            <th>Descripción</th>
+                            <th>Fecha Cálculo</th>
+                            <th>Empleados</th>
+                            <th>Sucursales</th>
+                            <th>Total USD</th>
+                            <th>Total Bs</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla_historial">
+                        <tr><td colspan="8" class="loading">🔄 Cargando lotes...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- ============================================ -->
-        <!-- SEGURIDAD -->
+        <!-- 🔐 MÓDULO: SEGURIDAD -->
         <!-- ============================================ -->
         <div id="seguridad" class="tab-content">
-            <h2>🔐 Gestión de Usuarios y Seguridad</h2>
-            <div id="alert_seg"></div>
-            <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
-                <div class="param-card">
-                    <h4 style="margin-top:0;">✏️ Cambiar mi Contraseña</h4>
-                    <div class="form-group-3cols">
-                        <div><label>Contraseña Actual:</label><input type="password" id="seg_old_pass" placeholder="Ingresa tu contraseña actual"></div>
-                        <div><label>Nueva Contraseña:</label><input type="password" id="seg_new_pass" placeholder="Ingresa tu nueva contraseña"></div>
-                        <div style="display: flex; align-items: flex-end;"><button class="btn-primary" onclick="cambiarPassword()" style="width:100%;">🔑 Cambiar Contraseña</button></div>
-                    </div>
-                </div>
-                <div class="param-card">
-                    <h4 style="margin-top:0;">➕ Crear / Editar Usuario</h4>
-                    <div class="form-group-3cols">
-                        <div><label>Nombre de Usuario:</label><input type="text" id="seg_new_user" placeholder="Ej: supervisor"></div>
-                        <div><label>Contraseña (Dejar vacía si no se cambia):</label><input type="password" id="seg_new_pass_user" placeholder="Contraseña para el nuevo usuario"></div>
-                        <div style="display: flex; align-items: flex-end; gap: 5px;">
-                            <button class="btn-success" onclick="guardarUsuario()" style="width:50%;">💾 Guardar</button>
-                            <button class="btn-danger" onclick="cancelarEdicionUsuario()" style="width:50%; display:none;" id="btn_cancel_user">❌ Cancelar</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="module-header">
                 <div>
-                    <h4 style="margin-top:0;">👥 Lista de Usuarios del Sistema</h4>
-                    <table><thead><tr><th>ID</th><th>Usuario</th><th>Acciones</th></tr></thead><tbody id="tabla_usuarios"></tbody></table>
+                    <h2 class="module-title">🔐 Gestión de Usuarios</h2>
+                    <p class="module-subtitle">Administración de usuarios y seguridad del sistema</p>
+                </div>
+            </div>
+
+            <div id="alert_seg"></div>
+
+            <div class="action-card">
+                <h4 class="action-card-title"><span class="icon">🔑</span> Cambiar mi Contraseña</h4>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">Contraseña Actual</label>
+                        <input type="password" id="seg_old_pass" placeholder="Ingresa tu contraseña actual" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Nueva Contraseña</label>
+                        <input type="password" id="seg_new_pass" placeholder="Ingresa tu nueva contraseña" class="form-input">
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
+                        <button class="btn-primary" onclick="cambiarPassword()" style="width:100%;">🔑 Cambiar Contraseña</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-card">
+                <h4 class="action-card-title"><span class="icon">➕</span> <span id="user_form_title">Crear / Editar Usuario</span></h4>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">👤 Nombre de Usuario</label>
+                        <input type="text" id="seg_new_user" placeholder="Ej: supervisor" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">🔑 Contraseña (Dejar vacía si no se cambia)</label>
+                        <input type="password" id="seg_new_pass_user" placeholder="Contraseña para el nuevo usuario" class="form-input">
+                    </div>
+                    <div style="display:flex; align-items:flex-end; gap:8px;">
+                        <button class="btn-success" onclick="guardarUsuario()" style="width:50%;">💾 Guardar</button>
+                        <button class="btn-danger" onclick="cancelarEdicionUsuario()" style="width:50%; display:none;" id="btn_cancel_user">❌ Cancelar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-card">
+                <h4 class="action-card-title"><span class="icon">👥</span> Lista de Usuarios del Sistema</h4>
+                <div class="table-responsive">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuario</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla_usuarios">
+                            <tr><td colspan="3" class="loading">🔄 Cargando usuarios...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -1388,11 +1312,27 @@
     <!-- MODAL DETALLE LOTE NÓMINA -->
     <div id="modalDetalleLote" class="modal">
         <div class="modal-content">
-            <div class="modal-header"><h3>📄 Detalle del Lote</h3><span class="close-btn" onclick="cerrarModalDetalle()">&times;</span></div>
+            <div class="modal-header">
+                <h3>📄 Detalle del Lote</h3>
+                <span class="close-btn" onclick="cerrarModalDetalle()">&times;</span>
+            </div>
             <div id="lote_header_info"></div>
-            <div id="lote_detalle_body" style="max-height: 500px; overflow-y: auto;">
-                <table id="tabla_detalle_lote">
-                    <thead><tr><th>Empleado</th><th>Base Full</th><th>Base 60%</th><th>Hrs Extras</th><th>Bono Comp.</th><th>Asign.</th><th>Deducc.</th><th>Neto USD</th><th>Neto Bs</th><th>Acciones</th></tr></thead>
+            <div id="lote_detalle_body" style="max-height:500px; overflow-y:auto;">
+                <table class="table-modern">
+                    <thead>
+                        <tr>
+                            <th>Empleado</th>
+                            <th>Base Full</th>
+                            <th>Base 60%</th>
+                            <th>Hrs Extras</th>
+                            <th>Bono Comp.</th>
+                            <th>Asign.</th>
+                            <th>Deducc.</th>
+                            <th>Neto USD</th>
+                            <th>Neto Bs</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
                     <tbody id="cuerpo_detalle_lote"></tbody>
                 </table>
             </div>
@@ -1402,11 +1342,22 @@
     <!-- MODAL DETALLE LOTE CESTATICKET -->
     <div id="modalDetalleCesta" class="modal">
         <div class="modal-content">
-            <div class="modal-header"><h3>🍽️ Detalle del Lote de Cestaticket</h3><span class="close-btn" onclick="cerrarModalDetalleCesta()">&times;</span></div>
+            <div class="modal-header">
+                <h3>🍽️ Detalle del Lote de Cestaticket</h3>
+                <span class="close-btn" onclick="cerrarModalDetalleCesta()">&times;</span>
+            </div>
             <div id="cesta_header_info"></div>
-            <div id="cesta_detalle_body" style="max-height: 500px; overflow-y: auto;">
-                <table id="tabla_detalle_cesta">
-                    <thead><tr><th>Empleado</th><th>Días Pagados</th><th>Total USD</th><th>Total Bs</th><th>Acciones</th></tr></thead>
+            <div id="cesta_detalle_body" style="max-height:500px; overflow-y:auto;">
+                <table class="table-modern">
+                    <thead>
+                        <tr>
+                            <th>Empleado</th>
+                            <th>Días Pagados</th>
+                            <th>Total USD</th>
+                            <th>Total Bs</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
                     <tbody id="cuerpo_detalle_cesta"></tbody>
                 </table>
             </div>
@@ -1431,9 +1382,7 @@
         async function checkBackendHealth() {
             const statusEl = document.getElementById('connection_status');
             try {
-                const res = await fetch(`${API_URL}/api/health`, {
-                    credentials: 'include'
-                });
+                const res = await fetch(`${API_URL}/api/health`, { credentials: 'include' });
                 if (res.ok) {
                     statusEl.textContent = '🟢 Online';
                     statusEl.className = 'connection-status status-online';
@@ -1460,19 +1409,15 @@
             options.credentials = 'include';
             options.headers = options.headers || {};
             options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
-            
             console.log(`🔍 Fetching: ${url}`);
-            
             try {
                 const res = await fetch(url, options);
-                
                 if (res.status === 401) {
                     cerrarModalDetalle();
                     cerrarModalDetalleCesta();
                     window.location.href = 'login.html';
                     return null;
                 }
-                
                 if (!res.ok) {
                     console.error(`❌ Error ${res.status}: ${res.statusText}`);
                     try {
@@ -1483,7 +1428,6 @@
                         console.error('❌ Respuesta no JSON:', text.substring(0, 200));
                     }
                 }
-                
                 return res;
             } catch (e) {
                 console.error('❌ Error de red en secureFetch:', e);
@@ -1522,14 +1466,10 @@
                         text: 'No se pudo conectar con el servidor. Verifica tu conexión.',
                         icon: 'warning',
                         confirmButtonText: 'Reintentar'
-                    }).then(() => {
-                        location.reload();
-                    });
+                    }).then(() => { location.reload(); });
                 }
 
-                setTimeout(() => {
-                    actualizarBCV(true);
-                }, 0);
+                setTimeout(() => { actualizarBCV(true); }, 0);
 
                 document.querySelectorAll('.tab-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
@@ -1538,7 +1478,7 @@
                         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
                         document.getElementById(tabId).classList.add('active');
                         this.classList.add('active');
-                        if (tabId === 'empleados') cargarEmpleadosAdmin();
+                        if (tabId === 'empleados') { cargarEmpleadosAdmin(); actualizarTotalEmpleados(); }
                         else if (tabId === 'sucursales') cargarSucursales();
                         else if (tabId === 'calculadora') cargarEmpleadosCalc();
                         else if (tabId === 'parametros') cargarParametros();
@@ -1565,9 +1505,7 @@
                     text: 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.',
                     icon: 'error',
                     confirmButtonText: 'Reintentar'
-                }).then(() => {
-                    location.reload();
-                });
+                }).then(() => { location.reload(); });
             }
         });
 
@@ -1584,11 +1522,7 @@
             });
             if (confirmLogout.isConfirmed) {
                 const res = await secureFetch(`${API_URL}/api/logout`, { method: 'POST' });
-                if (res) {
-                    window.location.href = 'login.html';
-                } else {
-                    window.location.href = 'login.html';
-                }
+                if (res) { window.location.href = 'login.html'; } else { window.location.href = 'login.html'; }
             }
         }
 
@@ -1600,11 +1534,12 @@
             document.getElementById('seg_new_user').value = '';
             document.getElementById('seg_new_pass_user').value = '';
             document.getElementById('btn_cancel_user').style.display = 'none';
+            document.getElementById('user_form_title').textContent = 'Crear / Editar Usuario';
         }
 
         async function cargarUsuarios() {
             const tableBody = document.getElementById('tabla_usuarios');
-            tableBody.innerHTML = '<tr><td colspan="3" class="loading">Cargando usuarios...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="3" class="loading">🔄 Cargando usuarios...</td></tr>';
             try {
                 const res = await secureFetch(`${API_URL}/api/usuarios`);
                 if (!res) return;
@@ -1618,8 +1553,8 @@
                         <td>${u.id}</td>
                         <td><strong>${u.username}</strong></td>
                         <td>
-                            <button class="btn-warning" onclick="cargarFormularioEditarUsuario(${u.id}, '${u.username}')" style="font-size: 12px; padding: 2px 8px;">✏️</button>
-                            <button class="btn-danger" onclick="eliminarUsuario(${u.id})" style="font-size: 12px; padding: 2px 8px;">🗑️</button>
+                            <button class="btn-warning" onclick="cargarFormularioEditarUsuario(${u.id}, '${u.username}')" style="font-size:12px; padding:2px 8px;">✏️</button>
+                            <button class="btn-danger" onclick="eliminarUsuario(${u.id})" style="font-size:12px; padding:2px 8px;">🗑️</button>
                         </td>
                     </tr>
                 `).join('');
@@ -1634,29 +1569,27 @@
             document.getElementById('seg_new_user').value = username;
             document.getElementById('seg_new_pass_user').value = '';
             document.getElementById('btn_cancel_user').style.display = 'inline-block';
-            document.getElementById('seguridad').scrollIntoView({behavior: "smooth"});
+            document.getElementById('user_form_title').textContent = '✏️ Editando Usuario';
+            document.getElementById('seguridad').scrollIntoView({ behavior: "smooth" });
         }
 
         async function guardarUsuario() {
             const username = document.getElementById('seg_new_user').value.trim();
             const password = document.getElementById('seg_new_pass_user').value.trim();
-            if(!username) return Swal.fire('Atención', 'El nombre de usuario es obligatorio.', 'warning');
-
+            if (!username) return Swal.fire('Atención', 'El nombre de usuario es obligatorio.', 'warning');
             let url = `${API_URL}/api/usuarios`;
             let method = 'POST';
             let body = JSON.stringify({ username, password });
-
             if (editingUserId) {
                 url += `/${editingUserId}`;
                 method = 'PUT';
                 body = JSON.stringify({ username, password: password || undefined });
             }
-
             try {
                 const res = await secureFetch(url, { method, body });
                 if (!res) return;
                 const data = await res.json();
-                if(res.ok) {
+                if (res.ok) {
                     Swal.fire('¡Éxito!', data.mensaje, 'success');
                     cancelarEdicionUsuario();
                     cargarUsuarios();
@@ -1681,7 +1614,7 @@
                     const res = await secureFetch(`${API_URL}/api/usuarios/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const data = await res.json();
-                    if(res.ok) {
+                    if (res.ok) {
                         Swal.fire('Eliminado', data.mensaje, 'success');
                         cancelarEdicionUsuario();
                         cargarUsuarios();
@@ -1695,7 +1628,7 @@
         async function cambiarPassword() {
             const old_pass = document.getElementById('seg_old_pass').value.trim();
             const new_pass = document.getElementById('seg_new_pass').value.trim();
-            if(!old_pass || !new_pass) return Swal.fire('Atención', 'Ambos campos son obligatorios.', 'warning');
+            if (!old_pass || !new_pass) return Swal.fire('Atención', 'Ambos campos son obligatorios.', 'warning');
             try {
                 const res = await secureFetch(`${API_URL}/api/usuarios/password`, {
                     method: 'PUT',
@@ -1703,7 +1636,7 @@
                 });
                 if (!res) return;
                 const data = await res.json();
-                if(res.ok) {
+                if (res.ok) {
                     Swal.fire('¡Éxito!', data.mensaje, 'success');
                     document.getElementById('seg_old_pass').value = '';
                     document.getElementById('seg_new_pass').value = '';
@@ -1720,15 +1653,15 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
                 if (!res) return;
-                if(!res.ok) throw new Error("Error al cargar sucursales");
+                if (!res.ok) throw new Error("Error al cargar sucursales");
                 const sucs = await res.json();
                 const select = document.getElementById('calc_sucursal');
                 select.innerHTML = '<option value="">Todas las sucursales</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
-            } catch(e) { console.error(e); }
+            } catch (e) { console.error(e); }
         }
 
         // ============================================
-        // 🆕 FUNCIONES PARA LA NUEVA VISTA DE NÓMINA
+        // FUNCIONES PARA LA VISTA DE NÓMINA
         // ============================================
         function seleccionarTodosEmpleados() {
             document.querySelectorAll('.emp-check').forEach(cb => cb.checked = true);
@@ -1745,9 +1678,13 @@
         function actualizarBadgeEmpleados() {
             const total = document.querySelectorAll('.emp-check:checked').length;
             const badge = document.getElementById('empleados_seleccionados_badge');
-            if (badge) {
-                badge.textContent = `${total} empleados seleccionados`;
-            }
+            if (badge) { badge.textContent = `${total} empleados seleccionados`; }
+        }
+
+        function actualizarTotalEmpleados() {
+            const total = document.querySelectorAll('#tabla_empleados tr').length - 1;
+            const badge = document.getElementById('total_empleados_badge');
+            if (badge && total > 0) { badge.textContent = `${total} empleados`; }
         }
 
         function limpiarCamposNomina() {
@@ -1766,93 +1703,93 @@
                 const inputsContainer = document.getElementById('nomina_inputs_container');
                 container.innerHTML = '<div class="loading">🔄 Cargando empleados...</div>';
                 inputsContainer.style.display = 'none';
-                
+
                 let url = `${API_URL}/api/empleados`;
                 const params = [];
                 if (sucursal_id) params.push(`sucursal_id=${encodeURIComponent(sucursal_id)}`);
                 if (tipo_pago) params.push(`tipo_pago=${encodeURIComponent(tipo_pago)}`);
                 if (params.length > 0) url += '?' + params.join('&');
-                
+
                 const res = await secureFetch(url);
                 if (!res) return;
-                if(!res.ok) throw new Error("Error al obtener empleados");
-                
+                if (!res.ok) throw new Error("Error al obtener empleados");
+
                 let data;
                 const contentType = res.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) {
                     data = await res.json();
                 } else {
                     const text = await res.text();
-                    throw new Error(`HTML recibido. ${text.substring(0,80)}...`);
+                    throw new Error(`HTML recibido. ${text.substring(0, 80)}...`);
                 }
 
-                if(data.length === 0) {
-                    container.innerHTML = "<p style='color: #6b7a8f; text-align:center; padding: 20px;'>📭 No hay empleados con esos filtros.</p>";
+                if (data.length === 0) {
+                    container.innerHTML = "<p style='color:#6b7a8f; text-align:center; padding:20px;'>📭 No hay empleados con esos filtros.</p>";
                 } else {
                     const quincenal = data.filter(e => e.tipo_pago === 'Quincenal');
                     const semanal = data.filter(e => e.tipo_pago === 'Semanal');
-                    
+
                     let html = '';
-                    
+
                     if (quincenal.length > 0) {
-                        html += `<div class="emp-group-header">📅 Quincenales</div>`;
+                        html += `<div style="grid-column:1/-1; font-size:13px; font-weight:700; color:#1a2a6c; padding:10px 0 4px 0; border-bottom:2px solid #e8ecf1; margin-bottom:4px;">📅 Quincenales</div>`;
                         html += quincenal.map(e => `
-                            <div class="emp-item">
-                                <input type="checkbox" class="emp-check" value="${e.id_empleado}" checked onchange="actualizarTablaNomina(); actualizarBadgeEmpleados();">
+                            <div style="display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:6px; transition:background 0.2s;">
+                                <input type="checkbox" class="emp-check" value="${e.id_empleado}" checked onchange="actualizarTablaNomina(); actualizarBadgeEmpleados();" style="width:16px; height:16px; cursor:pointer; accent-color:#1a2a6c;">
                                 <span><strong>${e.cedula}</strong> - ${e.nombres} ${e.apellidos}</span>
-                                <span class="emp-badge-quincenal">Quincenal</span>
+                                <span style="font-size:10px; background:#dbeafe; color:#1a2a6c; padding:1px 8px; border-radius:12px; font-weight:600; margin-left:auto;">Quincenal</span>
                             </div>
                         `).join('');
                     }
-                    
+
                     if (semanal.length > 0) {
-                        html += `<div class="emp-group-header">📅 Semanales</div>`;
+                        html += `<div style="grid-column:1/-1; font-size:13px; font-weight:700; color:#856404; padding:10px 0 4px 0; border-bottom:2px solid #e8ecf1; margin-bottom:4px;">📅 Semanales</div>`;
                         html += semanal.map(e => `
-                            <div class="emp-item">
-                                <input type="checkbox" class="emp-check" value="${e.id_empleado}" checked onchange="actualizarTablaNomina(); actualizarBadgeEmpleados();">
+                            <div style="display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:6px; transition:background 0.2s;">
+                                <input type="checkbox" class="emp-check" value="${e.id_empleado}" checked onchange="actualizarTablaNomina(); actualizarBadgeEmpleados();" style="width:16px; height:16px; cursor:pointer; accent-color:#1a2a6c;">
                                 <span><strong>${e.cedula}</strong> - ${e.nombres} ${e.apellidos}</span>
-                                <span class="emp-badge-semanal">Semanal</span>
+                                <span style="font-size:10px; background:#fef3c7; color:#92400e; padding:1px 8px; border-radius:12px; font-weight:600; margin-left:auto;">Semanal</span>
                             </div>
                         `).join('');
                     }
-                    
+
                     container.innerHTML = html;
                     actualizarBadgeEmpleados();
-                    
+
                     let detalleHtml = '';
-                    
+
                     if (quincenal.length > 0) {
-                        detalleHtml += `<tr class="group-row-quincenal"><td colspan="5">📅 Quincenales</td></tr>`;
+                        detalleHtml += `<tr style="background:#f0f7ff; font-weight:700; color:#1a2a6c;"><td colspan="5">📅 Quincenales</td></tr>`;
                         detalleHtml += quincenal.map(e => `
                             <tr data-cedula="${e.cedula}" style="display:table-row;">
                                 <td><strong>${e.nombres} ${e.apellidos}</strong></td>
-                                <td><input type="number" class="input-detalle input_faltas" min="0" value="0"></td>
-                                <td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0"></td>
-                                <td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0"></td>
-                                <td><input type="number" class="input-detalle input_bono" min="0" step="0.01" value="0"></td>
+                                <td><input type="number" class="input-detalle input_faltas" min="0" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                                <td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                                <td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                                <td><input type="number" class="input-detalle input_bono" min="0" step="0.01" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
                             </tr>
                         `).join('');
                     }
-                    
+
                     if (semanal.length > 0) {
-                        detalleHtml += `<tr class="group-row-semanal"><td colspan="5">📅 Semanales</td></tr>`;
+                        detalleHtml += `<tr style="background:#fffbe6; font-weight:700; color:#856404;"><td colspan="5">📅 Semanales</td></tr>`;
                         detalleHtml += semanal.map(e => `
                             <tr data-cedula="${e.cedula}" style="display:table-row;">
                                 <td><strong>${e.nombres} ${e.apellidos}</strong></td>
-                                <td><input type="number" class="input-detalle input_faltas" min="0" value="0"></td>
-                                <td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0"></td>
-                                <td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0"></td>
-                                <td><input type="number" class="input-detalle input_bono" min="0" step="0.01" value="0"></td>
+                                <td><input type="number" class="input-detalle input_faltas" min="0" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                                <td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                                <td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                                <td><input type="number" class="input-detalle input_bono" min="0" step="0.01" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
                             </tr>
                         `).join('');
                     }
-                    
+
                     detalleContainer.innerHTML = detalleHtml;
                     inputsContainer.style.display = 'block';
                     actualizarTablaNomina();
                 }
             } catch (e) {
-                container.innerHTML = `<p style='color: #dc3545; font-weight: bold; text-align:center; padding: 20px;'>❌ Error al cargar empleados: ${e.message}</p>`;
+                container.innerHTML = `<p style='color:#dc3545; font-weight:bold; text-align:center; padding:20px;'>❌ Error al cargar empleados: ${e.message}</p>`;
                 console.error(e);
             }
         }
@@ -1862,8 +1799,8 @@
             const rows = document.querySelectorAll('#cuerpo_detalle_nomina tr');
             let empIdx = 0;
             rows.forEach(row => {
-                if(row.hasAttribute('data-cedula')) {
-                    if(empIdx < checkboxes.length) {
+                if (row.hasAttribute('data-cedula')) {
+                    if (empIdx < checkboxes.length) {
                         row.style.display = checkboxes[empIdx].checked ? 'table-row' : 'none';
                         empIdx++;
                     }
@@ -1883,18 +1820,18 @@
             const split_60_40 = document.getElementById('split_60_40').checked;
             const calcular_solo_bono = document.getElementById('calcular_solo_bono').checked;
             const ids = Array.from(document.querySelectorAll('.emp-check:checked')).map(c => parseInt(c.value));
-            
-            if(!ids.length) {
+
+            if (!ids.length) {
                 Swal.fire('Atención', 'Selecciona al menos un empleado.', 'warning');
                 return;
             }
-            
+
             const faltas = {};
             const horas_extras = {};
             const bonos = {};
-            
+
             document.querySelectorAll('#cuerpo_detalle_nomina tr').forEach(row => {
-                if(row.hasAttribute('data-cedula') && row.style.display !== 'none') {
+                if (row.hasAttribute('data-cedula') && row.style.display !== 'none') {
                     const cedula = row.getAttribute('data-cedula');
                     const faltas_val = parseInt(row.querySelector('.input_faltas').value) || 0;
                     const horas_val = parseFloat(row.querySelector('.input_horas').value) || 0;
@@ -1905,7 +1842,7 @@
                     if (bono_val > 0) bonos[cedula] = bono_val;
                 }
             });
-            
+
             try {
                 const res = await secureFetch(`${API_URL}/api/calcular_nomina`, {
                     method: 'POST',
@@ -1917,110 +1854,106 @@
                 });
                 if (!res) return;
                 const data = await res.json();
-                if(data.error) {
+                if (data.error) {
                     Swal.fire('Error', data.error, 'error');
                     return;
                 }
-                
+
                 let total_usd = 0;
                 let total_bs = 0;
                 data.resultados.forEach(r => {
                     total_usd += r.neto_pagar_usd;
                     total_bs += r.neto_pagar_bs;
                 });
-                
+
                 let html = `<h3 style="color:#1a2a6c;">📊 Resultado del Cálculo</h3>`;
-                html += `<div style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                html += `<div style="background:#e8f4fd; padding:15px; border-radius:8px; margin:10px 0;">
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
                         <div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div>
                         <div><strong>📋 Lote ID:</strong> #${data.lote_id}</div>
                         <div><strong>👥 Empleados:</strong> ${data.resultados.length}</div>
                     </div>
                 </div>`;
-                
+
                 if (split_60_40) {
-                    html += `<div style="overflow-x: auto;">
-                        <table style="min-width: 800px; font-size: 13px;">
-                            <thead>
-                                <tr>
-                                    <th>Empleado</th>
-                                    <th>Días Trab.</th>
-                                    <th>Base Full</th>
-                                    <th>Hrs Extras</th>
-                                    <th>Bono Comp.</th>
-                                    <th>Asign.</th>
-                                    <th>Deducc.</th>
-                                    <th>Pago 60%</th>
-                                    <th>Pago 40%</th>
-                                    <th>Total Bs</th>
-                                </tr>
-                            </thead>
+                    html += `<div style="overflow-x:auto;">
+                        <table style="min-width:800px; font-size:13px; width:100%; border-collapse:collapse;">
+                            <thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;">
+                                <th style="padding:10px 12px; text-align:left;">Empleado</th>
+                                <th style="padding:10px 12px; text-align:center;">Días</th>
+                                <th style="padding:10px 12px; text-align:right;">Base Full</th>
+                                <th style="padding:10px 12px; text-align:right;">Hrs Extras</th>
+                                <th style="padding:10px 12px; text-align:right;">Bono</th>
+                                <th style="padding:10px 12px; text-align:right;">Asign.</th>
+                                <th style="padding:10px 12px; text-align:right;">Deducc.</th>
+                                <th style="padding:10px 12px; text-align:right;">Pago 60%</th>
+                                <th style="padding:10px 12px; text-align:right;">Pago 40%</th>
+                                <th style="padding:10px 12px; text-align:right;">Total Bs</th>
+                            </tr></thead>
                             <tbody>`;
                     data.resultados.forEach(r => {
-                        html += `<tr>
-                            <td><strong>${r.empleado.nombre_completo}</strong></td>
-                            <td>${r.dias_reales_trabajados}</td>
-                            <td>$${r.salario_base_full_usd.toFixed(2)}</td>
-                            <td>$${r.horas_extras_usd.toFixed(2)}</td>
-                            <td>$${r.bono_complementario_usd.toFixed(2)}</td>
-                            <td>$${r.total_asignaciones_base_usd.toFixed(2)}</td>
-                            <td>$${r.total_deducciones_usd.toFixed(2)}</td>
-                            <td>$${r.pago_60_usd.toFixed(2)}</td>
-                            <td>$${r.pago_40_usd.toFixed(2)}</td>
-                            <td><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td>
+                        html += `<tr style="border-bottom:1px solid #f1f4f9;">
+                            <td style="padding:8px 12px;"><strong>${r.empleado.nombre_completo}</strong></td>
+                            <td style="padding:8px 12px; text-align:center;">${r.dias_reales_trabajados}</td>
+                            <td style="padding:8px 12px; text-align:right;">$${r.salario_base_full_usd.toFixed(2)}</td>
+                            <td style="padding:8px 12px; text-align:right;">$${r.horas_extras_usd.toFixed(2)}</td>
+                            <td style="padding:8px 12px; text-align:right;">$${r.bono_complementario_usd.toFixed(2)}</td>
+                            <td style="padding:8px 12px; text-align:right;">$${r.total_asignaciones_base_usd.toFixed(2)}</td>
+                            <td style="padding:8px 12px; text-align:right;">$${r.total_deducciones_usd.toFixed(2)}</td>
+                            <td style="padding:8px 12px; text-align:right;">$${r.pago_60_usd.toFixed(2)}</td>
+                            <td style="padding:8px 12px; text-align:right;">$${r.pago_40_usd.toFixed(2)}</td>
+                            <td style="padding:8px 12px; text-align:right;"><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td>
                         </tr>`;
                     });
-                    html += `<tr class="lote-total-row">
-                        <td colspan="6" style="text-align: right;"><strong>TOTAL</strong></td>
-                        <td><strong>$${total_usd.toFixed(2)}</strong></td>
-                        <td colspan="2"></td>
-                        <td><strong>Bs. ${total_bs.toFixed(2)}</strong></td>
+                    html += `<tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;">
+                        <td colspan="6" style="padding:10px 12px; text-align:right;">TOTAL</td>
+                        <td style="padding:10px 12px; text-align:right;">$${total_usd.toFixed(2)}</td>
+                        <td colspan="2" style="padding:10px 12px; text-align:right;"></td>
+                        <td style="padding:10px 12px; text-align:right;"><strong>Bs. ${total_bs.toFixed(2)}</strong></td>
                     </tr>`;
                     html += `</tbody></table></div>`;
                 } else {
-                    html += `<div style="overflow-x: auto;">
-                        <table style="min-width: 700px; font-size: 13px;">
-                            <thead>
-                                <tr>
-                                    <th>Empleado</th>
-                                    <th>Días Trab.</th>
-                                    <th>Base Full</th>
-                                    <th>Hrs Extras</th>
-                                    <th>Bono Comp.</th>
-                                    <th>Asign.</th>
-                                    <th>Deducc.</th>
-                                    <th>Neto USD</th>
-                                    <th>Neto Bs</th>
-                                </tr>
-                            </thead>
+                    html += `<div style="overflow-x:auto;">
+                        <table style="min-width:700px; font-size:13px; width:100%; border-collapse:collapse;">
+                            <thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;">
+                                <th style="padding:10px 12px; text-align:left;">Empleado</th>
+                                <th style="padding:10px 12px; text-align:center;">Días</th>
+                                <th style="padding:10px 12px; text-align:right;">Base Full</th>
+                                <th style="padding:10px 12px; text-align:right;">Hrs Extras</th>
+                                <th style="padding:10px 12px; text-align:right;">Bono</th>
+                                <th style="padding:10px 12px; text-align:right;">Asign.</th>
+                                <th style="padding:10px 12px; text-align:right;">Deducc.</th>
+                                <th style="padding:10px 12px; text-align:right;">Neto USD</th>
+                                <th style="padding:10px 12px; text-align:right;">Neto Bs</th>
+                            </tr></thead>
                             <tbody>`;
                     data.resultados.forEach(r => {
-                        html += `<tr>
-                            <td><strong>${r.empleado.nombre_completo}</strong></td>
-                            <td>${r.dias_reales_trabajados}</td>
-                            <td>$${r.salario_base_full_usd.toFixed(2)}</td>
-                            <td>$${r.horas_extras_usd.toFixed(2)}</td>
-                            <td>$${r.bono_complementario_usd.toFixed(2)}</td>
-                            <td>$${r.total_asignaciones_base_usd.toFixed(2)}</td>
-                            <td>$${r.total_deducciones_usd.toFixed(2)}</td>
-                            <td><strong>$${r.neto_pagar_usd.toFixed(2)}</strong></td>
-                            <td><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td>
+                        html += `<tr style="border-bottom:1px solid #f1f4f9;">
+                            <td style="padding:8px 12px;"><strong>${r.empleado.nombre_completo}</strong></td>
+                            <td style="padding:8px 12px; text-align:center;">${r.dias_reales_trabajados}</td>
+                            <td style="padding:8px 12px; text-align:right;">$${r.salario_base_full_usd.toFixed(2)}</td>
+                            <td style="padding:8px 12px; text-align:right;">$${r.horas_extras_usd.toFixed(2)}</td>
+                            <td style="padding:8px 12px; text-align:right;">$${r.bono_complementario_usd.toFixed(2)}</td>
+                            <td style="padding:8px 12px; text-align:right;">$${r.total_asignaciones_base_usd.toFixed(2)}</td>
+                            <td style="padding:8px 12px; text-align:right;">$${r.total_deducciones_usd.toFixed(2)}</td>
+                            <td style="padding:8px 12px; text-align:right;"><strong>$${r.neto_pagar_usd.toFixed(2)}</strong></td>
+                            <td style="padding:8px 12px; text-align:right;"><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td>
                         </tr>`;
                     });
-                    html += `<tr class="lote-total-row">
-                        <td colspan="5" style="text-align: right;"><strong>TOTAL</strong></td>
-                        <td>$${total_usd.toFixed(2)}</td>
-                        <td></td>
-                        <td><strong>$${total_usd.toFixed(2)}</strong></td>
-                        <td><strong>Bs. ${total_bs.toFixed(2)}</strong></td>
+                    html += `<tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;">
+                        <td colspan="5" style="padding:10px 12px; text-align:right;">TOTAL</td>
+                        <td style="padding:10px 12px; text-align:right;">$${total_usd.toFixed(2)}</td>
+                        <td style="padding:10px 12px; text-align:right;"></td>
+                        <td style="padding:10px 12px; text-align:right;"><strong>$${total_usd.toFixed(2)}</strong></td>
+                        <td style="padding:10px 12px; text-align:right;"><strong>Bs. ${total_bs.toFixed(2)}</strong></td>
                     </tr>`;
                     html += `</tbody></table></div>`;
                 }
-                
+
                 document.getElementById('resultado_content').innerHTML = html;
                 Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success');
                 cargarLotes();
-            } catch(e) {
+            } catch (e) {
                 console.error(e);
                 Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
             }
@@ -2034,91 +1967,84 @@
                 const container = document.getElementById('lista_empleados_cesta');
                 const faltasContainer = document.getElementById('cesta_faltas_container');
                 const cuerpoFaltas = document.getElementById('cuerpo_detalle_cesta_faltas');
-                
+
                 container.innerHTML = '<div class="loading">🔄 Cargando empleados...</div>';
                 if (faltasContainer) faltasContainer.style.display = 'none';
-                
+
                 const res = await secureFetch(`${API_URL}/api/empleados`);
                 if (!res) return;
-                if(!res.ok) throw new Error("Error al obtener empleados");
+                if (!res.ok) throw new Error("Error al obtener empleados");
                 const data = await res.json();
-                
-                if(data.length === 0) {
-                    container.innerHTML = "<p style='color: #6b7a8f; text-align:center; padding: 20px;'>📭 No hay empleados registrados.</p>";
+
+                if (data.length === 0) {
+                    container.innerHTML = "<p style='color:#6b7a8f; text-align:center; padding:20px;'>📭 No hay empleados registrados.</p>";
                 } else {
                     const quincenal = data.filter(e => e.tipo_pago === 'Quincenal');
                     const semanal = data.filter(e => e.tipo_pago === 'Semanal');
                     let html = '';
                     let faltasHtml = '';
-                    
+
                     if (quincenal.length > 0) {
-                        html += `<div style="font-weight:bold; color:#1a2a6c; padding: 8px 0 4px 0;">📅 Quincenales</div>`;
-                        html += quincenal.map(e => 
-                            `<label style="display:block; padding: 4px 0;">
-                                <input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> 
+                        html += `<div style="font-weight:bold; color:#1a2a6c; padding:8px 0 4px 0;">📅 Quincenales</div>`;
+                        html += quincenal.map(e =>
+                            `<label style="display:block; padding:4px 0;">
+                                <input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked style="accent-color:#1a2a6c;">
                                 ${e.cedula} - ${e.nombres} ${e.apellidos}
                             </label>`
                         ).join('');
-                        
+
                         faltasHtml += quincenal.map(e => `
                             <tr data-emp-id="${e.id_empleado}">
-                                <td>${e.nombres} ${e.apellidos}</td>
-                                <td><input type="number" class="cesta-falta" min="0" max="30" value="0"></td>
-                                <td class="cesta-dias-pagar">30 días</td>
+                                <td style="padding:8px 12px;">${e.nombres} ${e.apellidos}</td>
+                                <td style="padding:8px 12px; text-align:center;"><input type="number" class="cesta-falta" min="0" max="30" value="0" style="width:80px; text-align:center; padding:5px; border:1px solid #dce1e8; border-radius:4px;"></td>
+                                <td class="cesta-dias-pagar" style="padding:8px 12px; text-align:center; font-weight:bold; color:#1a2a6c;">30 días</td>
                             </tr>
                         `).join('');
                     }
-                    
+
                     if (semanal.length > 0) {
-                        html += `<div style="font-weight:bold; color:#856404; padding: 8px 0 4px 0;">📅 Semanales</div>`;
-                        html += semanal.map(e => 
-                            `<label style="display:block; padding: 4px 0;">
-                                <input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked> 
+                        html += `<div style="font-weight:bold; color:#856404; padding:8px 0 4px 0;">📅 Semanales</div>`;
+                        html += semanal.map(e =>
+                            `<label style="display:block; padding:4px 0;">
+                                <input type="checkbox" class="cesta-check" value="${e.id_empleado}" checked style="accent-color:#1a2a6c;">
                                 ${e.cedula} - ${e.nombres} ${e.apellidos}
                             </label>`
                         ).join('');
-                        
+
                         faltasHtml += semanal.map(e => `
                             <tr data-emp-id="${e.id_empleado}">
-                                <td>${e.nombres} ${e.apellidos}</td>
-                                <td><input type="number" class="cesta-falta" min="0" max="30" value="0"></td>
-                                <td class="cesta-dias-pagar">30 días</td>
+                                <td style="padding:8px 12px;">${e.nombres} ${e.apellidos}</td>
+                                <td style="padding:8px 12px; text-align:center;"><input type="number" class="cesta-falta" min="0" max="30" value="0" style="width:80px; text-align:center; padding:5px; border:1px solid #dce1e8; border-radius:4px;"></td>
+                                <td class="cesta-dias-pagar" style="padding:8px 12px; text-align:center; font-weight:bold; color:#1a2a6c;">30 días</td>
                             </tr>
                         `).join('');
                     }
-                    
+
                     container.innerHTML = html;
                     if (cuerpoFaltas) cuerpoFaltas.innerHTML = faltasHtml;
                     if (faltasContainer) faltasContainer.style.display = 'block';
-                    
-                    const diasText = document.getElementById('cesta_dias_text');
-                    if (diasText) {
-                        diasText.innerHTML = `📅 <strong>Base de cálculo:</strong> 30 días (Ley Cestaticket) | <span style="color:#0056b3;">$40 USD mensuales</span>`;
-                    }
-                    
+
                     document.querySelectorAll('.cesta-check').forEach(cb => {
                         cb.addEventListener('change', actualizarFaltasCesta);
                     });
                     document.querySelectorAll('.cesta-falta').forEach(input => {
                         input.addEventListener('input', actualizarFaltasCesta);
                     });
-                    
+
                     actualizarFaltasCesta();
                 }
-            } catch (e) { 
-                console.error(e); 
-            }
+            } catch (e) { console.error(e); }
         }
 
         function actualizarFaltasCesta() {
             const checks = document.querySelectorAll('.cesta-check');
             const rows = document.querySelectorAll('#cuerpo_detalle_cesta_faltas tr');
             const DIAS_BASE = 30;
-            
+
             rows.forEach(row => {
                 const empId = row.getAttribute('data-emp-id');
                 const isChecked = Array.from(checks).some(cb => cb.value == empId && cb.checked);
-                
+
                 if (isChecked) {
                     row.style.display = 'table-row';
                     const faltasInput = row.querySelector('.cesta-falta');
@@ -2137,9 +2063,9 @@
             const fecha_fin = document.getElementById('cesta_fecha_fin').value;
             const descripcion = document.getElementById('cesta_descripcion').value;
             const ids = Array.from(document.querySelectorAll('#lista_empleados_cesta input.cesta-check:checked')).map(c => parseInt(c.value));
-            
-            if(!ids.length) {
-                Swal.fire('Atención', 'Selecciona al menos un empleado para calcular el Cestaticket.', 'warning');
+
+            if (!ids.length) {
+                Swal.fire('Atención', 'Selecciona al menos un empleado.', 'warning');
                 return;
             }
 
@@ -2148,103 +2074,75 @@
                 if (row.style.display !== 'none') {
                     const empId = row.getAttribute('data-emp-id');
                     const faltasVal = parseInt(row.querySelector('.cesta-falta').value) || 0;
-                    if (faltasVal > 0) {
-                        faltas[empId] = faltasVal;
-                    }
+                    if (faltasVal > 0) { faltas[empId] = faltasVal; }
                 }
             });
-
-            console.log('📤 Enviando faltas:', faltas);
 
             try {
                 const res = await secureFetch(`${API_URL}/api/calcular_cestaticket`, {
                     method: 'POST',
-                    body: JSON.stringify({ 
-                        fecha_inicio, 
-                        fecha_fin, 
-                        descripcion, 
-                        empleados_ids: ids,
-                        faltas: faltas
-                    })
+                    body: JSON.stringify({ fecha_inicio, fecha_fin, descripcion, empleados_ids: ids, faltas: faltas })
                 });
                 if (!res) return;
                 const data = await res.json();
-                if(data.error) {
+                if (data.error) {
                     Swal.fire('Error', data.error, 'error');
                     return;
                 }
 
                 let total_bs = 0;
                 let total_usd = 0;
-                
                 let html = `
-                    <h3>🍽️ Cálculo de Cestaticket</h3>
-                    <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 10px 0;">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                    <h3 style="color:#1a2a6c;">🍽️ Cálculo de Cestaticket</h3>
+                    <div style="background:#e8f4fd; padding:15px; border-radius:8px; margin:10px 0;">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
                             <div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div>
                             <div><strong>💰 Valor Mensual:</strong> $${data.valor_mensual_usd.toFixed(2)}</div>
                             <div><strong>📅 Valor por Día:</strong> $${data.valor_diario_usd.toFixed(4)}</div>
-                            <div><strong>📆 Días hábiles del período:</strong> ${data.total_working_days}</div>
-                        </div>
-                        <div style="margin-top: 10px; font-size: 0.9em; color: #555; background: #f8f9fa; padding: 8px; border-radius: 4px;">
-                            ℹ️ <strong>Fórmula:</strong> $${data.valor_mensual_usd.toFixed(2)} - (Faltas × $${data.valor_diario_usd.toFixed(4)}) × Tasa BCV
+                            <div><strong>📆 Días hábiles:</strong> ${data.total_working_days}</div>
                         </div>
                     </div>
-                    <div style="overflow-x: auto;">
-                        <table style="min-width: 800px;">
-                            <thead>
-                                <tr>
-                                    <th>Empleado</th>
-                                    <th>Monto Base (USD)</th>
-                                    <th>Valor Día (USD)</th>
-                                    <th>Faltas</th>
-                                    <th>Descuento (USD)</th>
-                                    <th>Total USD</th>
-                                    <th>Total Bs</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-                
+                    <div style="overflow-x:auto;">
+                        <table style="min-width:800px; font-size:13px; width:100%; border-collapse:collapse;">
+                            <thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;">
+                                <th style="padding:10px 12px; text-align:left;">Empleado</th>
+                                <th style="padding:10px 12px; text-align:right;">Monto Base</th>
+                                <th style="padding:10px 12px; text-align:right;">Valor Día</th>
+                                <th style="padding:10px 12px; text-align:center;">Faltas</th>
+                                <th style="padding:10px 12px; text-align:right;">Descuento</th>
+                                <th style="padding:10px 12px; text-align:right;">Total USD</th>
+                                <th style="padding:10px 12px; text-align:right;">Total Bs</th>
+                            </tr></thead>
+                            <tbody>`;
                 data.resultados.forEach(r => {
                     total_usd += r.total_usd;
                     total_bs += r.total_bs;
-                    html += `
-                        <tr>
-                            <td><strong>${r.nombre_completo}</strong></td>
-                            <td>$${r.valor_mensual_usd.toFixed(2)}</td>
-                            <td>$${r.valor_diario_usd.toFixed(4)}</td>
-                            <td style="color:${r.faltas > 0 ? 'red' : 'green'}; font-weight:bold; text-align:center;">${r.faltas}</td>
-                            <td style="color:red;">$${r.descuento_usd.toFixed(2)}</td>
-                            <td><strong>$${r.total_usd.toFixed(2)}</strong></td>
-                            <td><strong style="color:#0056b3;">Bs. ${r.total_bs.toFixed(2)}</strong></td>
-                        </tr>
-                    `;
+                    html += `<tr style="border-bottom:1px solid #f1f4f9;">
+                        <td style="padding:8px 12px;"><strong>${r.nombre_completo}</strong></td>
+                        <td style="padding:8px 12px; text-align:right;">$${r.valor_mensual_usd.toFixed(2)}</td>
+                        <td style="padding:8px 12px; text-align:right;">$${r.valor_diario_usd.toFixed(4)}</td>
+                        <td style="padding:8px 12px; text-align:center; color:${r.faltas > 0 ? 'red' : 'green'}; font-weight:bold;">${r.faltas}</td>
+                        <td style="padding:8px 12px; text-align:right; color:red;">$${r.descuento_usd.toFixed(2)}</td>
+                        <td style="padding:8px 12px; text-align:right;"><strong>$${r.total_usd.toFixed(2)}</strong></td>
+                        <td style="padding:8px 12px; text-align:right;"><strong style="color:#1a2a6c;">Bs. ${r.total_bs.toFixed(2)}</strong></td>
+                    </tr>`;
                 });
-                
-                html += `
-                            </tbody>
-                            <tfoot>
-                                <tr class="lote-total-row">
-                                    <td colspan="5" style="text-align: right; padding-right: 15px;"><strong>TOTAL GENERAL DEL LOTE</strong></td>
-                                    <td><strong>$${total_usd.toFixed(2)}</strong></td>
-                                    <td><strong style="color:#0056b3;">Bs. ${total_bs.toFixed(2)}</strong></td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                    <div style="margin-top: 15px; font-size: 0.9em; color: #666; background: #f8f9fa; padding: 10px; border-radius: 5px;">
-                        <strong>📌 Lote ID:</strong> #${data.lote_id} | 
-                        <strong>📅 Fecha de cálculo:</strong> ${new Date().toLocaleDateString()}
-                    </div>
-                `;
-                
+                html += `<tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;">
+                    <td colspan="5" style="padding:10px 12px; text-align:right;">TOTAL GENERAL</td>
+                    <td style="padding:10px 12px; text-align:right;"><strong>$${total_usd.toFixed(2)}</strong></td>
+                    <td style="padding:10px 12px; text-align:right;"><strong style="color:#1a2a6c;">Bs. ${total_bs.toFixed(2)}</strong></td>
+                </tr>`;
+                html += `</tbody></table></div>
+                    <div style="margin-top:15px; font-size:0.9em; color:#666; background:#f8f9fa; padding:10px; border-radius:5px;">
+                        <strong>📌 Lote ID:</strong> #${data.lote_id} | <strong>📅 Fecha:</strong> ${new Date().toLocaleDateString()}
+                    </div>`;
+
                 document.getElementById('resultado_cesta').innerHTML = html;
                 Swal.fire('¡Éxito!', `Cestaticket guardado como Lote #${data.lote_id}`, 'success');
                 cargarLotesCestaticket();
-            } catch(e) {
+            } catch (e) {
                 console.error('❌ Error en calcularCestaticket:', e);
-                Swal.fire('Error de red', 'No se pudo conectar con el servidor. Verifica la consola para más detalles.', 'error');
+                Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
             }
         }
 
@@ -2260,9 +2158,9 @@
                 if (searchText) url += `?search=${encodeURIComponent(searchText)}`;
                 const res = await secureFetch(url);
                 if (!res) return;
-                if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
+                if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const lotes = await res.json();
-                if(lotes.length === 0) {
+                if (lotes.length === 0) {
                     tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">📭 No hay lotes de Cestaticket registrados.</td></tr>';
                 } else {
                     tableBody.innerHTML = lotes.map(l => `
@@ -2273,15 +2171,15 @@
                             <td>${l.cantidad_empleados_lote} empleados</td>
                             <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
                             <td>
-                                <button class="btn-success" onclick="generarArchivoCestaticket(${l.id_lote})" style="font-size: 12px; padding: 4px 10px;">💳 TXT</button>
-                                <button class="btn-warning" onclick="abrirModalDetalleCesta(${l.id_lote})">📂 Ver Detalle</button>
-                                <button class="btn-danger" onclick="eliminarLoteCestaticket(${l.id_lote})">🗑️</button>
+                                <button class="btn-success" onclick="generarArchivoCestaticket(${l.id_lote})" style="font-size:11px; padding:4px 10px;">💳 TXT</button>
+                                <button class="btn-warning" onclick="abrirModalDetalleCesta(${l.id_lote})" style="font-size:11px; padding:4px 10px;">📂 Ver</button>
+                                <button class="btn-danger" onclick="eliminarLoteCestaticket(${l.id_lote})" style="font-size:11px; padding:4px 10px;">🗑️</button>
                             </td>
                         </tr>
                     `).join('');
                 }
-            } catch(e) {
-                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; font-weight:bold;">❌ Error al cargar historial de cestaticket: ${e.message}</td></tr>`;
+            } catch (e) {
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`;
                 console.error(e);
             }
         }
@@ -2298,7 +2196,7 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `CESTA_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.txt`;
+                a.download = `CESTA_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.txt`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -2308,20 +2206,17 @@
             }
         }
 
-        // ============================================
-        // ✅ FUNCIÓN CORREGIDA: abrirModalDetalleCesta
-        // ============================================
         async function abrirModalDetalleCesta(id) {
             const modal = document.getElementById('modalDetalleCesta');
             const header = document.getElementById('cesta_header_info');
             const body = document.getElementById('cuerpo_detalle_cesta');
-            header.innerHTML = '<div class="loading">🔄 Cargando datos del lote...</div>';
+            header.innerHTML = '<div class="loading">🔄 Cargando datos...</div>';
             body.innerHTML = '';
             modal.style.display = 'flex';
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`);
                 if (!res) return;
-                if(!res.ok) {
+                if (!res.ok) {
                     let errorMsg = `Error ${res.status}: ${res.statusText}`;
                     try {
                         const errorData = await res.json();
@@ -2330,20 +2225,14 @@
                     throw new Error(errorMsg);
                 }
                 const lote = await res.json();
-                
                 let total_usd_lote = 0;
                 if (lote.nominas && lote.nominas.length > 0) {
-                    lote.nominas.forEach(n => {
-                        total_usd_lote += (n.total_usd || 0);
-                    });
+                    lote.nominas.forEach(n => { total_usd_lote += (n.total_usd || 0); });
                 }
-                
+
                 header.innerHTML = `
                     <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
-                        <div>
-                            <strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'}
-                            <br><small>Generado el ${lote.fecha_calculo}</small>
-                        </div>
+                        <div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'}<br><small>Generado el ${lote.fecha_calculo}</small></div>
                         <div style="text-align:right;">
                             <div><strong>Total Lote:</strong> Bs. ${(lote.total_bs || 0).toFixed(2)}</div>
                             <div><small>Total USD: $${total_usd_lote.toFixed(2)}</small></div>
@@ -2351,7 +2240,7 @@
                     </div>
                     <br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas ? lote.nominas.length : 0}</small>
                 `;
-                
+
                 if (lote.nominas && lote.nominas.length > 0) {
                     body.innerHTML = lote.nominas.map(n => `
                         <tr>
@@ -2359,9 +2248,7 @@
                             <td>${n.dias_pagados || 0}</td>
                             <td>$${(n.total_usd || 0).toFixed(2)}</td>
                             <td><strong>Bs. ${(n.total_bs || 0).toFixed(2)}</strong></td>
-                            <td>
-                                <button class="btn-warning" onclick="generarReciboCestaticket(${n.id})" style="font-size: 12px; padding: 4px 10px;">📄 Recibo</button>
-                            </td>
+                            <td><button class="btn-warning" onclick="generarReciboCestaticket(${n.id})" style="font-size:11px; padding:4px 10px;">📄 Recibo</button></td>
                         </tr>
                     `).join('');
                 } else {
@@ -2369,7 +2256,7 @@
                 }
             } catch (e) {
                 console.error('❌ Error en abrirModalDetalleCesta:', e);
-                Swal.fire('Error', `No se pudo cargar el detalle del lote de cestaticket: ${e.message}`, 'error');
+                Swal.fire('Error', `No se pudo cargar el detalle: ${e.message}`, 'error');
                 modal.style.display = 'none';
             }
         }
@@ -2381,12 +2268,12 @@
         async function eliminarLoteCestaticket(id) {
             const result = await Swal.fire({
                 title: '⚠️ ¿Estás seguro?',
-                text: "Esta acción eliminará TODO el lote de Cestaticket y todos sus registros asociados. No se puede deshacer.",
+                text: "Esta acción eliminará TODO el lote de Cestaticket y sus registros.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, eliminar lote',
+                confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar'
             });
             if (result.isConfirmed) {
@@ -2394,15 +2281,13 @@
                     const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const resp = await res.json();
-                    if(res.ok) {
-                        Swal.fire('¡Eliminado!', 'El lote de Cestaticket ha sido eliminado.', 'success');
+                    if (res.ok) {
+                        Swal.fire('¡Eliminado!', 'El lote ha sido eliminado.', 'success');
                         cargarLotesCestaticket();
                     } else {
-                        Swal.fire('Error', resp.error || 'No se pudo eliminar el lote.', 'error');
+                        Swal.fire('Error', resp.error || 'No se pudo eliminar.', 'error');
                     }
-                } catch (e) {
-                    Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
-                }
+                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
             }
         }
 
@@ -2411,13 +2296,13 @@
         }
 
         // ============================================
-        // CÁLCULO PASIVOS Y BONOS
+        // CÁLCULO PASIVOS
         // ============================================
         async function calcularPasivos() {
             const salario_mensual = parseFloat(document.getElementById('pasivos_salario').value) || 0;
             const dias = parseInt(document.getElementById('pasivos_dias').value) || 30;
             const usar_base_60 = document.getElementById('pasivos_60').checked;
-            if(salario_mensual <= 0) {
+            if (salario_mensual <= 0) {
                 Swal.fire('Atención', 'Ingresa un salario mensual base válido en USD.', 'warning');
                 return;
             }
@@ -2428,30 +2313,33 @@
                 });
                 if (!res) return;
                 const data = await res.json();
-                if(data.error) {
+                if (data.error) {
                     Swal.fire('Error', data.error, 'error');
                     return;
                 }
                 let html = `
-                    <h4>📊 Resultado del Cálculo</h4>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; background: #f8f9fc; padding: 15px; border-radius: 8px;">
-                        <div><strong>📅 Días calculados:</strong> ${data.dias}</div>
-                        <div><strong>📌 Base utilizada:</strong> ${data.base_usada}</div>
+                    <h4 style="color:#1a2a6c; margin:0 0 15px 0;">📊 Resultado del Cálculo</h4>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:15px; background:#f8f9fc; padding:15px; border-radius:8px;">
+                        <div><strong>📅 Días:</strong> ${data.dias}</div>
+                        <div><strong>📌 Base:</strong> ${data.base_usada}</div>
                         <div><strong>💱 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(2)}</div>
                     </div>
-                    <div style="margin-top:20px; font-size: 1.3em; padding: 20px; background: #d4edda; border-radius: 8px; text-align: center; border: 1px solid #c3e6cb;">
-                        <div><strong>Total a Pagar en USD:</strong> <span style="color:#1a2a6c;">$${data.total_usd.toFixed(2)}</span></div>
-                        <div><strong>Total a Pagar en Bs (a tasa BCV):</strong> <span style="color:#1a2a6c;">Bs. ${data.total_bs.toFixed(2)}</span></div>
+                    <div style="margin-top:20px; font-size:1.3em; padding:20px; background:#d4edda; border-radius:8px; text-align:center; border:1px solid #c3e6cb;">
+                        <div><strong>Total en USD:</strong> <span style="color:#1a2a6c;">$${data.total_usd.toFixed(2)}</span></div>
+                        <div><strong>Total en Bs:</strong> <span style="color:#1a2a6c;">Bs. ${data.total_bs.toFixed(2)}</span></div>
                     </div>
                 `;
                 document.getElementById('resultado_pasivos').innerHTML = html;
-                document.getElementById('alert_pasivos').innerHTML = `<div class="alert alert-success">✅ Cálculo de pasivos realizado correctamente.</div>`;
-            } catch(e) {
+                document.getElementById('alert_pasivos').innerHTML = `<div class="alert alert-success">✅ Cálculo realizado correctamente.</div>`;
+            } catch (e) {
                 console.error(e);
                 Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
             }
         }
 
+        // ============================================
+        // ACTUALIZAR BCV
+        // ============================================
         async function actualizarBCV(silencioso = false) {
             try {
                 const res = await secureFetch(`${API_URL}/api/actualizar_bcv`);
@@ -2467,7 +2355,7 @@
                 }
             } catch (e) {
                 if (!silencioso) {
-                    Swal.fire('Error de red', 'No se pudo conectar con el servidor para actualizar la tasa.', 'error');
+                    Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
                 }
             }
         }
@@ -2505,7 +2393,7 @@
             document.getElementById('emp_fecha_ingreso').value = fecha_ing;
             document.getElementById('emp_cuenta_bancaria').value = cuenta;
             document.getElementById('emp_tipo_pago').value = tipo_pago;
-            document.getElementById('empleados').scrollIntoView({behavior: "smooth"});
+            document.getElementById('empleados').scrollIntoView({ behavior: "smooth" });
         }
 
         async function guardarEmpleado() {
@@ -2525,7 +2413,6 @@
 
             let url = `${API_URL}/api/empleados`;
             let method = 'POST';
-
             if (editingEmployeeId) {
                 url += `/${editingEmployeeId}`;
                 method = 'PUT';
@@ -2535,17 +2422,14 @@
                 const res = await secureFetch(url, { method: method, body: JSON.stringify(data) });
                 if (!res) return;
                 let resp;
-                try {
-                    resp = await res.json();
-                } catch {
-                    resp = { error: "El servidor respondió con HTML" };
-                }
+                try { resp = await res.json(); } catch { resp = { error: "El servidor respondió con HTML" }; }
                 const alertBox = document.getElementById('alert_emp');
-                if(res.ok) {
+                if (res.ok) {
                     alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`;
                     Swal.fire('¡Éxito!', resp.mensaje, 'success');
                     cancelarEdicion();
                     cargarEmpleadosAdmin();
+                    actualizarTotalEmpleados();
                 } else {
                     alertBox.innerHTML = `<div class="alert alert-danger">Error: ${resp.error}</div>`;
                     Swal.fire('Error', resp.error, 'error');
@@ -2567,13 +2451,13 @@
                 if (searchText) params.push(`search=${encodeURIComponent(searchText)}`);
                 if (filterSucursal) params.push(`sucursal_id=${encodeURIComponent(filterSucursal)}`);
                 if (params.length > 0) url += '?' + params.join('&');
-                
+
                 const res = await secureFetch(url);
                 if (!res) return;
-                if(!res.ok) throw new Error(`Error HTTP ${res.status}`);
+                if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const empleados = await res.json();
-                if(empleados.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">📭 No se encontraron empleados con esos filtros.</td></tr>';
+                if (empleados.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">📭 No se encontraron empleados.</td></tr>';
                 } else {
                     tableBody.innerHTML = empleados.map(e => `
                         <tr>
@@ -2585,13 +2469,13 @@
                             <td><span class="${e.tipo_pago === 'Quincenal' ? 'badge-quincenal' : 'badge-semanal'}">${e.tipo_pago}</span></td>
                             <td>${e.fecha_ingreso || '-'}</td>
                             <td>
-                                <button class="btn-warning" onclick="cargarFormularioEditar(${e.id_empleado}, '${e.cedula}', '${e.nombres}', '${e.apellidos}', '${e.cargo}', '${e.departamento}', ${e.salario_mensual_usd}, ${e.sucursal_id || ''}, '${e.fecha_nacimiento || ''}', '${e.fecha_ingreso || ''}', '${e.cuenta_bancaria || ''}', '${e.tipo_pago}')">✏️</button>
-                                <button class="btn-danger" onclick="eliminarEmpleado(${e.id_empleado})">🗑️</button>
+                                <button class="btn-warning" onclick="cargarFormularioEditar(${e.id_empleado}, '${e.cedula}', '${e.nombres}', '${e.apellidos}', '${e.cargo}', '${e.departamento}', ${e.salario_mensual_usd}, ${e.sucursal_id || ''}, '${e.fecha_nacimiento || ''}', '${e.fecha_ingreso || ''}', '${e.cuenta_bancaria || ''}', '${e.tipo_pago}')" style="font-size:12px; padding:2px 8px;">✏️</button>
+                                <button class="btn-danger" onclick="eliminarEmpleado(${e.id_empleado})" style="font-size:12px; padding:2px 8px;">🗑️</button>
                             </td>
                         </tr>
                     `).join('');
                 }
-                
+
                 const resSuc = await secureFetch(`${API_URL}/api/sucursales`);
                 if (resSuc && resSuc.ok) {
                     const sucs = await resSuc.json();
@@ -2601,10 +2485,18 @@
                     selectSucFilter.innerHTML = '<option value="">Ver todas las sucursales</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
                     selectSucFilter.value = cVal;
                 }
-            } catch(e) {
-                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">❌ Error al cargar empleados: ${e.message}</td></tr>`;
+                actualizarTotalEmpleados();
+            } catch (e) {
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`;
                 console.error(e);
             }
+        }
+
+        function actualizarTotalEmpleados() {
+            const rows = document.querySelectorAll('#tabla_empleados tr');
+            const total = rows.length - 1;
+            const badge = document.getElementById('total_empleados_badge');
+            if (badge && total > 0) { badge.textContent = `${total} empleados`; }
         }
 
         async function eliminarEmpleado(id) {
@@ -2623,15 +2515,13 @@
                     const res = await secureFetch(`${API_URL}/api/empleados/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const resp = await res.json();
-                    if(res.ok) {
+                    if (res.ok) {
                         cargarEmpleadosAdmin();
                         Swal.fire('Eliminado', 'El empleado ha sido eliminado.', 'success');
                     } else {
                         Swal.fire('Error', resp.error, 'error');
                     }
-                } catch (e) {
-                    Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
-                }
+                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
             }
         }
 
@@ -2644,27 +2534,27 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
                 if (!res) return;
-                if(!res.ok) throw new Error(`Error del servidor: ${res.status}`);
+                if (!res.ok) throw new Error(`Error del servidor: ${res.status}`);
                 let data;
                 const contentType = res.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) {
                     data = await res.json();
                 } else {
                     const text = await res.text();
-                    throw new Error(`HTML recibido. ${text.substring(0,80)}...`);
+                    throw new Error(`HTML recibido. ${text.substring(0, 80)}...`);
                 }
-                if(data.length === 0) {
+                if (data.length === 0) {
                     tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">📭 No hay sucursales creadas.</td></tr>';
                 } else {
                     tableBody.innerHTML = data.map(s => `
                         <tr>
                             <td>${s.id_sucursal}</td>
-                            <td>${s.nombre}</td>
-                            <td><button class="btn-danger" onclick="eliminarSucursal(${s.id_sucursal})">🗑️</button></td>
+                            <td><strong>${s.nombre}</strong></td>
+                            <td><button class="btn-danger" onclick="eliminarSucursal(${s.id_sucursal})" style="font-size:12px; padding:2px 8px;">🗑️</button></td>
                         </tr>
                     `).join('');
                 }
-            } catch(e) {
+            } catch (e) {
                 tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`;
                 console.error(e);
             }
@@ -2672,24 +2562,20 @@
 
         async function crearSucursal() {
             const nombre = document.getElementById('suc_nombre').value;
-            if(!nombre) {
+            if (!nombre) {
                 Swal.fire('Atención', 'El nombre no puede estar vacío.', 'warning');
                 return;
             }
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`, {
                     method: 'POST',
-                    body: JSON.stringify({nombre})
+                    body: JSON.stringify({ nombre })
                 });
                 if (!res) return;
                 let resp;
-                try {
-                    resp = await res.json();
-                } catch {
-                    resp = { error: "El servidor no respondió con JSON" };
-                }
+                try { resp = await res.json(); } catch { resp = { error: "El servidor no respondió con JSON" }; }
                 const alertBox = document.getElementById('alert_suc');
-                if(res.ok) {
+                if (res.ok) {
                     alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`;
                     document.getElementById('suc_nombre').value = '';
                     cargarSucursales();
@@ -2720,15 +2606,13 @@
                     const res = await secureFetch(`${API_URL}/api/sucursales/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const resp = await res.json();
-                    if(res.ok) {
+                    if (res.ok) {
                         cargarSucursales();
                         Swal.fire('Eliminado', 'Sucursal eliminada.', 'success');
                     } else {
                         Swal.fire('Error', resp.error, 'error');
                     }
-                } catch (e) {
-                    Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
-                }
+                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
             }
         }
 
@@ -2739,7 +2623,7 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/parametros`);
                 if (!res) return;
-                if(!res.ok) throw new Error("Error al cargar parámetros");
+                if (!res.ok) throw new Error("Error al cargar parámetros");
                 const params = await res.json();
                 document.getElementById('param_tasa_bcv').value = params.tasa_bcv || 755.1552;
                 document.getElementById('param_ivss').value = params.porcentaje_ivss || 0.04;
@@ -2768,7 +2652,7 @@
                 { clave: 'nombre_cuenta_empresa', valor: document.getElementById('param_nombre_cuenta_empresa').value.trim() },
                 { clave: 'codigo_banco_defecto', valor: document.getElementById('param_codigo_banco').value.trim() }
             ];
-            
+
             let errores = 0;
             for (const param of parametros) {
                 try {
@@ -2778,13 +2662,11 @@
                     });
                     if (!res) return;
                     if (!res.ok) errores++;
-                } catch (e) {
-                    errores++;
-                }
+                } catch (e) { errores++; }
             }
-            
+
             if (errores === 0) {
-                Swal.fire('¡Actualizado!', 'Todos los parámetros (Nómina y Empresa) se han guardado.', 'success');
+                Swal.fire('¡Actualizado!', 'Todos los parámetros se han guardado.', 'success');
                 document.getElementById('alert_params').innerHTML = `<div class="alert alert-success">✅ Parámetros actualizados correctamente.</div>`;
             } else {
                 Swal.fire('Error', 'Ocurrió un error al guardar algunos parámetros.', 'error');
@@ -2807,7 +2689,7 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `PROV_${tipo}_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.txt`;
+                a.download = `PROV_${tipo}_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.txt`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -2819,12 +2701,10 @@
 
         async function downloadFile(url, filename) {
             try {
-                const res = await fetch(url, {
-                    credentials: 'include'
-                });
+                const res = await fetch(url, { credentials: 'include' });
                 if (!res.ok) {
                     const errorText = await res.text();
-                    throw new Error(`Error ${res.status}: ${errorText || 'Error desconocido al descargar el archivo'}`);
+                    throw new Error(`Error ${res.status}: ${errorText || 'Error desconocido'}`);
                 }
                 const blob = await res.blob();
                 const a = document.createElement('a');
@@ -2857,24 +2737,16 @@
                 const searchText = document.getElementById('search_historial').value;
                 let url = `${API_URL}/api/lotes`;
                 if (searchText) url += `?search=${encodeURIComponent(searchText)}`;
-                
-                console.log(`🔍 Fetching lotes desde: ${url}`);
-                
+
                 const res = await secureFetch(url);
-                if (!res) {
-                    throw new Error("No se pudo conectar con el servidor. Verifica tu conexión.");
-                }
-                
+                if (!res) throw new Error("No se pudo conectar con el servidor.");
                 if (!res.ok) {
                     const errorText = await res.text();
-                    console.error(`❌ Error response:`, errorText);
                     throw new Error(`Error ${res.status}: ${errorText || 'Error desconocido'}`);
                 }
-                
+
                 const lotes = await res.json();
-                console.log(`✅ Lotes cargados: ${lotes.length}`);
-                
-                if(lotes.length === 0) {
+                if (lotes.length === 0) {
                     tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">📭 No hay lotes registrados.</td></tr>';
                 } else {
                     tableBody.innerHTML = lotes.map(l => `
@@ -2887,17 +2759,17 @@
                             <td><strong>$${l.total_usd.toFixed(2)}</strong></td>
                             <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
                             <td>
-                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size: 11px; padding: 4px 8px;">💳 60%</button>
-                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size: 11px; padding: 4px 8px;">💳 100%</button>
-                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size: 11px; padding: 4px 8px;">💳 40%</button>
-                                <button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size: 11px; padding: 4px 8px;">📄 PDF</button>
-                                <button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})" style="font-size: 11px; padding: 4px 8px;">📂 Ver</button>
-                                <button class="btn-danger" onclick="eliminarLote(${l.id_lote})" style="font-size: 11px; padding: 4px 8px;">🗑️</button>
+                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size:10px; padding:3px 8px;">60%</button>
+                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size:10px; padding:3px 8px;">100%</button>
+                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size:10px; padding:3px 8px;">40%</button>
+                                <button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size:10px; padding:3px 8px;">📄</button>
+                                <button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})" style="font-size:10px; padding:3px 8px;">📂</button>
+                                <button class="btn-danger" onclick="eliminarLote(${l.id_lote})" style="font-size:10px; padding:3px 8px;">🗑️</button>
                             </td>
                         </tr>
                     `).join('');
                 }
-            } catch(e) {
+            } catch (e) {
                 console.error('❌ Error en cargarLotes:', e);
                 tableBody.innerHTML = `
                     <tr>
@@ -2917,13 +2789,13 @@
             const modal = document.getElementById('modalDetalleLote');
             const header = document.getElementById('lote_header_info');
             const body = document.getElementById('cuerpo_detalle_lote');
-            header.innerHTML = '<div class="loading">🔄 Cargando datos del lote...</div>';
+            header.innerHTML = '<div class="loading">🔄 Cargando datos...</div>';
             body.innerHTML = '';
             modal.style.display = 'flex';
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes/${id}`);
                 if (!res) return;
-                if(!res.ok) {
+                if (!res.ok) {
                     let errorMsg = `Error ${res.status}: ${res.statusText}`;
                     try {
                         const errorData = await res.json();
@@ -2934,10 +2806,7 @@
                 const lote = await res.json();
                 header.innerHTML = `
                     <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
-                        <div>
-                            <strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'}
-                            <br><small>Generado el ${lote.fecha_calculo}</small>
-                        </div>
+                        <div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'}<br><small>Generado el ${lote.fecha_calculo}</small></div>
                         <div style="text-align:right;">
                             <div><strong>Total Lote:</strong> $${lote.total_usd.toFixed(2)}</div>
                             <div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div>
@@ -2956,14 +2825,12 @@
                         <td>$${(n.total_deducciones_usd || 0).toFixed(2)}</td>
                         <td><strong>$${(n.neto_pagar_usd || 0).toFixed(2)}</strong></td>
                         <td><strong>Bs. ${(n.neto_pagar_bs || 0).toFixed(2)}</strong></td>
-                        <td>
-                            <button class="btn-warning" onclick="generarRecibo(${n.id_nomina})" style="font-size: 11px; padding: 4px 8px;">📄 Recibo</button>
-                        </td>
+                        <td><button class="btn-warning" onclick="generarRecibo(${n.id_nomina})" style="font-size:11px; padding:3px 8px;">📄</button></td>
                     </tr>
                 `).join('');
             } catch (e) {
                 console.error(e);
-                Swal.fire('Error', `No se pudo cargar el detalle del lote: ${e.message}`, 'error');
+                Swal.fire('Error', `No se pudo cargar el detalle: ${e.message}`, 'error');
                 modal.style.display = 'none';
             }
         }
@@ -2975,12 +2842,12 @@
         async function eliminarLote(id) {
             const result = await Swal.fire({
                 title: '⚠️ ¿Estás seguro?',
-                text: "Esta acción eliminará TODO el lote de nómina y todos sus registros asociados. No se puede deshacer.",
+                text: "Esta acción eliminará TODO el lote de nómina y sus registros.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, eliminar lote',
+                confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar'
             });
             if (result.isConfirmed) {
@@ -2988,28 +2855,22 @@
                     const res = await secureFetch(`${API_URL}/api/lotes/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const resp = await res.json();
-                    if(res.ok) {
-                        Swal.fire('¡Eliminado!', 'El lote de nómina ha sido eliminado.', 'success');
+                    if (res.ok) {
+                        Swal.fire('¡Eliminado!', 'El lote ha sido eliminado.', 'success');
                         cargarLotes();
                     } else {
-                        Swal.fire('Error', resp.error || 'No se pudo eliminar el lote.', 'error');
+                        Swal.fire('Error', resp.error || 'No se pudo eliminar.', 'error');
                     }
-                } catch (e) {
-                    Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
-                }
+                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
             }
         }
 
-        // Eventos para cerrar modales con click fuera
+        // Eventos para cerrar modales
         window.onclick = function(event) {
             const modalCesta = document.getElementById('modalDetalleCesta');
-            if (event.target == modalCesta) {
-                cerrarModalDetalleCesta();
-            }
+            if (event.target == modalCesta) { cerrarModalDetalleCesta(); }
             const modalLote = document.getElementById('modalDetalleLote');
-            if (event.target == modalLote) {
-                cerrarModalDetalle();
-            }
+            if (event.target == modalLote) { cerrarModalDetalle(); }
         }
     </script>
 </body>
