@@ -712,6 +712,7 @@
             <button class="tab-btn" data-target="pasivos">📄 Pasivos</button>
             <button class="tab-btn" data-target="cestaticket">🍽️ Cestaticket</button>
             <button class="tab-btn" data-target="historial">📋 Historial</button>
+            <button class="tab-btn" data-target="reportes">📊 Reportes</button>
             <button class="tab-btn" data-target="seguridad">🔐 Usuarios</button>
         </div>
 
@@ -1242,6 +1243,115 @@
         </div>
 
         <!-- ============================================ -->
+        <!-- 📊 MÓDULO: REPORTES -->
+        <!-- ============================================ -->
+        <div id="reportes" class="tab-content">
+            <div class="module-header">
+                <div>
+                    <h2 class="module-title">📊 Reportes Especiales</h2>
+                    <p class="module-subtitle">Pasivos laborales, parafiscales y resumen en dólares</p>
+                </div>
+            </div>
+
+            <!-- Reporte de Pasivos Laborales -->
+            <div class="action-card" style="border-left: 4px solid #1a2a6c;">
+                <h4 class="action-card-title"><span class="icon">📄</span> Reporte de Pasivos Laborales</h4>
+                <p style="color:#6b7a8f; font-size:13px; margin-bottom:15px;">
+                    Calcula utilidades, aguinaldo, vacaciones y bono vacacional según la LOTTT.
+                </p>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">👤 Empleado</label>
+                        <select id="reporte_pasivos_empleado" class="form-input">
+                            <option value="">Todos los empleados</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
+                        <button class="btn-primary" onclick="generarReportePasivos()" style="width:100%;">
+                            📊 Calcular Pasivos
+                        </button>
+                    </div>
+                </div>
+                <div id="resultado_pasivos_report" style="margin-top:20px;"></div>
+            </div>
+
+            <!-- Reporte Parafiscales -->
+            <div class="action-card" style="border-left: 4px solid #28a745; margin-top:20px;">
+                <h4 class="action-card-title"><span class="icon">📊</span> Reporte Parafiscales</h4>
+                <p style="color:#6b7a8f; font-size:13px; margin-bottom:15px;">
+                    Reporte de IVSS, RPE, FAOV y LPPP (Prestaciones Sociales).
+                </p>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">📅 Fecha Inicio</label>
+                        <input type="date" id="reporte_para_fecha_inicio" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">📅 Fecha Fin</label>
+                        <input type="date" id="reporte_para_fecha_fin" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">👤 Empleado</label>
+                        <select id="reporte_para_empleado" class="form-input">
+                            <option value="">Todos los empleados</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
+                        <button class="btn-success" onclick="generarReporteParafiscales()" style="width:100%;">
+                            📊 Generar Reporte
+                        </button>
+                    </div>
+                </div>
+                <div id="resultado_parafiscales" style="margin-top:20px;"></div>
+            </div>
+
+            <!-- Resumen en Dólares -->
+            <div class="action-card" style="border-left: 4px solid #ffc107; margin-top:20px;">
+                <h4 class="action-card-title"><span class="icon">💵</span> Resumen en Dólares</h4>
+                <p style="color:#6b7a8f; font-size:13px; margin-bottom:15px;">
+                    Resumen mensual de todos los conceptos en dólares.
+                </p>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">📅 Mes</label>
+                        <select id="reporte_mes" class="form-input">
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">📅 Año</label>
+                        <select id="reporte_anio" class="form-input">
+                            <!-- Se llenará con JavaScript -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">👤 Empleado</label>
+                        <select id="reporte_resumen_empleado" class="form-input">
+                            <option value="">Todos los empleados</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
+                        <button class="btn-warning" onclick="generarResumenDolares()" style="width:100%;">
+                            💵 Generar Resumen
+                        </button>
+                    </div>
+                </div>
+                <div id="resultado_resumen_dolares" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
         <!-- 🔐 MÓDULO: SEGURIDAD -->
         <!-- ============================================ -->
         <div id="seguridad" class="tab-content">
@@ -1484,6 +1594,7 @@
                         else if (tabId === 'parametros') cargarParametros();
                         else if (tabId === 'cestaticket') { cargarEmpleadosCesta(); cargarLotesCestaticket(); }
                         else if (tabId === 'historial') cargarLotes();
+                        else if (tabId === 'reportes') { cargarEmpleadosReportes(); }
                         else if (tabId === 'seguridad') cargarUsuarios();
                     });
                 });
@@ -2778,6 +2889,350 @@
 
         function generarRecibo(id) {
             downloadFile(`${API_URL}/api/generar_recibo/${id}`, `recibo_${id}.pdf`);
+        }
+
+        // ============================================
+        // 📊 FUNCIONES PARA REPORTES
+        // ============================================
+
+        // Cargar empleados en los selects de reportes
+        async function cargarEmpleadosReportes() {
+            try {
+                const res = await secureFetch(`${API_URL}/api/empleados`);
+                if (!res) return;
+                const data = await res.json();
+                
+                const selects = [
+                    'reporte_pasivos_empleado',
+                    'reporte_para_empleado',
+                    'reporte_resumen_empleado'
+                ];
+                
+                selects.forEach(id => {
+                    const select = document.getElementById(id);
+                    if (select) {
+                        const currentVal = select.value;
+                        select.innerHTML = '<option value="">Todos los empleados</option>';
+                        data.forEach(e => {
+                            select.innerHTML += `<option value="${e.id_empleado}">${e.cedula} - ${e.nombres} ${e.apellidos}</option>`;
+                        });
+                        if (currentVal) select.value = currentVal;
+                    }
+                });
+                
+                const anioSelect = document.getElementById('reporte_anio');
+                if (anioSelect) {
+                    const currentYear = new Date().getFullYear();
+                    anioSelect.innerHTML = '';
+                    for (let y = currentYear; y >= 2020; y--) {
+                        anioSelect.innerHTML += `<option value="${y}">${y}</option>`;
+                    }
+                    anioSelect.value = currentYear;
+                }
+                
+            } catch (e) {
+                console.error('❌ Error cargando empleados para reportes:', e);
+            }
+        }
+
+        // Reporte de Pasivos Laborales
+        async function generarReportePasivos() {
+            const empleado_id = document.getElementById('reporte_pasivos_empleado').value;
+            
+            const resultDiv = document.getElementById('resultado_pasivos_report');
+            resultDiv.innerHTML = '<div class="loading">🔄 Calculando pasivos laborales...</div>';
+            
+            try {
+                const res = await secureFetch(`${API_URL}/api/reporte_pasivos`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        empleado_id: empleado_id ? parseInt(empleado_id) : null,
+                        calcular_para_todos: !empleado_id
+                    })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`;
+                    return;
+                }
+                
+                let html = `
+                    <div style="background:#e8f4fd; padding:15px; border-radius:8px; margin-bottom:15px;">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+                            <div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div>
+                            <div><strong>👥 Empleados:</strong> ${data.resultados.length}</div>
+                            <div><strong>💰 Total General USD:</strong> $${data.total_general_usd.toFixed(2)}</div>
+                            <div><strong>💰 Total General Bs:</strong> Bs. ${data.total_general_bs.toFixed(2)}</div>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                            <thead>
+                                <tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;">
+                                    <th style="padding:8px 10px;">Empleado</th>
+                                    <th style="padding:8px 10px;">Antigüedad</th>
+                                    <th style="padding:8px 10px; text-align:right;">Salario Base</th>
+                                    <th style="padding:8px 10px; text-align:right;">Salario Integral</th>
+                                    <th style="padding:8px 10px; text-align:right;">Utilidades</th>
+                                    <th style="padding:8px 10px; text-align:right;">Aguinaldo</th>
+                                    <th style="padding:8px 10px; text-align:right;">Vacaciones</th>
+                                    <th style="padding:8px 10px; text-align:right;">Bono Vac.</th>
+                                    <th style="padding:8px 10px; text-align:right;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                
+                data.resultados.forEach(r => {
+                    const antiguedad = `${r.antiguedad.anos} años, ${r.antiguedad.meses} meses`;
+                    html += `
+                        <tr style="border-bottom:1px solid #f1f4f9;">
+                            <td style="padding:6px 10px;"><strong>${r.empleado.nombre}</strong><br><small style="color:#6b7a8f;">${r.empleado.cedula}</small></td>
+                            <td style="padding:6px 10px;">${antiguedad}</td>
+                            <td style="padding:6px 10px; text-align:right;">$${r.salario_base_usd.toFixed(2)}</td>
+                            <td style="padding:6px 10px; text-align:right;">$${r.salario_integral_usd.toFixed(2)}</td>
+                            <td style="padding:6px 10px; text-align:right;">$${r.utilidades.usd.toFixed(2)}<br><small>${r.utilidades.dias} días</small></td>
+                            <td style="padding:6px 10px; text-align:right;">$${r.aguinaldo.usd.toFixed(2)}<br><small>${r.aguinaldo.dias} días</small></td>
+                            <td style="padding:6px 10px; text-align:right;">$${r.vacaciones.usd.toFixed(2)}<br><small>${r.vacaciones.dias} días</small></td>
+                            <td style="padding:6px 10px; text-align:right;">$${r.bono_vacacional.usd.toFixed(2)}<br><small>${r.bono_vacacional.dias} días</small></td>
+                            <td style="padding:6px 10px; text-align:right;"><strong>$${r.total_pasivos_usd.toFixed(2)}</strong><br><small>Bs. ${r.total_pasivos_bs.toFixed(2)}</small></td>
+                        </tr>`;
+                });
+                
+                html += `
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;">
+                                    <td colspan="8" style="padding:8px 10px; text-align:right;">TOTAL GENERAL</td>
+                                    <td style="padding:8px 10px; text-align:right;">
+                                        <strong>$${data.total_general_usd.toFixed(2)}</strong>
+                                        <br><small>Bs. ${data.total_general_bs.toFixed(2)}</small>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>`;
+                
+                resultDiv.innerHTML = html;
+                Swal.fire('✅ Reporte Generado', 'El reporte de pasivos laborales se ha generado correctamente.', 'success');
+                
+            } catch (e) {
+                console.error('❌ Error:', e);
+                resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error al generar el reporte: ${e.message}</div>`;
+            }
+        }
+
+        // Reporte Parafiscales
+        async function generarReporteParafiscales() {
+            const fecha_inicio = document.getElementById('reporte_para_fecha_inicio').value;
+            const fecha_fin = document.getElementById('reporte_para_fecha_fin').value;
+            const empleado_id = document.getElementById('reporte_para_empleado').value;
+            
+            if (!fecha_inicio || !fecha_fin) {
+                Swal.fire('Atención', 'Selecciona un período de fechas.', 'warning');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('resultado_parafiscales');
+            resultDiv.innerHTML = '<div class="loading">🔄 Generando reporte parafiscal...</div>';
+            
+            try {
+                const res = await secureFetch(`${API_URL}/api/reporte_parafiscales`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        fecha_inicio: fecha_inicio,
+                        fecha_fin: fecha_fin,
+                        empleado_id: empleado_id ? parseInt(empleado_id) : null
+                    })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`;
+                    return;
+                }
+                
+                let html = `
+                    <div style="background:#e8f4fd; padding:15px; border-radius:8px; margin-bottom:15px;">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
+                            <div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div>
+                            <div><strong>📅 Período:</strong> ${data.periodo.fecha_inicio} al ${data.periodo.fecha_fin}</div>
+                            <div><strong>👥 Empleados:</strong> ${Object.keys(data.detalle_empleados).length}</div>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:15px;">
+                        <div style="background:#d4edda; padding:15px; border-radius:8px; text-align:center;">
+                            <div style="font-size:12px; color:#155724;">IVSS (4%)</div>
+                            <div style="font-size:18px; font-weight:bold; color:#155724;">$${data.totales.ivss_usd.toFixed(2)}</div>
+                            <div style="font-size:12px;">Bs. ${data.totales.ivss_bs.toFixed(2)}</div>
+                        </div>
+                        <div style="background:#fff3cd; padding:15px; border-radius:8px; text-align:center;">
+                            <div style="font-size:12px; color:#856404;">RPE (0.5%)</div>
+                            <div style="font-size:18px; font-weight:bold; color:#856404;">$${data.totales.rpe_usd.toFixed(2)}</div>
+                            <div style="font-size:12px;">Bs. ${data.totales.rpe_bs.toFixed(2)}</div>
+                        </div>
+                        <div style="background:#f8d7da; padding:15px; border-radius:8px; text-align:center;">
+                            <div style="font-size:12px; color:#721c24;">FAOV (1%)</div>
+                            <div style="font-size:18px; font-weight:bold; color:#721c24;">$${data.totales.faov_usd.toFixed(2)}</div>
+                            <div style="font-size:12px;">Bs. ${data.totales.faov_bs.toFixed(2)}</div>
+                        </div>
+                        <div style="background:#cce5ff; padding:15px; border-radius:8px; text-align:center;">
+                            <div style="font-size:12px; color:#004085;">LPPP (9%)</div>
+                            <div style="font-size:18px; font-weight:bold; color:#004085;">$${data.totales.lppp_usd.toFixed(2)}</div>
+                            <div style="font-size:12px;">Bs. ${data.totales.lppp_bs.toFixed(2)}</div>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                            <thead>
+                                <tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;">
+                                    <th style="padding:8px 10px;">Empleado</th>
+                                    <th style="padding:8px 10px; text-align:right;">Asignaciones</th>
+                                    <th style="padding:8px 10px; text-align:right;">IVSS</th>
+                                    <th style="padding:8px 10px; text-align:right;">RPE</th>
+                                    <th style="padding:8px 10px; text-align:right;">FAOV</th>
+                                    <th style="padding:8px 10px; text-align:right;">LPPP</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                
+                for (const empId in data.detalle_empleados) {
+                    const emp = data.detalle_empleados[empId];
+                    html += `
+                        <tr style="border-bottom:1px solid #f1f4f9;">
+                            <td style="padding:6px 10px;"><strong>${emp.nombre}</strong><br><small style="color:#6b7a8f;">${emp.cedula}</small></td>
+                            <td style="padding:6px 10px; text-align:right;">$${emp.total_asignaciones.toFixed(2)}</td>
+                            <td style="padding:6px 10px; text-align:right;">$${emp.total_ivss.toFixed(2)}</td>
+                            <td style="padding:6px 10px; text-align:right;">$${emp.total_rpe.toFixed(2)}</td>
+                            <td style="padding:6px 10px; text-align:right;">$${emp.total_faov.toFixed(2)}</td>
+                            <td style="padding:6px 10px; text-align:right;">$${emp.total_lppp.toFixed(2)}</td>
+                        </tr>`;
+                }
+                
+                html += `
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;">
+                                    <td style="padding:8px 10px;">TOTAL</td>
+                                    <td style="padding:8px 10px; text-align:right;">$${data.totales.total_asignaciones_usd.toFixed(2)}</td>
+                                    <td style="padding:8px 10px; text-align:right;">$${data.totales.ivss_usd.toFixed(2)}</td>
+                                    <td style="padding:8px 10px; text-align:right;">$${data.totales.rpe_usd.toFixed(2)}</td>
+                                    <td style="padding:8px 10px; text-align:right;">$${data.totales.faov_usd.toFixed(2)}</td>
+                                    <td style="padding:8px 10px; text-align:right;">$${data.totales.lppp_usd.toFixed(2)}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>`;
+                
+                resultDiv.innerHTML = html;
+                Swal.fire('✅ Reporte Generado', 'El reporte parafiscal se ha generado correctamente.', 'success');
+                
+            } catch (e) {
+                console.error('❌ Error:', e);
+                resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error al generar el reporte: ${e.message}</div>`;
+            }
+        }
+
+        // Resumen en Dólares
+        async function generarResumenDolares() {
+            const mes = parseInt(document.getElementById('reporte_mes').value);
+            const anio = parseInt(document.getElementById('reporte_anio').value);
+            const empleado_id = document.getElementById('reporte_resumen_empleado').value;
+            
+            const resultDiv = document.getElementById('resultado_resumen_dolares');
+            resultDiv.innerHTML = '<div class="loading">🔄 Generando resumen en dólares...</div>';
+            
+            try {
+                const res = await secureFetch(`${API_URL}/api/resumen_dolares`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        mes: mes,
+                        anio: anio,
+                        empleado_id: empleado_id ? parseInt(empleado_id) : null
+                    })
+                });
+                if (!res) return;
+                const data = await res.json();
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`;
+                    return;
+                }
+                
+                const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+                const nombreMes = meses[mes - 1];
+                
+                let html = `
+                    <div style="background:#e8f4fd; padding:15px; border-radius:8px; margin-bottom:15px;">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+                            <div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div>
+                            <div><strong>📅 Período:</strong> ${nombreMes} ${anio}</div>
+                            <div><strong>👥 Empleados:</strong> ${Object.keys(data.detalle_empleados).length}</div>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:15px; margin-bottom:15px;">
+                        <div style="background:#d4edda; padding:15px; border-radius:8px; text-align:center;">
+                            <div style="font-size:12px; color:#155724;">💰 Salario</div>
+                            <div style="font-size:18px; font-weight:bold; color:#155724;">$${data.totales.salario_usd.toFixed(2)}</div>
+                        </div>
+                        <div style="background:#fff3cd; padding:15px; border-radius:8px; text-align:center;">
+                            <div style="font-size:12px; color:#856404;">⏱️ Horas Extras</div>
+                            <div style="font-size:18px; font-weight:bold; color:#856404;">$${data.totales.horas_extras_usd.toFixed(2)}</div>
+                        </div>
+                        <div style="background:#cce5ff; padding:15px; border-radius:8px; text-align:center;">
+                            <div style="font-size:12px; color:#004085;">🎁 Bono</div>
+                            <div style="font-size:18px; font-weight:bold; color:#004085;">$${data.totales.bono_usd.toFixed(2)}</div>
+                        </div>
+                        <div style="background:#e9ecef; padding:15px; border-radius:8px; text-align:center;">
+                            <div style="font-size:12px; color:#212529;">📊 Neto</div>
+                            <div style="font-size:18px; font-weight:bold; color:#1a2a6c;">$${data.totales.neto_usd.toFixed(2)}</div>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                            <thead>
+                                <tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;">
+                                    <th style="padding:8px 10px;">Empleado</th>
+                                    <th style="padding:8px 10px; text-align:right;">Salario</th>
+                                    <th style="padding:8px 10px; text-align:right;">Horas Extras</th>
+                                    <th style="padding:8px 10px; text-align:right;">Bono</th>
+                                    <th style="padding:8px 10px; text-align:right;">Neto</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                
+                for (const empId in data.detalle_empleados) {
+                    const emp = data.detalle_empleados[empId];
+                    html += `
+                        <tr style="border-bottom:1px solid #f1f4f9;">
+                            <td style="padding:6px 10px;"><strong>${emp.nombre}</strong><br><small style="color:#6b7a8f;">${emp.cedula}</small></td>
+                            <td style="padding:6px 10px; text-align:right;">$${emp.salario_usd.toFixed(2)}</td>
+                            <td style="padding:6px 10px; text-align:right;">$${emp.horas_extras_usd.toFixed(2)}</td>
+                            <td style="padding:6px 10px; text-align:right;">$${emp.bono_usd.toFixed(2)}</td>
+                            <td style="padding:6px 10px; text-align:right;"><strong>$${emp.neto_usd.toFixed(2)}</strong></td>
+                        </tr>`;
+                }
+                
+                html += `
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;">
+                                    <td style="padding:8px 10px;">TOTAL</td>
+                                    <td style="padding:8px 10px; text-align:right;">$${data.totales.salario_usd.toFixed(2)}</td>
+                                    <td style="padding:8px 10px; text-align:right;">$${data.totales.horas_extras_usd.toFixed(2)}</td>
+                                    <td style="padding:8px 10px; text-align:right;">$${data.totales.bono_usd.toFixed(2)}</td>
+                                    <td style="padding:8px 10px; text-align:right;"><strong>$${data.totales.neto_usd.toFixed(2)}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>`;
+                
+                resultDiv.innerHTML = html;
+                Swal.fire('✅ Resumen Generado', 'El resumen en dólares se ha generado correctamente.', 'success');
+                
+            } catch (e) {
+                console.error('❌ Error:', e);
+                resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error al generar el resumen: ${e.message}</div>`;
+            }
         }
 
         // ============================================
