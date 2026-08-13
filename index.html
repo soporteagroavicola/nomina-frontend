@@ -2374,10 +2374,10 @@
             }
         }
 
-                // ============================================
-        // HISTORIAL DE NÓMINAS (CORREGIDO)
+                        // ============================================
+        // HISTORIAL DE NÓMINAS
         // ============================================
-              async function cargarLotes() {
+        async function cargarLotes() {
             const tableBody = document.getElementById('tabla_historial');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading">🔄 Cargando lotes...</td></tr>';
             try {
@@ -2385,7 +2385,7 @@
                 let url = `${API_URL}/api/lotes`;
                 if (searchText) url += `?search=${encodeURIComponent(searchText)}`;
 
-                // FORZAMOS EL ENVÍO DE LA COOKIE CON credentials: 'include'
+                // CORRECCIÓN FINAL: Usamos fetch estándar con credentials: 'include'
                 const res = await fetch(url, { 
                     method: 'GET',
                     credentials: 'include',
@@ -2399,13 +2399,9 @@
                     return;
                 }
 
-                if (!res.ok) {
-                    const errorText = await res.text();
-                    throw new Error(`Error ${res.status}: ${errorText || 'Error desconocido'}`);
-                }
+                if (!res.ok) throw new Error(`Error ${res.status}`);
 
                 const lotes = await res.json();
-                
                 if (lotes.length === 0) {
                     tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">📭 No hay lotes registrados.</td></tr>';
                 } else {
