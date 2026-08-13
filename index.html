@@ -3403,87 +3403,121 @@ async function generarReciboCestaticketMatriz(id) {
         }
 
         // ============================================
-        // DETALLE DE LOTE
-        // ============================================
-        async function abrirModalDetalleLote(id) {
-            const modal = document.getElementById('modalDetalleLote');
-            const header = document.getElementById('lote_header_info');
-            const body = document.getElementById('cuerpo_detalle_lote');
-            header.innerHTML = '<div class="loading">🔄 Cargando datos...</div>';
-            body.innerHTML = '';
-            modal.style.display = 'flex';
+// ABRIR MODAL DETALLE DE LOTE - SOLO EN Bs.
+// ============================================
+async function abrirModalDetalleLote(id) {
+    const modal = document.getElementById('modalDetalleLote');
+    const header = document.getElementById('lote_header_info');
+    const body = document.getElementById('cuerpo_detalle_lote');
+    header.innerHTML = '<div class="loading">🔄 Cargando datos...</div>';
+    body.innerHTML = '';
+    modal.style.display = 'flex';
+    try {
+        const res = await secureFetch(`${API_URL}/api/lotes/${id}`);
+        if (!res) return;
+        if (!res.ok) {
+            let errorMsg = `Error ${res.status}: ${res.statusText}`;
             try {
-                const res = await secureFetch(`${API_URL}/api/lotes/${id}`);
-                if (!res) return;
-                if (!res.ok) {
-                    let errorMsg = `Error ${res.status}: ${res.statusText}`;
-                    try {
-                        const errorData = await res.json();
-                        if (errorData.error) errorMsg = errorData.error;
-                    } catch (parseError) {}
-                    throw new Error(errorMsg);
-                }
-                const lote = await res.json();
-                header.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
-                        <div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'}<br><small>Generado el ${lote.fecha_calculo}</small></div>
-                        <div style="text-align:right;">
-                            <div><strong>Total Lote:</strong> $${lote.total_usd.toFixed(2)}</div>
-                            <div><strong>Total Lote:</strong> Bs. ${lote.total_bs.toFixed(2)}</div>
-                        </div>
-                    </div>
-                    <br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>
-                `;
-                body.innerHTML = lote.nominas.map(n => `
-                    <tr>
-                        <td>${n.nombres} ${n.apellidos}</td>
-                        <td>$${(n.salario_base_usd || 0).toFixed(2)}</td>
-                        <td><small>$${(n.salario_base_usd * 0.6 || 0).toFixed(2)}</small></td>
-                        <td>$${(n.horas_extras_usd || 0).toFixed(2)}</td>
-                        <td>$${(n.bono_complementario_usd || 0).toFixed(2)}</td>
-                        <td>$${(n.total_asignaciones_usd || 0).toFixed(2)}</td>
-                        <td>$${(n.total_deducciones_usd || 0).toFixed(2)}</td>
-                        <td><strong>$${(n.neto_pagar_usd || 0).toFixed(2)}</strong></td>
-                        <td><strong>Bs. ${(n.neto_pagar_bs || 0).toFixed(2)}</strong></td>
-                        <td><button class="btn-warning" onclick="generarRecibo(${n.id_nomina})" style="font-size:11px; padding:3px 8px;">📄</button></td>
+                const errorData = await res.json();
+                if (errorData.error) errorMsg = errorData.error;
+            } catch (parseError) {}
+            throw new Error(errorMsg);
+        }
+        const lote = await res.json();
+        
+        // Formatear números en Bs
+        const totalBsFormateado = lote.total_bs.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        
+        header.innerHTML = `
+            <div style="display:flex; justify-content:space-between; flex-wrap:wrap; align-items:center;">
+                <div>
+                    <strong style="font-size:18px; color:#1a2a6c;">Lote #${lote.id_lote}</strong>
+                    <span style="font-size:14px; color:#555; margin-left:10px;">${lote.descripcion || 'Sin descripción'}</span>
+                    <br><small style="color:#6b7a8f;">Generado el ${lote.fecha_calculo}</small>
+                </div>
+                <div style="text-align:right; background:#e8f4fd; padding:10px 20px; border-radius:8px;">
+                    <div><strong>Total Lote:</strong> <span style="color:#1a2a6c; font-size:18px;">Bs. ${totalBsFormateado}</span></div>
+                    <div style="font-size:12px; color:#6b7a8f;">Tasa BCV: Bs. ${lote.tasa_bcv.toFixed(4)}</div>
+                </div>
+            </div>
+            <br><small style="color:#6b7a8f;"><strong>Cantidad de Empleados:</strong> ${lote.nominas.length}</small>
+        `;
+        
+        if (lote.nominas.length > 0) {
+            // Crear tabla con solo Bs.
+            let tablaHtml = `
+                <table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:10px;">
+                    <thead>
+                        <tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;">
+                            <th style="padding:8px 10px; text-align:left;">Empleado</th>
+                            <th style="padding:8px 10px; text-align:right;">Base Full (Bs.)</th>
+                            <th style="padding:8px 10px; text-align:right;">Base 60% (Bs.)</th>
+                            <th style="padding:8px 10px; text-align:right;">Hrs Extras (Bs.)</th>
+                            <th style="padding:8px 10px; text-align:right;">Bono Comp. (Bs.)</th>
+                            <th style="padding:8px 10px; text-align:right;">Asign. (Bs.)</th>
+                            <th style="padding:8px 10px; text-align:right;">Deducc. (Bs.)</th>
+                            <th style="padding:8px 10px; text-align:right;">Neto (Bs.)</th>
+                            <th style="padding:8px 10px; text-align:center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            lote.nominas.forEach((n, index) => {
+                const netoBs = n.neto_pagar_bs || 0;
+                const netoBsFormateado = netoBs.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                const bgColor = index % 2 === 0 ? '#ffffff' : '#fafbfc';
+                
+                tablaHtml += `
+                    <tr style="border-bottom:1px solid #f1f4f9; background:${bgColor};">
+                        <td style="padding:8px 10px;">
+                            <strong>${n.nombres} ${n.apellidos}</strong>
+                            <br><small style="color:#6b7a8f;">${n.cedula}</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:right;">${(n.salario_base_bs || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
+                        <td style="padding:8px 10px; text-align:right;">${(n.base_60_bs || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
+                        <td style="padding:8px 10px; text-align:right;">${(n.horas_extras_bs || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
+                        <td style="padding:8px 10px; text-align:right;">${(n.bono_complementario_bs || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
+                        <td style="padding:8px 10px; text-align:right; color:#28a745;">${(n.total_asignaciones_bs || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
+                        <td style="padding:8px 10px; text-align:right; color:#dc3545;">(${(n.total_deducciones_bs || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")})</td>
+                        <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c; font-size:14px;">${netoBsFormateado}</td>
+                        <td style="padding:8px 10px; text-align:center;">
+                            <button class="btn-warning" onclick="generarRecibo(${n.id_nomina})" style="font-size:11px; padding:3px 8px; border:none; border-radius:4px; cursor:pointer; background:#ffc107;">📄</button>
+                        </td>
                     </tr>
-                `).join('');
-            } catch (e) {
-                console.error(e);
-                Swal.fire('Error', `No se pudo cargar el detalle: ${e.message}`, 'error');
-                modal.style.display = 'none';
-            }
-        }
-
-        function cerrarModalDetalle() {
-            document.getElementById('modalDetalleLote').style.display = 'none';
-        }
-
-        async function eliminarLote(id) {
-            const result = await Swal.fire({
-                title: '⚠️ ¿Estás seguro?',
-                text: "Esta acción eliminará TODO el lote de nómina y sus registros.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
+                `;
             });
-            if (result.isConfirmed) {
-                try {
-                    const res = await secureFetch(`${API_URL}/api/lotes/${id}`, { method: 'DELETE' });
-                    if (!res) return;
-                    const resp = await res.json();
-                    if (res.ok) {
-                        Swal.fire('¡Eliminado!', 'El lote ha sido eliminado.', 'success');
-                        cargarLotes();
-                    } else {
-                        Swal.fire('Error', resp.error || 'No se pudo eliminar.', 'error');
-                    }
-                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
-            }
+            
+            // Total de la nómina en Bs
+            let totalBsGeneral = 0;
+            lote.nominas.forEach(n => {
+                totalBsGeneral += (n.neto_pagar_bs || 0);
+            });
+            const totalBsGeneralFormateado = totalBsGeneral.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            
+            tablaHtml += `
+                    </tbody>
+                    <tfoot>
+                        <tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;">
+                            <td colspan="7" style="padding:10px 12px; text-align:right;">TOTAL GENERAL DEL LOTE</td>
+                            <td style="padding:10px 12px; text-align:right; color:#1a2a6c; font-size:15px;">Bs. ${totalBsGeneralFormateado}</td>
+                            <td style="padding:10px 12px;"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            `;
+            
+            body.innerHTML = tablaHtml;
+        } else {
+            body.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No hay empleados en este lote.</div>';
         }
+        
+    } catch (e) {
+        console.error('❌ Error en abrirModalDetalleLote:', e);
+        Swal.fire('Error', `No se pudo cargar el detalle del lote: ${e.message}`, 'error');
+        modal.style.display = 'none';
+    }
+}
 
         // Eventos para cerrar modales
         window.onclick = function(event) {
