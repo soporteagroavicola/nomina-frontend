@@ -2434,36 +2434,45 @@
             }
         }
 
-        // ============================================
-        // 🆕 GENERAR RECIBO CESTATICKET - VISTA PREVIA ESTILO ODOO
-        // ============================================
-        function generarReciboCestaticketMatriz(id) {
-            // Abrir el recibo en una nueva ventana
-            const url = `${API_URL}/api/recibo_cestaticket_html/${id}`;
-            
-            // Abrir en nueva ventana
-            const ventana = window.open(url, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-            
-            if (!ventana) {
-                Swal.fire({
-                    title: '⚠️ Bloqueador de ventanas',
-                    text: 'Por favor, permite las ventanas emergentes para este sitio.',
-                    icon: 'warning',
-                    confirmButtonText: 'Entendido'
-                });
-                return;
-            }
-            
-            // Mostrar mensaje de carga
-            Swal.fire({
-                title: '📄 Generando Recibo',
-                text: 'El recibo se está generando...',
-                icon: 'info',
-                timer: 1500,
-                showConfirmButton: false
-            });
+       // ============================================
+// GENERAR RECIBO CESTATICKET - VISTA PREVIA ESTILO ODOO
+// ============================================
+function generarReciboCestaticketMatriz(id) {
+    // Mostrar mensaje de carga
+    Swal.fire({
+        title: '📄 Generando Recibo',
+        text: 'El recibo se está generando...',
+        icon: 'info',
+        timer: 1500,
+        showConfirmButton: false
+    });
+    
+    // Abrir en nueva ventana con la sesión actual
+    const url = `${API_URL}/api/recibo_cestaticket_html/${id}`;
+    
+    // Usar window.open con la misma sesión
+    const ventana = window.open(url, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+    
+    if (!ventana) {
+        Swal.fire({
+            title: '⚠️ Bloqueador de ventanas',
+            text: 'Por favor, permite las ventanas emergentes para este sitio.',
+            icon: 'warning',
+            confirmButtonText: 'Entendido'
+        });
+        return;
+    }
+    
+    // Esperar a que la ventana cargue
+    setTimeout(() => {
+        try {
+            // Recargar la ventana para asegurar la sesión
+            ventana.location.reload();
+        } catch(e) {
+            // Si no se puede recargar, ignorar
         }
-
+    }, 500);
+}
         // ============================================
         // DETALLE CESTATICKET
         // ============================================
