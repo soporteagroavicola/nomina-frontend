@@ -1562,14 +1562,22 @@
                     return null;
                 }
                 if (!res.ok) {
-                    console.error(`❌ Error ${res.status}: ${res.statusText}`);
+                    // Leemos el flujo UNA SOLA VEZ para evitar "body stream already read"
+                    let errorMsg = `Error ${res.status}: ${res.statusText}`;
                     try {
-                        const errorData = await res.json();
-                        console.error('❌ Error detalle:', errorData);
-                    } catch (e) {
-                        const text = await res.text();
-                        console.error('❌ Respuesta no JSON:', text.substring(0, 200));
+                        const bodyText = await res.text();
+                        try {
+                            const errorData = JSON.parse(bodyText);
+                            if (errorData.error) errorMsg = errorData.error;
+                        } catch (parseError) {
+                            if (bodyText && bodyText.trim()) {
+                                errorMsg = bodyText.trim().substring(0, 200);
+                            }
+                        }
+                    } catch (readError) {
+                        // El flujo podría estar vacío o tener un error de red
                     }
+                    throw new Error(errorMsg);
                 }
                 return res;
             } catch (e) {
@@ -1692,10 +1700,6 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/usuarios`);
                 if (!res) return;
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.error || 'Error al cargar usuarios');
-                }
                 const usuarios = await res.json();
                 tableBody.innerHTML = usuarios.map(u => `
                     <tr>
@@ -1738,14 +1742,10 @@
                 const res = await secureFetch(url, { method, body });
                 if (!res) return;
                 const data = await res.json();
-                if (res.ok) {
-                    Swal.fire('¡Éxito!', data.mensaje, 'success');
-                    cancelarEdicionUsuario();
-                    cargarUsuarios();
-                } else {
-                    Swal.fire('Error', data.error, 'error');
-                }
-            } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+                Swal.fire('¡Éxito!', data.mensaje, 'success');
+                cancelarEdicionUsuario();
+                cargarUsuarios();
+            } catch (e) { Swal.fire('Error', e.message, 'error'); }
         }
 
         async function eliminarUsuario(id) {
@@ -1763,14 +1763,10 @@
                     const res = await secureFetch(`${API_URL}/api/usuarios/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const data = await res.json();
-                    if (res.ok) {
-                        Swal.fire('Eliminado', data.mensaje, 'success');
-                        cancelarEdicionUsuario();
-                        cargarUsuarios();
-                    } else {
-                        Swal.fire('Error', data.error, 'error');
-                    }
-                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+                    Swal.fire('Eliminado', data.mensaje, 'success');
+                    cancelarEdicionUsuario();
+                    cargarUsuarios();
+                } catch (e) { Swal.fire('Error', e.message, 'error'); }
             }
         }
 
@@ -1785,14 +1781,10 @@
                 });
                 if (!res) return;
                 const data = await res.json();
-                if (res.ok) {
-                    Swal.fire('¡Éxito!', data.mensaje, 'success');
-                    document.getElementById('seg_old_pass').value = '';
-                    document.getElementById('seg_new_pass').value = '';
-                } else {
-                    Swal.fire('Error', data.error, 'error');
-                }
-            } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+                Swal.fire('¡Éxito!', data.mensaje, 'success');
+                document.getElementById('seg_old_pass').value = '';
+                document.getElementById('seg_new_pass').value = '';
+            } catch (e) { Swal.fire('Error', e.message, 'error'); }
         }
 
         // ============================================
@@ -1802,7 +1794,6 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
                 if (!res) return;
-                if (!res.ok) throw new Error("Error al cargar sucursales");
                 const sucs = await res.json();
                 const select = document.getElementById('calc_sucursal');
                 select.innerHTML = '<option value="">Todas las sucursales</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
@@ -1861,8 +1852,6 @@
 
                 const res = await secureFetch(url);
                 if (!res) return;
-                if (!res.ok) throw new Error("Error al obtener empleados");
-
                 let data;
                 const contentType = res.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) {
@@ -2104,7 +2093,7 @@
                 cargarLotes();
             } catch (e) {
                 console.error(e);
-                Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+                Swal.fire('Error', e.message, 'error');
             }
         }
 
@@ -2370,7 +2359,7 @@
                 cargarLotesCestaticket();
             } catch (e) {
                 console.error('❌ Error en calcularCestaticket:', e);
-                Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+                Swal.fire('Error', e.message, 'error');
             }
         }
 
@@ -2386,7 +2375,6 @@
                 if (searchText) url += `?search=${encodeURIComponent(searchText)}`;
                 const res = await secureFetch(url);
                 if (!res) return;
-                if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const lotes = await res.json();
                 if (lotes.length === 0) {
                     tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">📭 No hay lotes de Cestaticket registrados.</td></tr>';
@@ -2416,10 +2404,6 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/generar_archivo_cestaticket/${id}`);
                 if (!res) return;
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.error || 'Error al descargar el archivo');
-                }
                 const blob = await res.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -2553,13 +2537,6 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`);
                 if (!res) return;
-                
-                // 🔥 CORRECCIÓN: No intentar leer el cuerpo del error de nuevo, secureFetch ya lo hizo y lo registró en consola.
-                if (!res.ok) {
-                    // Simplemente lanzamos el error con el código de estado, evitando la segunda lectura.
-                    throw new Error(`Error ${res.status}: ${res.statusText}`);
-                }
-
                 const lote = await res.json();
                 let total_usd_lote = 0;
                 if (lote.nominas && lote.nominas.length > 0) {
@@ -2620,13 +2597,9 @@
                     const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const resp = await res.json();
-                    if (res.ok) {
-                        Swal.fire('¡Eliminado!', 'El lote ha sido eliminado.', 'success');
-                        cargarLotesCestaticket();
-                    } else {
-                        Swal.fire('Error', resp.error || 'No se pudo eliminar.', 'error');
-                    }
-                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+                    Swal.fire('¡Eliminado!', 'El lote ha sido eliminado.', 'success');
+                    cargarLotesCestaticket();
+                } catch (e) { Swal.fire('Error', e.message, 'error'); }
             }
         }
 
@@ -2647,12 +2620,6 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes/${id}`);
                 if (!res) return;
-                
-                // 🔥 CORRECCIÓN: No intentar leer el cuerpo del error de nuevo, secureFetch ya lo hizo y lo registró en consola.
-                if (!res.ok) {
-                    throw new Error(`Error ${res.status}: ${res.statusText}`);
-                }
-                
                 const lote = await res.json();
                 console.log('📊 Datos del lote:', lote);
                 
@@ -2814,7 +2781,7 @@
                 document.getElementById('alert_pasivos').innerHTML = `<div class="alert alert-success">✅ Cálculo realizado correctamente.</div>`;
             } catch (e) {
                 console.error(e);
-                Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+                Swal.fire('Error', e.message, 'error');
             }
         }
 
@@ -2836,7 +2803,7 @@
                 }
             } catch (e) {
                 if (!silencioso) {
-                    Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+                    Swal.fire('Error', e.message, 'error');
                 }
             }
         }
@@ -2917,7 +2884,7 @@
                 }
             } catch (error) {
                 document.getElementById('alert_emp').innerHTML = `<div class="alert alert-danger">Error de red: ${error.message}</div>`;
-                Swal.fire('Error de red', error.message, 'error');
+                Swal.fire('Error', error.message, 'error');
             }
         }
 
@@ -2935,7 +2902,6 @@
 
                 const res = await secureFetch(url);
                 if (!res) return;
-                if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
                 const empleados = await res.json();
                 if (empleados.length === 0) {
                     tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">📭 No se encontraron empleados.</td></tr>';
@@ -2995,7 +2961,7 @@
                     } else {
                         Swal.fire('Error', resp.error, 'error');
                     }
-                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+                } catch (e) { Swal.fire('Error', e.message, 'error'); }
             }
         }
 
@@ -3008,7 +2974,6 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
                 if (!res) return;
-                if (!res.ok) throw new Error(`Error del servidor: ${res.status}`);
                 let data;
                 const contentType = res.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) {
@@ -3060,7 +3025,7 @@
                 }
             } catch (error) {
                 document.getElementById('alert_suc').innerHTML = `<div class="alert alert-danger">❌ Error de red: ${error.message}</div>`;
-                Swal.fire('Error de red', error.message, 'error');
+                Swal.fire('Error', error.message, 'error');
             }
         }
 
@@ -3086,7 +3051,7 @@
                     } else {
                         Swal.fire('Error', resp.error, 'error');
                     }
-                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+                } catch (e) { Swal.fire('Error', e.message, 'error'); }
             }
         }
 
@@ -3097,7 +3062,6 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/parametros`);
                 if (!res) return;
-                if (!res.ok) throw new Error("Error al cargar parámetros");
                 const params = await res.json();
                 document.getElementById('param_tasa_bcv').value = params.tasa_bcv || 755.1552;
                 document.getElementById('param_ivss').value = params.porcentaje_ivss || 0.04;
@@ -3110,7 +3074,7 @@
                 document.getElementById('param_codigo_banco').value = params.codigo_banco_defecto || '';
             } catch (e) {
                 console.error(e);
-                Swal.fire('Error', 'No se pudieron cargar los parámetros.', 'error');
+                Swal.fire('Error', e.message, 'error');
             }
         }
 
@@ -3155,10 +3119,6 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/generar_archivo_pago/${id}?tipo=${tipo}`);
                 if (!res) return;
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.error || 'Error al descargar el archivo');
-                }
                 const blob = await res.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -3553,12 +3513,7 @@
                 if (searchText) url += `?search=${encodeURIComponent(searchText)}`;
 
                 const res = await secureFetch(url);
-                if (!res) throw new Error("No se pudo conectar con el servidor.");
-                if (!res.ok) {
-                    const errorText = await res.text();
-                    throw new Error(`Error ${res.status}: ${errorText || 'Error desconocido'}`);
-                }
-
+                if (!res) return;
                 const lotes = await res.json();
                 if (lotes.length === 0) {
                     tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">📭 No hay lotes registrados.</td></tr>';
@@ -3612,13 +3567,9 @@
                     const res = await secureFetch(`${API_URL}/api/lotes/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const resp = await res.json();
-                    if (res.ok) {
-                        Swal.fire('¡Eliminado!', 'El lote ha sido eliminado.', 'success');
-                        cargarLotes();
-                    } else {
-                        Swal.fire('Error', resp.error || 'No se pudo eliminar.', 'error');
-                    }
-                } catch (e) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+                    Swal.fire('¡Eliminado!', 'El lote ha sido eliminado.', 'success');
+                    cargarLotes();
+                } catch (e) { Swal.fire('Error', e.message, 'error'); }
             }
         }
 
