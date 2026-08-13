@@ -2553,14 +2553,13 @@
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`);
                 if (!res) return;
+                
+                // 🔥 CORRECCIÓN: No intentar leer el cuerpo del error de nuevo, secureFetch ya lo hizo y lo registró en consola.
                 if (!res.ok) {
-                    let errorMsg = `Error ${res.status}: ${res.statusText}`;
-                    try {
-                        const errorData = await res.json();
-                        if (errorData.error) errorMsg = errorData.error;
-                    } catch (parseError) {}
-                    throw new Error(errorMsg);
+                    // Simplemente lanzamos el error con el código de estado, evitando la segunda lectura.
+                    throw new Error(`Error ${res.status}: ${res.statusText}`);
                 }
+
                 const lote = await res.json();
                 let total_usd_lote = 0;
                 if (lote.nominas && lote.nominas.length > 0) {
@@ -2649,13 +2648,9 @@
                 const res = await secureFetch(`${API_URL}/api/lotes/${id}`);
                 if (!res) return;
                 
+                // 🔥 CORRECCIÓN: No intentar leer el cuerpo del error de nuevo, secureFetch ya lo hizo y lo registró en consola.
                 if (!res.ok) {
-                    let errorMsg = `Error ${res.status}: ${res.statusText}`;
-                    try {
-                        const errorData = await res.json();
-                        if (errorData.error) errorMsg = errorData.error;
-                    } catch (parseError) {}
-                    throw new Error(errorMsg);
+                    throw new Error(`Error ${res.status}: ${res.statusText}`);
                 }
                 
                 const lote = await res.json();
