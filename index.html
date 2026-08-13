@@ -236,7 +236,80 @@
             background: #f8d7da;
             color: #721c24;
         }
-        
+        /* ============================================
+   ESTILOS MEJORADOS PARA DETALLE DE LOTE
+   ============================================ */
+.modal-content .table-modern {
+    font-size: 12px;
+}
+
+.modal-content .table-modern thead th {
+    background: #f8f9fc;
+    color: #2d3748;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 8px 10px;
+    border-bottom: 2px solid #e8ecf1;
+    text-align: right;
+}
+
+.modal-content .table-modern thead th:first-child {
+    text-align: left;
+}
+
+.modal-content .table-modern tbody td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f1f4f9;
+    vertical-align: middle;
+}
+
+.modal-content .table-modern tbody tr:hover {
+    background: #f8fafd;
+}
+
+.modal-content .table-modern .total-row td {
+    background: #e9ecef;
+    font-weight: bold;
+    border-top: 2px solid #1a2a6c;
+}
+
+.modal-content .badge-tipo {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.badge-quincenal {
+    background: #dbeafe;
+    color: #1a2a6c;
+}
+
+.badge-semanal {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* Scroll suave para el modal */
+.modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #c1c7cd;
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #a0a7ae;
+}
         /* ============================================
            ESTILOS PROFESIONALES - TODOS LOS MÓDULOS
            ============================================ */
@@ -2435,56 +2508,29 @@
         }
 
        // ============================================
-// GENERAR RECIBO CESTATICKET - CON FETCH Y SESIÓN
+// GENERAR RECIBO DE NÓMINA - SOLO EN Bs.
 // ============================================
-async function generarReciboCestaticketMatriz(id) {
-    const url = `${API_URL}/api/recibo_cestaticket_html/${id}`;
-    
-    try {
-        Swal.fire({
-            title: '📄 Generando Recibo',
-            text: 'El recibo se está generando...',
-            icon: 'info',
-            timer: 1500,
-            showConfirmButton: false
-        });
+function generarRecibo(id) {
+    downloadFile(`${API_URL}/api/generar_recibo/${id}`, `recibo_${id}.pdf`);
+}
 
-        const res = await fetch(url, {
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'text/html'
-            }
-        });
-        
+async function downloadFile(url, filename) {
+    try {
+        const res = await fetch(url, { credentials: 'include' });
         if (!res.ok) {
-            throw new Error(`Error ${res.status}: ${res.statusText}`);
+            const errorText = await res.text();
+            throw new Error(`Error ${res.status}: ${errorText || 'Error desconocido'}`);
         }
-        
-        const html = await res.text();
-        
-        // Crear una nueva ventana y escribir el HTML
-        const ventana = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-        if (!ventana) {
-            Swal.fire({
-                title: '⚠️ Bloqueador de ventanas',
-                text: 'Por favor, permite las ventanas emergentes para este sitio.',
-                icon: 'warning',
-                confirmButtonText: 'Entendido'
-            });
-            return;
-        }
-        
-        ventana.document.write(html);
-        ventana.document.close();
-        
+        const blob = await res.blob();
+        const a = document.createElement('a');
+        a.href = window.URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
     } catch (e) {
-        console.error('❌ Error:', e);
-        Swal.fire({
-            title: '❌ Error',
-            text: `No se pudo generar el recibo: ${e.message}`,
-            icon: 'error',
-            confirmButtonText: 'Entendido'
-        });
+        Swal.fire('Error', e.message, 'error');
     }
 }
         // ============================================
