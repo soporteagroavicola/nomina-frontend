@@ -2435,7 +2435,37 @@
         }
 
         // ============================================
-        // DETALLE CESTATICKET - CORREGIDO
+        // 🆕 GENERAR RECIBO CESTATICKET - VISTA PREVIA ESTILO ODOO
+        // ============================================
+        function generarReciboCestaticketMatriz(id) {
+            // Abrir el recibo en una nueva ventana
+            const url = `${API_URL}/api/recibo_cestaticket_html/${id}`;
+            
+            // Abrir en nueva ventana
+            const ventana = window.open(url, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+            
+            if (!ventana) {
+                Swal.fire({
+                    title: '⚠️ Bloqueador de ventanas',
+                    text: 'Por favor, permite las ventanas emergentes para este sitio.',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido'
+                });
+                return;
+            }
+            
+            // Mostrar mensaje de carga
+            Swal.fire({
+                title: '📄 Generando Recibo',
+                text: 'El recibo se está generando...',
+                icon: 'info',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+
+        // ============================================
+        // DETALLE CESTATICKET
         // ============================================
         async function abrirModalDetalleCesta(id) {
             const modal = document.getElementById('modalDetalleCesta');
@@ -2481,7 +2511,7 @@
                             <td><strong>Bs. ${(n.total_bs || 0).toFixed(2)}</strong></td>
                             <td>
                                 <button class="btn-warning" onclick="generarReciboCestaticket(${n.id})" style="font-size:11px; padding:4px 8px;">📄 PDF</button>
-                                <button class="btn-primary" onclick="generarReciboCestaticketMatriz(${n.id})" style="font-size:11px; padding:4px 8px; background:#1a2a6c; color:white; border:none; border-radius:4px; cursor:pointer;">🖨️ Matriz</button>
+                                <button class="btn-primary" onclick="generarReciboCestaticketMatriz(${n.id})" style="font-size:11px; padding:4px 8px; background:#1a2a6c; color:white; border:none; border-radius:4px; cursor:pointer;">🖨️ Ver/Imprimir</button>
                             </td>
                         </tr>
                     `).join('');
@@ -2527,53 +2557,6 @@
 
         function generarReciboCestaticket(id) {
             downloadFile(`${API_URL}/api/generar_recibo_cestaticket/${id}`, `recibo_cesta_${id}.pdf`);
-        }
-
-        // ============================================
-        // 🆕 GENERAR RECIBO CESTATICKET EN MATRIZ DE PUNTO
-        // ============================================
-        function generarReciboCestaticketMatriz(id) {
-            Swal.fire({
-                title: '📄 Generando Recibo',
-                text: 'El recibo se generará en formato TXT para impresión en matriz de punto.',
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#1a2a6c',
-                cancelButtonColor: '#6b7a8f',
-                confirmButtonText: '✅ Generar Recibo',
-                cancelButtonText: 'Cancelar'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    try {
-                        const res = await fetch(`${API_URL}/api/generar_recibo_cestaticket_matriz/${id}`, {
-                            credentials: 'include'
-                        });
-                        if (!res.ok) {
-                            const errorText = await res.text();
-                            throw new Error(`Error ${res.status}: ${errorText || 'Error desconocido'}`);
-                        }
-                        const blob = await res.blob();
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `RECIBO_CESTA_${id}.txt`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        window.URL.revokeObjectURL(url);
-                        
-                        Swal.fire({
-                            title: '¡Éxito!',
-                            text: 'El recibo se ha generado correctamente.',
-                            icon: 'success',
-                            timer: 2000
-                        });
-                    } catch (e) {
-                        console.error('❌ Error:', e);
-                        Swal.fire('Error', `No se pudo generar el recibo: ${e.message}`, 'error');
-                    }
-                }
-            });
         }
 
         // ============================================
