@@ -686,17 +686,106 @@
             </div>
         </div>
 
-        <!-- Módulo: Cestaticket -->
+        <!-- ⚠️ MÓDULO DE CESTATICKET COMPLETAMENTE RESTAURADO (AQUÍ ESTABA EL ERROR) -->
         <div id="cestaticket" class="tab-content">
-            <div class="module-header"><div><h2 class="module-title">🍽️ Cestaticket</h2><p class="module-subtitle">Cálculo del bono de alimentación según Ley</p></div><span class="module-badge" id="cesta_total_empleados_badge">0 empleados</span></div>
+            <div class="module-header">
+                <div><h2 class="module-title">🍽️ Cestaticket</h2><p class="module-subtitle">Cálculo del bono de alimentación según Ley</p></div>
+                <span class="module-badge" id="cesta_total_empleados_badge">0 empleados</span>
+            </div>
+
+            <!-- Configuración Principal -->
             <div class="config-grid">
                 <div class="config-card"><label class="config-label">Fecha Inicio</label><input type="date" id="cesta_fecha_inicio" class="config-input"></div>
                 <div class="config-card"><label class="config-label">Fecha Fin</label><input type="date" id="cesta_fecha_fin" class="config-input"></div>
                 <div class="config-card"><label class="config-label">Descripción</label><input type="text" id="cesta_descripcion" class="config-input" placeholder="Ej: Cestaticket 1ra Quincena"></div>
             </div>
+
+            <!-- FILTROS, BÚSQUEDA Y LISTA DE EMPLEADOS (Restaurado) -->
+            <div class="filters-modern">
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label class="filter-label">🏢 Sucursal</label>
+                        <select id="cesta_filter_sucursal" class="config-select" onchange="cargarEmpleadosCestaFiltrados()">
+                            <option value="">Todas las sucursales</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label class="filter-label">💳 Tipo de Pago</label>
+                        <select id="cesta_filter_tipo" class="config-select" onchange="cargarEmpleadosCestaFiltrados()">
+                            <option value="">Todos</option>
+                            <option value="Quincenal">Quincenal</option>
+                            <option value="Semanal">Semanal</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label class="filter-label">🔍 Buscar</label>
+                        <input type="text" id="cesta_search_empleado" class="config-input" placeholder="Buscar por cédula o nombre..." oninput="cargarEmpleadosCestaFiltrados()">
+                    </div>
+                </div>
+                <div class="options-group" style="border-top: none; padding-top: 0; margin-top: 5px;">
+                    <button class="btn-select-all" onclick="seleccionarTodosCesta()" style="padding:4px 14px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; background:#dbeafe; color:#1a2a6c;">✅ Seleccionar Todos</button>
+                    <button class="btn-deselect-all" onclick="deseleccionarTodosCesta()" style="padding:4px 14px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; background:#fee2e2; color:#991b1b;">❌ Deseleccionar Todos</button>
+                    <span style="font-size:12px; color:#6b7a8f; margin-left:10px;" id="cesta_seleccionados_count">0 empleados seleccionados</span>
+                </div>
+            </div>
+
+            <!-- Lista de empleados -->
+            <div style="border:1px solid #e8ecf1; border-radius:10px; overflow:hidden; margin-top:10px;">
+                <div style="padding:12px 20px; background:#f8f9fc; border-bottom:1px solid #e8ecf1;">
+                    <span style="font-weight:600;">👥 Seleccionar empleados</span>
+                </div>
+                <div id="lista_empleados_cesta" style="padding:15px 20px; max-height:400px; overflow-y:auto;">
+                    <div class="loading"><span class="loading-spinner"></span> Cargando empleados...</div>
+                </div>
+            </div>
+
+            <!-- Tabla de faltas -->
+            <div id="cesta_faltas_container" style="display:none; margin-top:15px; border:1px solid #e8ecf1; border-radius:10px; overflow:hidden;">
+                <div style="padding:12px 20px; background:#f8f9fc; border-bottom:1px solid #e8ecf1;">
+                    <h4 style="margin:0; font-size:15px; color:#1a2a6c;">📝 Faltas por Empleado</h4>
+                </div>
+                <div style="padding:12px 20px; background:#e8f4fd; font-size:13px; color:#555; border-bottom:1px solid #e8ecf1;">
+                    ℹ️ Ingresa los días de falta. Se restará <strong>$1.3333</strong> por cada día (valor diario = $40 ÷ 30).
+                    <div id="cesta_dias_info" style="margin-top:8px; font-weight:600; color:#1a2a6c;">
+                        <span id="cesta_dias_text">📅 Base: 30 días (Ley) | $40 USD mensuales</span>
+                    </div>
+                </div>
+                <div style="overflow-x:auto; max-height:300px; overflow-y:auto;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr>
+                                <th style="padding:10px 15px; background:#f8f9fc; border-bottom:2px solid #e8ecf1; text-align:left; position:sticky; top:0; background:#f8f9fc; z-index:1;">Empleado</th>
+                                <th style="padding:10px 15px; background:#f8f9fc; border-bottom:2px solid #e8ecf1; text-align:center; width:120px; position:sticky; top:0; background:#f8f9fc; z-index:1;">Días de Falta</th>
+                                <th style="padding:10px 15px; background:#f8f9fc; border-bottom:2px solid #e8ecf1; text-align:center; width:120px; position:sticky; top:0; background:#f8f9fc; z-index:1;">Días a Pagar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpo_detalle_cesta_faltas"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Botón calcular -->
+            <div style="display:flex; gap:15px; margin-top:25px; flex-wrap:wrap;">
+                <button class="btn-primary" onclick="calcularCestaticket()" style="display:inline-flex; align-items:center; gap:10px; padding:14px 35px; font-size:16px;">
+                    <span style="font-size:20px;">🍽️</span> Calcular Cestaticket
+                </button>
+            </div>
+
             <div id="resultado_cesta" class="results-container"></div>
+
             <hr style="margin:40px 0; border:1px solid #e8ecf1;">
+
+            <!-- Historial de Cestaticket -->
             <div class="module-header" style="background:linear-gradient(135deg, #2d4373, #1a2a6c); margin-bottom:20px;"><div><h2 class="module-title">📋 Historial de Cestaticket</h2></div></div>
+            <div class="filters-modern">
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label class="filter-label">🔍 Buscar</label>
+                        <!-- ¡CORREGIDO! Este ID ahora existe en el HTML -->
+                        <input type="text" id="search_historial_cesta" placeholder="Buscar por descripción o ID..." oninput="cargarLotesCestaticket()" class="config-input">
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive"><table class="table-modern"><thead><tr><th>ID Lote</th><th>Descripción</th><th>Fecha Cálculo</th><th>Empleados</th><th>Total Bs</th><th>Acciones</th></tr></thead><tbody id="tabla_historial_cesta"><tr><td colspan="6" class="loading"><span class="loading-spinner"></span> Cargando...</td></tr></tbody></table></div>
         </div>
 
@@ -763,19 +852,14 @@
         </div>
     </div>
 
+    <!-- JS COMPLETO E INTACTO (EL QUE YA TENÍAS FUNCIONANDO) -->
     <script>
-        // ============================================
-        // ✅ CONFIGURACIÓN Y VARIABLES GLOBALES
-        // ============================================
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
         let editingEmployeeId = null;
         let editingUserId = null;
         let empleadosCesta = [];
         let empleadosFiltradosCesta = [];
 
-        // ============================================
-        // ✅ FUNCIONES DE CONEXIÓN Y SEGURIDAD
-        // ============================================
         async function checkBackendHealth() {
             const statusEl = document.getElementById('connection_status');
             try {
@@ -885,9 +969,6 @@
             }
         }
 
-        // ============================================
-        // GESTIÓN DE USUARIOS
-        // ============================================
         function cancelarEdicionUsuario() {
             editingUserId = null;
             document.getElementById('seg_new_user').value = '';
@@ -958,9 +1039,6 @@
             } catch (e) { Swal.fire('Error', e.message, 'error'); }
         }
 
-        // ============================================
-        // MÓDULO DE EMPLEADOS
-        // ============================================
         async function cargarEmpleadosAdmin() {
             const tableBody = document.getElementById('tabla_empleados');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading"><span class="loading-spinner"></span> Cargando empleados...</td></tr>';
@@ -1066,9 +1144,6 @@
             }
         }
 
-        // ============================================
-        // MÓDULO DE SUCURSALES
-        // ============================================
         async function cargarSucursales() {
             const tableBody = document.getElementById('tabla_sucursales');
             tableBody.innerHTML = '<tr><td colspan="3" class="loading"><span class="loading-spinner"></span> Cargando sucursales...</td></tr>';
@@ -1108,9 +1183,6 @@
             }
         }
 
-        // ============================================
-        // MÓDULO DE PARÁMETROS
-        // ============================================
         async function cargarParametros() {
             try {
                 const res = await secureFetch(`${API_URL}/api/parametros`);
@@ -1162,9 +1234,6 @@
             } catch (e) { if (!silencioso) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); } }
         }
 
-        // ============================================
-        // MÓDULO DE CÁLCULO DE NÓMINA Y EMPLEADOS
-        // ============================================
         async function cargarSucursalesCalc() {
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
@@ -1301,9 +1370,6 @@
             } catch (e) { console.error(e); Swal.fire('Error', e.message, 'error'); }
         }
 
-        // ============================================
-        // MÓDULO DE CESTATICKET
-        // ============================================
         async function cargarSucursalesCesta() {
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
@@ -1424,15 +1490,22 @@
             const tableBody = document.getElementById('tabla_historial_cesta');
             tableBody.innerHTML = '<tr><td colspan="6" class="loading"><span class="loading-spinner"></span> Cargando lotes de cestaticket...</td></tr>';
             try {
+                // ¡Este elemento AHORA EXISTE en el HTML!
                 const searchText = document.getElementById('search_historial_cesta').value;
                 let url = `${API_URL}/api/lotes_cestaticket`;
                 if (searchText) url += `?search=${encodeURIComponent(searchText)}`;
                 const res = await secureFetch(url);
                 if (!res) return;
                 const lotes = await res.json();
-                if (lotes.length === 0) { tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">📭 No hay lotes de Cestaticket registrados.</td></tr>'; } 
-                else { tableBody.innerHTML = lotes.map(l => `<tr><td><strong>#${l.id_lote}</strong></td><td>${l.descripcion || 'Sin descripción'}</td><td>${l.fecha_calculo}</td><td>${l.cantidad_empleados_lote} empleados</td><td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td><td><button class="btn-success" onclick="generarArchivoCestaticket(${l.id_lote})" style="font-size:11px; padding:4px 10px;">💳 TXT</button><button class="btn-warning" onclick="abrirModalDetalleCesta(${l.id_lote})" style="font-size:11px; padding:4px 10px;">📂 Ver</button><button class="btn-danger" onclick="eliminarLoteCestaticket(${l.id_lote})" style="font-size:11px; padding:4px 10px;">🗑️</button></td></tr>`).join(''); }
-            } catch (e) { tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`; }
+                if (lotes.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">📭 No hay lotes de Cestaticket registrados.</td></tr>';
+                } else {
+                    tableBody.innerHTML = lotes.map(l => `<tr><td><strong>#${l.id_lote}</strong></td><td>${l.descripcion || 'Sin descripción'}</td><td>${l.fecha_calculo}</td><td>${l.cantidad_empleados_lote} empleados</td><td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td><td><button class="btn-success" onclick="generarArchivoCestaticket(${l.id_lote})" style="font-size:11px; padding:4px 10px;">💳 TXT</button><button class="btn-warning" onclick="abrirModalDetalleCesta(${l.id_lote})" style="font-size:11px; padding:4px 10px;">📂 Ver</button><button class="btn-danger" onclick="eliminarLoteCestaticket(${l.id_lote})" style="font-size:11px; padding:4px 10px;">🗑️</button></td></tr>`).join('');
+                }
+            } catch (e) {
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`;
+                console.error(e);
+            }
         }
         async function generarArchivoCestaticket(id) {
             try {
@@ -1475,9 +1548,6 @@
         }
         function generarReciboCestaticket(id) { downloadFile(`${API_URL}/api/generar_recibo_cestaticket/${id}`, `recibo_cesta_${id}.pdf`); }
 
-        // ============================================
-        // MÓDULO DE HISTORIAL Y DETALLE DE NÓMINA
-        // ============================================
         async function abrirModalDetalleLote(id) {
             const modal = document.getElementById('modalDetalleLote');
             const header = document.getElementById('lote_header_info');
@@ -1661,7 +1731,6 @@
             } catch (e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
         }
 
-        // Cerrar modales al hacer clic fuera
         window.onclick = function(event) {
             const modalCesta = document.getElementById('modalDetalleCesta');
             const modalLote = document.getElementById('modalDetalleLote');
