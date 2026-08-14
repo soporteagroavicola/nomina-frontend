@@ -723,7 +723,7 @@
             </div>
             <div class="action-card" style="border-left: 4px solid #ffc107; margin-top:20px;">
                 <h4 class="action-card-title"><span class="icon">💵</span> Resumen en Dólares</h4>
-                <div class="form-grid"><div><label class="form-label">📅 Mes</label><select id="reporte_mes" class="form-input"> <!-- Options Javascript --> </select></div><div><label class="form-label">📅 Año</label><select id="reporte_anio" class="form-input"></select></div><div><label class="form-label">👤 Empleado</label><select id="reporte_resumen_empleado" class="form-input"><option value="">Todos</option></select></div><div style="display:flex; align-items:flex-end;"><button class="btn-warning" onclick="generarResumenDolares()" style="width:100%;">💵 Generar Resumen</button></div></div>
+                <div class="form-grid"><div><label class="form-label">📅 Mes</label><select id="reporte_mes" class="form-input"></select></div><div><label class="form-label">📅 Año</label><select id="reporte_anio" class="form-input"></select></div><div><label class="form-label">👤 Empleado</label><select id="reporte_resumen_empleado" class="form-input"><option value="">Todos</option></select></div><div style="display:flex; align-items:flex-end;"><button class="btn-warning" onclick="generarResumenDolares()" style="width:100%;">💵 Generar Resumen</button></div></div>
                 <div id="resultado_resumen_dolares" style="margin-top:20px;"></div>
             </div>
         </div>
@@ -763,17 +763,19 @@
         </div>
     </div>
 
-    <!-- ============================================ -->
-    <!-- 🛠️ JAVASCRIPT COMPLETO Y FUNCIONAL -->
-    <!-- ============================================ -->
     <script>
+        // ============================================
+        // ✅ CONFIGURACIÓN Y VARIABLES GLOBALES
+        // ============================================
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
-
         let editingEmployeeId = null;
         let editingUserId = null;
         let empleadosCesta = [];
         let empleadosFiltradosCesta = [];
 
+        // ============================================
+        // ✅ FUNCIONES DE CONEXIÓN Y SEGURIDAD
+        // ============================================
         async function checkBackendHealth() {
             const statusEl = document.getElementById('connection_status');
             try {
@@ -781,18 +783,15 @@
                 if (res.ok) {
                     statusEl.textContent = '🟢 Online';
                     statusEl.className = 'connection-status status-online';
-                    console.log('✅ Backend conectado correctamente');
                     return true;
                 } else {
                     statusEl.textContent = '🔴 Error ' + res.status;
                     statusEl.className = 'connection-status status-offline';
-                    console.error('❌ Backend respondió con error:', res.status);
                     return false;
                 }
             } catch (e) {
                 statusEl.textContent = '🔴 Sin conexión';
                 statusEl.className = 'connection-status status-offline';
-                console.error('❌ No se pudo conectar al backend:', e);
                 return false;
             }
         }
@@ -801,12 +800,9 @@
             options.credentials = 'include';
             options.headers = options.headers || {};
             options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
-            console.log(`🔍 Fetching: ${url}`);
             try {
                 const res = await fetch(url, options);
                 if (res.status === 401) {
-                    cerrarModalDetalle();
-                    cerrarModalDetalleCesta();
                     window.location.href = 'login.html';
                     return null;
                 }
@@ -814,15 +810,8 @@
                     let errorMsg = `Error ${res.status}: ${res.statusText}`;
                     try {
                         const bodyText = await res.text();
-                        try {
-                            const errorData = JSON.parse(bodyText);
-                            if (errorData.error) errorMsg = errorData.error;
-                        } catch (parseError) {
-                            if (bodyText && bodyText.trim()) {
-                                errorMsg = bodyText.trim().substring(0, 200);
-                            }
-                        }
-                    } catch (readError) {}
+                        try { const errorData = JSON.parse(bodyText); if (errorData.error) errorMsg = errorData.error; } catch {}
+                    } catch {}
                     throw new Error(errorMsg);
                 }
                 return res;
@@ -854,10 +843,9 @@
                 }
                 const healthOk = await checkBackendHealth();
                 if (!healthOk) {
-                    Swal.fire({ title: '⚠️ Atención', text: 'No se pudo conectar con el servidor. Verifica tu conexión.', icon: 'warning', confirmButtonText: 'Reintentar' }).then(() => { location.reload(); });
+                    Swal.fire({ title: '⚠️ Atención', text: 'No se pudo conectar con el servidor.', icon: 'warning', confirmButtonText: 'Reintentar' }).then(() => { location.reload(); });
                 }
                 setTimeout(() => { actualizarBCV(true); }, 0);
-
                 document.querySelectorAll('.tab-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const tabId = this.getAttribute('data-target');
@@ -875,31 +863,31 @@
                         else if (tabId === 'seguridad') cargarUsuarios();
                     });
                 });
-
                 document.getElementById('calc_sucursal').addEventListener('change', function() {
                     cargarEmpleadosCalc(this.value, document.getElementById('calc_tipo_pago').value);
                 });
                 document.getElementById('calc_tipo_pago').addEventListener('change', function() {
                     cargarEmpleadosCalc(document.getElementById('calc_sucursal').value, this.value);
                 });
-
                 cargarSucursalesCalc();
                 cargarEmpleadosCalc('', '');
-
             } catch (error) {
                 console.error('❌ Error en DOMContentLoaded:', error);
-                Swal.fire({ title: '❌ Error de conexión', text: 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.', icon: 'error', confirmButtonText: 'Reintentar' }).then(() => { location.reload(); });
+                Swal.fire({ title: '❌ Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Reintentar' }).then(() => { location.reload(); });
             }
         });
 
         async function cerrarSesion() {
-            const confirmLogout = await Swal.fire({ title: '¿Cerrar sesión?', text: "Se cerrará tu sesión actual.", icon: 'question', showCancelButton: true, confirmButtonColor: '#dc3545', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, cerrar', cancelButtonText: 'Cancelar' });
+            const confirmLogout = await Swal.fire({ title: '¿Cerrar sesión?', text: "Se cerrará tu sesión actual.", icon: 'question', showCancelButton: true, confirmButtonColor: '#dc3545', confirmButtonText: 'Sí, cerrar' });
             if (confirmLogout.isConfirmed) {
                 const res = await secureFetch(`${API_URL}/api/logout`, { method: 'POST' });
                 if (res) { window.location.href = 'login.html'; } else { window.location.href = 'login.html'; }
             }
         }
 
+        // ============================================
+        // GESTIÓN DE USUARIOS
+        // ============================================
         function cancelarEdicionUsuario() {
             editingUserId = null;
             document.getElementById('seg_new_user').value = '';
@@ -907,7 +895,6 @@
             document.getElementById('btn_cancel_user').style.display = 'none';
             document.getElementById('user_form_title').textContent = 'Crear / Editar Usuario';
         }
-
         async function cargarUsuarios() {
             const tableBody = document.getElementById('tabla_usuarios');
             tableBody.innerHTML = '<tr><td colspan="3" class="loading"><span class="loading-spinner"></span> Cargando usuarios...</td></tr>';
@@ -915,13 +902,9 @@
                 const res = await secureFetch(`${API_URL}/api/usuarios`);
                 if (!res) return;
                 const usuarios = await res.json();
-                tableBody.innerHTML = usuarios.map(u => `<tr><td>${u.id}</td><td><strong>${u.username}</strong></td><td><button class="btn-warning" onclick="cargarFormularioEditarUsuario(${u.id}, '${u.username}')" style="font-size:12px; padding:2px 8px;">✏️</button><button class="btn-danger" onclick="eliminarUsuario(${u.id})" style="font-size:12px; padding:2px 8px;">🗑️</button></td></tr>`).join('');
-            } catch (e) {
-                tableBody.innerHTML = `<tr><td colspan="3" style="color:red;text-align:center;">${e.message}</td></tr>`;
-                console.error(e);
-            }
+                tableBody.innerHTML = usuarios.map(u => `<tr><td>${u.id}</td><td><strong>${u.username}</strong></td><td><button class="btn-warning" onclick="cargarFormularioEditarUsuario(${u.id}, '${u.username}')">✏️</button><button class="btn-danger" onclick="eliminarUsuario(${u.id})">🗑️</button></td></tr>`).join('');
+            } catch (e) { tableBody.innerHTML = `<tr><td colspan="3" style="color:red;text-align:center;">${e.message}</td></tr>`; }
         }
-
         function cargarFormularioEditarUsuario(id, username) {
             editingUserId = id;
             document.getElementById('seg_new_user').value = username;
@@ -930,7 +913,6 @@
             document.getElementById('user_form_title').textContent = '✏️ Editando Usuario';
             document.getElementById('seguridad').scrollIntoView({ behavior: "smooth" });
         }
-
         async function guardarUsuario() {
             const username = document.getElementById('seg_new_user').value.trim();
             const password = document.getElementById('seg_new_pass_user').value.trim();
@@ -948,25 +930,21 @@
                 if (!res) return;
                 const data = await res.json();
                 Swal.fire('¡Éxito!', data.mensaje, 'success');
-                cancelarEdicionUsuario();
-                cargarUsuarios();
+                cancelarEdicionUsuario(); cargarUsuarios();
             } catch (e) { Swal.fire('Error', e.message, 'error'); }
         }
-
         async function eliminarUsuario(id) {
-            const result = await Swal.fire({ title: '¿Estás seguro?', text: "Esta acción eliminará al usuario permanentemente.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
+            const result = await Swal.fire({ title: '¿Estás seguro?', text: "Esta acción eliminará al usuario permanentemente.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí, eliminar' });
             if (result.isConfirmed) {
                 try {
                     const res = await secureFetch(`${API_URL}/api/usuarios/${id}`, { method: 'DELETE' });
                     if (!res) return;
                     const data = await res.json();
                     Swal.fire('Eliminado', data.mensaje, 'success');
-                    cancelarEdicionUsuario();
-                    cargarUsuarios();
+                    cancelarEdicionUsuario(); cargarUsuarios();
                 } catch (e) { Swal.fire('Error', e.message, 'error'); }
             }
         }
-
         async function cambiarPassword() {
             const old_pass = document.getElementById('seg_old_pass').value.trim();
             const new_pass = document.getElementById('seg_new_pass').value.trim();
@@ -976,21 +954,225 @@
                 if (!res) return;
                 const data = await res.json();
                 Swal.fire('¡Éxito!', data.mensaje, 'success');
-                document.getElementById('seg_old_pass').value = '';
-                document.getElementById('seg_new_pass').value = '';
+                document.getElementById('seg_old_pass').value = ''; document.getElementById('seg_new_pass').value = '';
             } catch (e) { Swal.fire('Error', e.message, 'error'); }
         }
 
+        // ============================================
+        // MÓDULO DE EMPLEADOS
+        // ============================================
+        async function cargarEmpleadosAdmin() {
+            const tableBody = document.getElementById('tabla_empleados');
+            tableBody.innerHTML = '<tr><td colspan="8" class="loading"><span class="loading-spinner"></span> Cargando empleados...</td></tr>';
+            try {
+                const searchText = document.getElementById('search_empleado').value;
+                const filterSucursal = document.getElementById('filter_sucursal').value;
+                let url = `${API_URL}/api/empleados`;
+                const params = [];
+                if (searchText) params.push(`search=${encodeURIComponent(searchText)}`);
+                if (filterSucursal) params.push(`sucursal_id=${encodeURIComponent(filterSucursal)}`);
+                if (params.length > 0) url += '?' + params.join('&');
+                const res = await secureFetch(url);
+                if (!res) return;
+                const empleados = await res.json();
+                if (empleados.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">📭 No se encontraron empleados.</td></tr>';
+                } else {
+                    tableBody.innerHTML = empleados.map(e => `<tr><td>${e.id_empleado}</td><td>${e.cedula}</td><td>${e.nombres} ${e.apellidos}</td><td>${e.cargo}</td><td>$${e.salario_mensual_usd}</td><td><span class="${e.tipo_pago === 'Quincenal' ? 'badge-quincenal' : 'badge-semanal'}">${e.tipo_pago}</span></td><td>${e.fecha_ingreso || '-'}</td><td><button class="btn-warning" onclick="cargarFormularioEditar(${e.id_empleado}, '${e.cedula}', '${e.nombres}', '${e.apellidos}', '${e.cargo}', '${e.departamento}', ${e.salario_mensual_usd}, ${e.sucursal_id || ''}, '${e.fecha_nacimiento || ''}', '${e.fecha_ingreso || ''}', '${e.cuenta_bancaria || ''}', '${e.tipo_pago}')">✏️</button><button class="btn-danger" onclick="eliminarEmpleado(${e.id_empleado})">🗑️</button></td></tr>`).join('');
+                }
+                const resSuc = await secureFetch(`${API_URL}/api/sucursales`);
+                if (resSuc && resSuc.ok) {
+                    const sucs = await resSuc.json();
+                    document.getElementById('emp_sucursal').innerHTML = '<option value="">Seleccione una sucursal...</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+                    const selectSucFilter = document.getElementById('filter_sucursal');
+                    const cVal = selectSucFilter.value;
+                    selectSucFilter.innerHTML = '<option value="">Ver todas las sucursales</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+                    selectSucFilter.value = cVal;
+                }
+                actualizarTotalEmpleados();
+            } catch (e) {
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`;
+                console.error(e);
+            }
+        }
+        function cancelarEdicion() {
+            editingEmployeeId = null;
+            document.getElementById('form_title').innerText = 'Agregar Nuevo Empleado';
+            document.getElementById('btn_guardar_empleado').innerHTML = '➕ Guardar Empleado';
+            document.getElementById('emp_cedula').value = ''; document.getElementById('emp_nombres').value = '';
+            document.getElementById('emp_apellidos').value = ''; document.getElementById('emp_cargo').value = '';
+            document.getElementById('emp_depto').value = ''; document.getElementById('emp_salario').value = '';
+            document.getElementById('emp_fecha_nacimiento').value = ''; document.getElementById('emp_fecha_ingreso').value = '';
+            document.getElementById('emp_cuenta_bancaria').value = '';
+        }
+        function cargarFormularioEditar(id, cedula, nombres, apellidos, cargo, depto, salario, sucursal_id, fecha_nac, fecha_ing, cuenta, tipo_pago) {
+            editingEmployeeId = id;
+            document.getElementById('form_title').innerText = '✏️ Editando Empleado';
+            document.getElementById('btn_guardar_empleado').innerHTML = '💾 Actualizar Empleado';
+            document.getElementById('emp_cedula').value = cedula; document.getElementById('emp_nombres').value = nombres;
+            document.getElementById('emp_apellidos').value = apellidos; document.getElementById('emp_cargo').value = cargo;
+            document.getElementById('emp_depto').value = depto; document.getElementById('emp_salario').value = salario;
+            document.getElementById('emp_sucursal').value = sucursal_id; document.getElementById('emp_fecha_nacimiento').value = fecha_nac;
+            document.getElementById('emp_fecha_ingreso').value = fecha_ing; document.getElementById('emp_cuenta_bancaria').value = cuenta;
+            document.getElementById('emp_tipo_pago').value = tipo_pago;
+            document.getElementById('empleados').scrollIntoView({ behavior: "smooth" });
+        }
+        async function guardarEmpleado() {
+            const data = {
+                cedula: document.getElementById('emp_cedula').value,
+                nombres: document.getElementById('emp_nombres').value,
+                apellidos: document.getElementById('emp_apellidos').value,
+                cargo: document.getElementById('emp_cargo').value,
+                departamento: document.getElementById('emp_depto').value,
+                salario_mensual_usd: parseFloat(document.getElementById('emp_salario').value) || 0,
+                sucursal_id: parseInt(document.getElementById('emp_sucursal').value) || null,
+                fecha_nacimiento: document.getElementById('emp_fecha_nacimiento').value || null,
+                fecha_ingreso: document.getElementById('emp_fecha_ingreso').value || null,
+                cuenta_bancaria: document.getElementById('emp_cuenta_bancaria').value || '',
+                tipo_pago: document.getElementById('emp_tipo_pago').value
+            };
+            let url = `${API_URL}/api/empleados`;
+            let method = 'POST';
+            if (editingEmployeeId) { url += `/${editingEmployeeId}`; method = 'PUT'; }
+            try {
+                const res = await secureFetch(url, { method: method, body: JSON.stringify(data) });
+                if (!res) return;
+                let resp;
+                try { resp = await res.json(); } catch { resp = { error: "El servidor respondió con HTML" }; }
+                const alertBox = document.getElementById('alert_emp');
+                if (res.ok) {
+                    alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`;
+                    Swal.fire('¡Éxito!', resp.mensaje, 'success');
+                    cancelarEdicion(); cargarEmpleadosAdmin(); actualizarTotalEmpleados();
+                } else {
+                    alertBox.innerHTML = `<div class="alert alert-danger">Error: ${resp.error}</div>`;
+                    Swal.fire('Error', resp.error, 'error');
+                }
+            } catch (error) {
+                document.getElementById('alert_emp').innerHTML = `<div class="alert alert-danger">Error de red: ${error.message}</div>`;
+                Swal.fire('Error de red', error.message, 'error');
+            }
+        }
+        async function eliminarEmpleado(id) {
+            const result = await Swal.fire({ title: '¿Estás seguro?', text: "El empleado será inactivo.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí, eliminar' });
+            if (result.isConfirmed) {
+                try {
+                    const res = await secureFetch(`${API_URL}/api/empleados/${id}`, { method: 'DELETE' });
+                    if (!res) return;
+                    const resp = await res.json();
+                    if (res.ok) { cargarEmpleadosAdmin(); Swal.fire('Eliminado', 'El empleado ha sido eliminado.', 'success'); } 
+                    else { Swal.fire('Error', resp.error, 'error'); }
+                } catch (e) { Swal.fire('Error de red', e.message, 'error'); }
+            }
+        }
+
+        // ============================================
+        // MÓDULO DE SUCURSALES
+        // ============================================
+        async function cargarSucursales() {
+            const tableBody = document.getElementById('tabla_sucursales');
+            tableBody.innerHTML = '<tr><td colspan="3" class="loading"><span class="loading-spinner"></span> Cargando sucursales...</td></tr>';
+            try {
+                const res = await secureFetch(`${API_URL}/api/sucursales`);
+                if (!res) return;
+                let data = await res.json();
+                if (data.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">📭 No hay sucursales creadas.</td></tr>';
+                } else {
+                    tableBody.innerHTML = data.map(s => `<tr><td>${s.id_sucursal}</td><td><strong>${s.nombre}</strong></td><td><button class="btn-danger" onclick="eliminarSucursal(${s.id_sucursal})">🗑️</button></td></tr>`).join('');
+                }
+            } catch (e) { tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`; }
+        }
+        async function crearSucursal() {
+            const nombre = document.getElementById('suc_nombre').value;
+            if (!nombre) { Swal.fire('Atención', 'El nombre no puede estar vacío.', 'warning'); return; }
+            try {
+                const res = await secureFetch(`${API_URL}/api/sucursales`, { method: 'POST', body: JSON.stringify({ nombre }) });
+                if (!res) return;
+                let resp = await res.json();
+                const alertBox = document.getElementById('alert_suc');
+                if (res.ok) { alertBox.innerHTML = `<div class="alert alert-success">${resp.mensaje}</div>`; document.getElementById('suc_nombre').value = ''; cargarSucursales(); Swal.fire('¡Éxito!', resp.mensaje, 'success'); } 
+                else { alertBox.innerHTML = `<div class="alert alert-danger">⚠️ Error: ${resp.error || 'Error desconocido'}</div>`; Swal.fire('Error', resp.error || 'Error desconocido', 'error'); }
+            } catch (error) { document.getElementById('alert_suc').innerHTML = `<div class="alert alert-danger">❌ Error de red: ${error.message}</div>`; Swal.fire('Error de red', error.message, 'error'); }
+        }
+        async function eliminarSucursal(id) {
+            const result = await Swal.fire({ title: '¿Estás seguro?', text: "Esta acción eliminará la sucursal.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí, eliminar' });
+            if (result.isConfirmed) {
+                try {
+                    const res = await secureFetch(`${API_URL}/api/sucursales/${id}`, { method: 'DELETE' });
+                    if (!res) return;
+                    const resp = await res.json();
+                    if (res.ok) { cargarSucursales(); Swal.fire('Eliminado', 'Sucursal eliminada.', 'success'); } 
+                    else { Swal.fire('Error', resp.error, 'error'); }
+                } catch (e) { Swal.fire('Error de red', e.message, 'error'); }
+            }
+        }
+
+        // ============================================
+        // MÓDULO DE PARÁMETROS
+        // ============================================
+        async function cargarParametros() {
+            try {
+                const res = await secureFetch(`${API_URL}/api/parametros`);
+                if (!res) return;
+                const params = await res.json();
+                document.getElementById('param_tasa_bcv').value = params.tasa_bcv || 755.1552;
+                document.getElementById('param_ivss').value = params.porcentaje_ivss || 0.04;
+                document.getElementById('param_rpe').value = params.porcentaje_rpe || 0.005;
+                document.getElementById('param_faov').value = params.porcentaje_faov || 0.01;
+                document.getElementById('param_cestaticket').value = params.cestaticket_usd || 40.0;
+                document.getElementById('param_rif_empresa').value = params.rif_empresa || '';
+                document.getElementById('param_cuenta_empresa').value = params.cuenta_empresa || '';
+                document.getElementById('param_nombre_cuenta_empresa').value = params.nombre_cuenta_empresa || '';
+                document.getElementById('param_codigo_banco').value = params.codigo_banco_defecto || '';
+            } catch (e) { console.error(e); Swal.fire('Error', 'No se pudieron cargar los parámetros.', 'error'); }
+        }
+        async function guardarParametros() {
+            const parametros = [
+                { clave: 'tasa_bcv', valor: parseFloat(document.getElementById('param_tasa_bcv').value) || 0 },
+                { clave: 'porcentaje_ivss', valor: parseFloat(document.getElementById('param_ivss').value) || 0 },
+                { clave: 'porcentaje_rpe', valor: parseFloat(document.getElementById('param_rpe').value) || 0 },
+                { clave: 'porcentaje_faov', valor: parseFloat(document.getElementById('param_faov').value) || 0 },
+                { clave: 'cestaticket_usd', valor: parseFloat(document.getElementById('param_cestaticket').value) || 0 },
+                { clave: 'rif_empresa', valor: document.getElementById('param_rif_empresa').value.trim() },
+                { clave: 'cuenta_empresa', valor: document.getElementById('param_cuenta_empresa').value.trim() },
+                { clave: 'nombre_cuenta_empresa', valor: document.getElementById('param_nombre_cuenta_empresa').value.trim() },
+                { clave: 'codigo_banco_defecto', valor: document.getElementById('param_codigo_banco').value.trim() }
+            ];
+            let errores = 0;
+            for (const param of parametros) {
+                try {
+                    const res = await secureFetch(`${API_URL}/api/parametros`, { method: 'PUT', body: JSON.stringify(param) });
+                    if (!res) return;
+                    if (!res.ok) errores++;
+                } catch (e) { errores++; }
+            }
+            if (errores === 0) { Swal.fire('¡Actualizado!', 'Todos los parámetros se han guardado.', 'success'); document.getElementById('alert_params').innerHTML = `<div class="alert alert-success">✅ Parámetros actualizados correctamente.</div>`; } 
+            else { Swal.fire('Error', 'Ocurrió un error al guardar algunos parámetros.', 'error'); document.getElementById('alert_params').innerHTML = `<div class="alert alert-danger">❌ Error al guardar.</div>`; }
+        }
+        async function actualizarBCV(silencioso = false) {
+            try {
+                const res = await secureFetch(`${API_URL}/api/actualizar_bcv`);
+                if (!res) return;
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById('param_tasa_bcv').value = data.tasa;
+                    if (!silencioso) { Swal.fire('¡Tasa Actualizada!', `La nueva tasa BCV es: Bs. ${data.tasa}`, 'success'); }
+                } else if (!silencioso) { Swal.fire('Error', data.error || 'No se pudo actualizar la tasa.', 'error'); }
+            } catch (e) { if (!silencioso) { Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); } }
+        }
+
+        // ============================================
+        // MÓDULO DE CÁLCULO DE NÓMINA Y EMPLEADOS
+        // ============================================
         async function cargarSucursalesCalc() {
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
                 if (!res) return;
                 const sucs = await res.json();
-                const select = document.getElementById('calc_sucursal');
-                select.innerHTML = '<option value="">Todas las sucursales</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
-            } catch (e) { console.error(e); }
+                document.getElementById('calc_sucursal').innerHTML = '<option value="">Todas las sucursales</option>' + sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+            } catch (e) {}
         }
-
         function seleccionarTodosEmpleados() { document.querySelectorAll('.emp-check').forEach(cb => cb.checked = true); actualizarTablaNomina(); actualizarBadgeEmpleados(); }
         function deseleccionarTodosEmpleados() { document.querySelectorAll('.emp-check').forEach(cb => cb.checked = false); actualizarTablaNomina(); actualizarBadgeEmpleados(); }
         function actualizarBadgeEmpleados() {
@@ -1008,7 +1190,6 @@
             document.getElementById('resultado_content').innerHTML = '';
             Swal.fire('🧹 Limpiado', 'Todos los campos de detalles han sido reiniciados.', 'info');
         }
-
         async function cargarEmpleadosCalc(sucursal_id = '', tipo_pago = '') {
             try {
                 const container = document.getElementById('lista_empleados');
@@ -1023,14 +1204,7 @@
                 if (params.length > 0) url += '?' + params.join('&');
                 const res = await secureFetch(url);
                 if (!res) return;
-                let data;
-                const contentType = res.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    data = await res.json();
-                } else {
-                    const text = await res.text();
-                    throw new Error(`HTML recibido. ${text.substring(0, 80)}...`);
-                }
+                let data = await res.json();
                 if (data.length === 0) {
                     container.innerHTML = "<p style='color:#6b7a8f; text-align:center; padding:20px;'>📭 No hay empleados con esos filtros.</p>";
                 } else {
@@ -1039,11 +1213,11 @@
                     let html = '';
                     if (quincenal.length > 0) {
                         html += `<div style="grid-column:1/-1; font-size:13px; font-weight:700; color:#1a2a6c; padding:10px 0 4px 0; border-bottom:2px solid #e8ecf1; margin-bottom:4px;">📅 Quincenales</div>`;
-                        html += quincenal.map(e => `<div style="display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:6px; transition:background 0.2s;"><input type="checkbox" class="emp-check" value="${e.id_empleado}" checked onchange="actualizarTablaNomina(); actualizarBadgeEmpleados();" style="width:16px; height:16px; cursor:pointer; accent-color:#1a2a6c;"><span><strong>${e.cedula}</strong> - ${e.nombres} ${e.apellidos}</span><span style="font-size:10px; background:#dbeafe; color:#1a2a6c; padding:1px 8px; border-radius:12px; font-weight:600; margin-left:auto;">Quincenal</span></div>`).join('');
+                        html += quincenal.map(e => `<div style="display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:6px; transition:background 0.2s;"><input type="checkbox" class="emp-check" value="${e.id_empleado}" checked onchange="actualizarTablaNomina(); actualizarBadgeEmpleados();"><span><strong>${e.cedula}</strong> - ${e.nombres} ${e.apellidos}</span><span style="font-size:10px; background:#dbeafe; color:#1a2a6c; padding:1px 8px; border-radius:12px; font-weight:600; margin-left:auto;">Quincenal</span></div>`).join('');
                     }
                     if (semanal.length > 0) {
                         html += `<div style="grid-column:1/-1; font-size:13px; font-weight:700; color:#856404; padding:10px 0 4px 0; border-bottom:2px solid #e8ecf1; margin-bottom:4px;">📅 Semanales</div>`;
-                        html += semanal.map(e => `<div style="display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:6px; transition:background 0.2s;"><input type="checkbox" class="emp-check" value="${e.id_empleado}" checked onchange="actualizarTablaNomina(); actualizarBadgeEmpleados();" style="width:16px; height:16px; cursor:pointer; accent-color:#1a2a6c;"><span><strong>${e.cedula}</strong> - ${e.nombres} ${e.apellidos}</span><span style="font-size:10px; background:#fef3c7; color:#92400e; padding:1px 8px; border-radius:12px; font-weight:600; margin-left:auto;">Semanal</span></div>`).join('');
+                        html += semanal.map(e => `<div style="display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:6px; transition:background 0.2s;"><input type="checkbox" class="emp-check" value="${e.id_empleado}" checked onchange="actualizarTablaNomina(); actualizarBadgeEmpleados();"><span><strong>${e.cedula}</strong> - ${e.nombres} ${e.apellidos}</span><span style="font-size:10px; background:#fef3c7; color:#92400e; padding:1px 8px; border-radius:12px; font-weight:600; margin-left:auto;">Semanal</span></div>`).join('');
                     }
                     container.innerHTML = html;
                     actualizarBadgeEmpleados();
@@ -1065,7 +1239,6 @@
                 console.error(e);
             }
         }
-
         function actualizarTablaNomina() {
             const checkboxes = document.querySelectorAll('.emp-check');
             const rows = document.querySelectorAll('#cuerpo_detalle_nomina tr');
@@ -1079,7 +1252,6 @@
                 }
             });
         }
-
         async function calcularNomina() {
             const tipo = document.getElementById('tipo').value;
             const fecha_inicio = document.getElementById('fecha_inicio').value;
@@ -1089,11 +1261,8 @@
             const split_60_40 = document.getElementById('split_60_40').checked;
             const calcular_solo_bono = document.getElementById('calcular_solo_bono').checked;
             const ids = Array.from(document.querySelectorAll('.emp-check:checked')).map(c => parseInt(c.value));
-
             if (!ids.length) { Swal.fire('Atención', 'Selecciona al menos un empleado.', 'warning'); return; }
-
             const faltas = {}; const horas_extras = {}; const bonos = {};
-
             document.querySelectorAll('#cuerpo_detalle_nomina tr').forEach(row => {
                 if (row.hasAttribute('data-cedula') && row.style.display !== 'none') {
                     const cedula = row.getAttribute('data-cedula');
@@ -1106,56 +1275,44 @@
                     if (bono_val > 0) bonos[cedula] = bono_val;
                 }
             });
-
             try {
                 const res = await secureFetch(`${API_URL}/api/calcular_nomina`, { method: 'POST', body: JSON.stringify({ tipo, fecha_inicio, fecha_fin, descripcion, empleados_ids: ids, faltas, horas_extras, bonos, aplicar_deducciones, split_60_40, calcular_solo_bono }) });
                 if (!res) return;
                 const data = await res.json();
                 if (data.error) { Swal.fire('Error', data.error, 'error'); return; }
-
                 let total_usd = 0; let total_bs = 0;
                 data.resultados.forEach(r => { total_usd += r.neto_pagar_usd; total_bs += r.neto_pagar_bs; });
-
                 let html = `<h3 style="color:#1a2a6c;">📊 Resultado del Cálculo</h3>`;
                 html += `<div style="background:#e8f4fd; padding:15px; border-radius:8px; margin:10px 0;"><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;"><div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div><div><strong>📋 Lote ID:</strong> #${data.lote_id}</div><div><strong>👥 Empleados:</strong> ${data.resultados.length}</div></div></div>`;
-
                 if (split_60_40) {
                     html += `<div style="overflow-x:auto;"><table style="min-width:800px; font-size:13px; width:100%; border-collapse:collapse;"><thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:10px 12px; text-align:left;">Empleado</th><th style="padding:10px 12px; text-align:center;">Días</th><th style="padding:10px 12px; text-align:right;">Base Full</th><th style="padding:10px 12px; text-align:right;">Hrs Extras</th><th style="padding:10px 12px; text-align:right;">Bono</th><th style="padding:10px 12px; text-align:right;">Asign.</th><th style="padding:10px 12px; text-align:right;">Deducc.</th><th style="padding:10px 12px; text-align:right;">Pago 60%</th><th style="padding:10px 12px; text-align:right;">Pago 40%</th><th style="padding:10px 12px; text-align:right;">Total Bs</th></tr></thead><tbody>`;
-                    data.resultados.forEach(r => {
-                        html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:8px 12px;"><strong>${r.empleado.nombre_completo}</strong></td><td style="padding:8px 12px; text-align:center;">${r.dias_reales_trabajados}</td><td style="padding:8px 12px; text-align:right;">$${r.salario_base_full_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.horas_extras_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.bono_complementario_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_asignaciones_base_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_deducciones_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.pago_60_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.pago_40_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;"><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td></tr>`;
-                    });
+                    data.resultados.forEach(r => { html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:8px 12px;"><strong>${r.empleado.nombre_completo}</strong></td><td style="padding:8px 12px; text-align:center;">${r.dias_reales_trabajados}</td><td style="padding:8px 12px; text-align:right;">$${r.salario_base_full_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.horas_extras_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.bono_complementario_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_asignaciones_base_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_deducciones_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.pago_60_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.pago_40_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;"><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td></tr>`; });
                     html += `<tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="6" style="padding:10px 12px; text-align:right;">TOTAL</td><td style="padding:10px 12px; text-align:right;">$${total_usd.toFixed(2)}</td><td colspan="2" style="padding:10px 12px; text-align:right;"></td><td style="padding:10px 12px; text-align:right;"><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr>`;
                     html += `</tbody></table></div>`;
                 } else {
                     html += `<div style="overflow-x:auto;"><table style="min-width:700px; font-size:13px; width:100%; border-collapse:collapse;"><thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:10px 12px; text-align:left;">Empleado</th><th style="padding:10px 12px; text-align:center;">Días</th><th style="padding:10px 12px; text-align:right;">Base Full</th><th style="padding:10px 12px; text-align:right;">Hrs Extras</th><th style="padding:10px 12px; text-align:right;">Bono</th><th style="padding:10px 12px; text-align:right;">Asign.</th><th style="padding:10px 12px; text-align:right;">Deducc.</th><th style="padding:10px 12px; text-align:right;">Neto USD</th><th style="padding:10px 12px; text-align:right;">Neto Bs</th></tr></thead><tbody>`;
-                    data.resultados.forEach(r => {
-                        html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:8px 12px;"><strong>${r.empleado.nombre_completo}</strong></td><td style="padding:8px 12px; text-align:center;">${r.dias_reales_trabajados}</td><td style="padding:8px 12px; text-align:right;">$${r.salario_base_full_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.horas_extras_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.bono_complementario_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_asignaciones_base_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_deducciones_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;"><strong>$${r.neto_pagar_usd.toFixed(2)}</strong></td><td style="padding:8px 12px; text-align:right;"><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td></tr>`;
-                    });
+                    data.resultados.forEach(r => { html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:8px 12px;"><strong>${r.empleado.nombre_completo}</strong></td><td style="padding:8px 12px; text-align:center;">${r.dias_reales_trabajados}</td><td style="padding:8px 12px; text-align:right;">$${r.salario_base_full_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.horas_extras_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.bono_complementario_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_asignaciones_base_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_deducciones_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;"><strong>$${r.neto_pagar_usd.toFixed(2)}</strong></td><td style="padding:8px 12px; text-align:right;"><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td></tr>`; });
                     html += `<tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="5" style="padding:10px 12px; text-align:right;">TOTAL</td><td style="padding:10px 12px; text-align:right;">$${total_usd.toFixed(2)}</td><td style="padding:10px 12px; text-align:right;"></td><td style="padding:10px 12px; text-align:right;"><strong>$${total_usd.toFixed(2)}</strong></td><td style="padding:10px 12px; text-align:right;"><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr>`;
                     html += `</tbody></table></div>`;
                 }
-
                 document.getElementById('resultado_content').innerHTML = html;
                 Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success');
                 cargarLotes();
             } catch (e) { console.error(e); Swal.fire('Error', e.message, 'error'); }
         }
 
-        // Inicio de funciones de Cestaticket y Reportes (Completas)
-
+        // ============================================
+        // MÓDULO DE CESTATICKET
+        // ============================================
         async function cargarSucursalesCesta() {
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
                 if (!res) return;
                 const data = await res.json();
                 const select = document.getElementById('cesta_filter_sucursal');
-                if (select) {
-                    select.innerHTML = '<option value="">Todas las sucursales</option>';
-                    data.forEach(s => { select.innerHTML += `<option value="${s.id_sucursal}">${s.nombre}</option>`; });
-                }
-            } catch (e) { console.error('❌ Error cargando sucursales para Cestaticket:', e); }
+                if (select) { select.innerHTML = '<option value="">Todas las sucursales</option>'; data.forEach(s => { select.innerHTML += `<option value="${s.id_sucursal}">${s.nombre}</option>`; }); }
+            } catch (e) {}
         }
-
         async function cargarEmpleadosCestaFiltrados() {
             const sucursal_id = document.getElementById('cesta_filter_sucursal')?.value || '';
             const tipo_pago = document.getElementById('cesta_filter_tipo')?.value || '';
@@ -1173,20 +1330,11 @@
                 const res = await secureFetch(url);
                 if (!res) return;
                 const data = await res.json();
-                empleadosCesta = data;
-                empleadosFiltradosCesta = data;
-                if (data.length === 0) {
-                    container.innerHTML = "<p style='color:#6b7a8f; text-align:center; padding:20px;'>📭 No hay empleados con esos filtros.</p>";
-                    return;
-                }
-                renderizarEmpleadosCesta(data);
-                actualizarContadorCesta();
-            } catch (e) {
-                console.error('❌ Error cargando empleados:', e);
-                container.innerHTML = `<p style="color:red; text-align:center; padding:20px;">❌ Error al cargar empleados: ${e.message}</p>`;
-            }
+                empleadosCesta = data; empleadosFiltradosCesta = data;
+                if (data.length === 0) { container.innerHTML = "<p style='color:#6b7a8f; text-align:center; padding:20px;'>📭 No hay empleados con esos filtros.</p>"; return; }
+                renderizarEmpleadosCesta(data); actualizarContadorCesta();
+            } catch (e) { container.innerHTML = `<p style="color:red; text-align:center; padding:20px;">❌ Error al cargar empleados: ${e.message}</p>`; }
         }
-
         function renderizarEmpleadosCesta(empleados) {
             const container = document.getElementById('lista_empleados_cesta');
             if (!container) return;
@@ -1199,14 +1347,11 @@
             });
             let html = '';
             const keysOrdenadas = Object.keys(grupos).sort((a, b) => {
-                if (a === 'sin_sucursal') return 1;
-                if (b === 'sin_sucursal') return -1;
-                return grupos[a].nombre.localeCompare(grupos[b].nombre);
+                if (a === 'sin_sucursal') return 1; if (b === 'sin_sucursal') return -1; return grupos[a].nombre.localeCompare(grupos[b].nombre);
             });
             keysOrdenadas.forEach(key => {
                 const grupo = grupos[key];
-                html += `<div style="margin-bottom:10px;">`;
-                html += `<div style="font-weight:700; color:#1a2a6c; padding:6px 0 4px 0; border-bottom:1px solid #e8ecf1; display:flex; justify-content:space-between; align-items:center;"><span>🏢 ${grupo.nombre}</span><span style="font-size:12px; color:#6b7a8f; font-weight:400;">${grupo.empleados.length} empleados</span></div>`;
+                html += `<div style="margin-bottom:10px;"><div style="font-weight:700; color:#1a2a6c; padding:6px 0 4px 0; border-bottom:1px solid #e8ecf1; display:flex; justify-content:space-between; align-items:center;"><span>🏢 ${grupo.nombre}</span><span style="font-size:12px; color:#6b7a8f; font-weight:400;">${grupo.empleados.length} empleados</span></div>`;
                 grupo.empleados.forEach(emp => {
                     const badgeColor = emp.tipo_pago === 'Quincenal' ? '#dbeafe' : '#fef3c7';
                     const badgeText = emp.tipo_pago === 'Quincenal' ? 'Quincenal' : 'Semanal';
@@ -1215,10 +1360,8 @@
                 });
                 html += `</div>`;
             });
-            container.innerHTML = html;
-            actualizarFaltasCesta();
+            container.innerHTML = html; actualizarFaltasCesta();
         }
-
         function actualizarContadorCesta() {
             const total = document.querySelectorAll('#lista_empleados_cesta .cesta-check:checked').length;
             const badge = document.getElementById('cesta_total_empleados_badge');
@@ -1226,11 +1369,9 @@
             if (badge) badge.textContent = `${total} empleados`;
             if (contador) contador.textContent = `${total} empleados seleccionados`;
         }
-
         function seleccionarTodosCesta() { document.querySelectorAll('#lista_empleados_cesta .cesta-check').forEach(cb => cb.checked = true); actualizarFaltasCesta(); actualizarContadorCesta(); }
         function deseleccionarTodosCesta() { document.querySelectorAll('#lista_empleados_cesta .cesta-check').forEach(cb => cb.checked = false); actualizarFaltasCesta(); actualizarContadorCesta(); }
         function initCestaticket() { cargarSucursalesCesta(); cargarEmpleadosCestaFiltrados(); }
-
         function actualizarFaltasCesta() {
             const checks = document.querySelectorAll('.cesta-check');
             const rows = document.querySelectorAll('#cuerpo_detalle_cesta_faltas tr');
@@ -1251,7 +1392,6 @@
                 } else { row.style.display = 'none'; }
             });
         }
-
         async function calcularCestaticket() {
             const fecha_inicio = document.getElementById('cesta_fecha_inicio').value;
             const fecha_fin = document.getElementById('cesta_fecha_fin').value;
@@ -1273,20 +1413,13 @@
                 if (data.error) { Swal.fire('Error', data.error, 'error'); return; }
                 let total_bs = 0; let total_usd = 0;
                 let html = `<h3 style="color:#1a2a6c;">🍽️ Cálculo de Cestaticket</h3><div style="background:#e8f4fd; padding:15px; border-radius:8px; margin:10px 0;"><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;"><div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div><div><strong>💰 Valor Mensual:</strong> $${data.valor_mensual_usd.toFixed(2)}</div><div><strong>📅 Valor por Día:</strong> $${data.valor_diario_usd.toFixed(4)}</div><div><strong>📆 Días hábiles:</strong> ${data.total_working_days}</div></div></div><div style="overflow-x:auto;"><table style="min-width:800px; font-size:13px; width:100%; border-collapse:collapse;"><thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:10px 12px; text-align:left;">Empleado</th><th style="padding:10px 12px; text-align:right;">Monto Base</th><th style="padding:10px 12px; text-align:right;">Valor Día</th><th style="padding:10px 12px; text-align:center;">Faltas</th><th style="padding:10px 12px; text-align:right;">Descuento</th><th style="padding:10px 12px; text-align:right;">Total USD</th><th style="padding:10px 12px; text-align:right;">Total Bs</th></tr></thead><tbody>`;
-                data.resultados.forEach(r => {
-                    total_usd += r.total_usd; total_bs += r.total_bs;
-                    html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:8px 12px;"><strong>${r.nombre_completo}</strong></td><td style="padding:8px 12px; text-align:right;">$${r.valor_mensual_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.valor_diario_usd.toFixed(4)}</td><td style="padding:8px 12px; text-align:center; color:${r.faltas > 0 ? 'red' : 'green'}; font-weight:bold;">${r.faltas}</td><td style="padding:8px 12px; text-align:right; color:red;">$${r.descuento_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;"><strong>$${r.total_usd.toFixed(2)}</strong></td><td style="padding:8px 12px; text-align:right;"><strong style="color:#1a2a6c;">Bs. ${r.total_bs.toFixed(2)}</strong></td></tr>`;
-                });
+                data.resultados.forEach(r => { total_usd += r.total_usd; total_bs += r.total_bs; html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:8px 12px;"><strong>${r.nombre_completo}</strong></td><td style="padding:8px 12px; text-align:right;">$${r.valor_mensual_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.valor_diario_usd.toFixed(4)}</td><td style="padding:8px 12px; text-align:center; color:${r.faltas > 0 ? 'red' : 'green'}; font-weight:bold;">${r.faltas}</td><td style="padding:8px 12px; text-align:right; color:red;">$${r.descuento_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;"><strong>$${r.total_usd.toFixed(2)}</strong></td><td style="padding:8px 12px; text-align:right;"><strong style="color:#1a2a6c;">Bs. ${r.total_bs.toFixed(2)}</strong></td></tr>`; });
                 html += `<tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="5" style="padding:10px 12px; text-align:right;">TOTAL GENERAL</td><td style="padding:10px 12px; text-align:right;"><strong>$${total_usd.toFixed(2)}</strong></td><td style="padding:10px 12px; text-align:right;"><strong style="color:#1a2a6c;">Bs. ${total_bs.toFixed(2)}</strong></td></tr></tbody></table></div><div style="margin-top:15px; font-size:0.9em; color:#666; background:#f8f9fa; padding:10px; border-radius:5px;"><strong>📌 Lote ID:</strong> #${data.lote_id} | <strong>📅 Fecha:</strong> ${new Date().toLocaleDateString()}</div>`;
                 document.getElementById('resultado_cesta').innerHTML = html;
                 Swal.fire('¡Éxito!', `Cestaticket guardado como Lote #${data.lote_id}`, 'success');
                 cargarLotesCestaticket();
-            } catch (e) {
-                console.error('❌ Error en calcularCestaticket:', e);
-                Swal.fire('Error', e.message, 'error');
-            }
+            } catch (e) { console.error('❌ Error en calcularCestaticket:', e); Swal.fire('Error', e.message, 'error'); }
         }
-
         async function cargarLotesCestaticket() {
             const tableBody = document.getElementById('tabla_historial_cesta');
             tableBody.innerHTML = '<tr><td colspan="6" class="loading"><span class="loading-spinner"></span> Cargando lotes de cestaticket...</td></tr>';
@@ -1297,90 +1430,60 @@
                 const res = await secureFetch(url);
                 if (!res) return;
                 const lotes = await res.json();
-                if (lotes.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">📭 No hay lotes de Cestaticket registrados.</td></tr>';
-                } else {
-                    tableBody.innerHTML = lotes.map(l => `<tr><td><strong>#${l.id_lote}</strong></td><td>${l.descripcion || 'Sin descripción'}</td><td>${l.fecha_calculo}</td><td>${l.cantidad_empleados_lote} empleados</td><td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td><td><button class="btn-success" onclick="generarArchivoCestaticket(${l.id_lote})" style="font-size:11px; padding:4px 10px;">💳 TXT</button><button class="btn-warning" onclick="abrirModalDetalleCesta(${l.id_lote})" style="font-size:11px; padding:4px 10px;">📂 Ver</button><button class="btn-danger" onclick="eliminarLoteCestaticket(${l.id_lote})" style="font-size:11px; padding:4px 10px;">🗑️</button></td></tr>`).join('');
-                }
-            } catch (e) {
-                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`;
-                console.error(e);
-            }
+                if (lotes.length === 0) { tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">📭 No hay lotes de Cestaticket registrados.</td></tr>'; } 
+                else { tableBody.innerHTML = lotes.map(l => `<tr><td><strong>#${l.id_lote}</strong></td><td>${l.descripcion || 'Sin descripción'}</td><td>${l.fecha_calculo}</td><td>${l.cantidad_empleados_lote} empleados</td><td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td><td><button class="btn-success" onclick="generarArchivoCestaticket(${l.id_lote})" style="font-size:11px; padding:4px 10px;">💳 TXT</button><button class="btn-warning" onclick="abrirModalDetalleCesta(${l.id_lote})" style="font-size:11px; padding:4px 10px;">📂 Ver</button><button class="btn-danger" onclick="eliminarLoteCestaticket(${l.id_lote})" style="font-size:11px; padding:4px 10px;">🗑️</button></td></tr>`).join(''); }
+            } catch (e) { tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; font-weight:bold;">❌ Error: ${e.message}</td></tr>`; }
         }
-
         async function generarArchivoCestaticket(id) {
             try {
                 const res = await secureFetch(`${API_URL}/api/generar_archivo_cestaticket/${id}`);
                 if (!res) return;
                 const blob = await res.blob();
                 const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `CESTA_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.txt`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
+                const a = document.createElement('a'); a.href = url; a.download = `CESTA_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.txt`;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(url);
             } catch (e) { Swal.fire('Error', `No se pudo descargar el archivo: ${e.message}`, 'error'); }
         }
-
         async function abrirModalDetalleCesta(id) {
             const modal = document.getElementById('modalDetalleCesta');
             const header = document.getElementById('cesta_header_info');
             const body = document.getElementById('cuerpo_detalle_cesta');
-            header.innerHTML = '<div class="loading"><span class="loading-spinner"></span> Cargando datos...</div>';
-            body.innerHTML = '';
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('show'), 10);
+            header.innerHTML = '<div class="loading"><span class="loading-spinner"></span> Cargando datos...</div>'; body.innerHTML = '';
+            modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10);
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`);
                 if (!res) return;
                 const lote = await res.json();
                 let total_usd_lote = 0;
                 if (lote.nominas && lote.nominas.length > 0) { lote.nominas.forEach(n => { total_usd_lote += (n.total_usd || 0); }); }
-
                 header.innerHTML = `<div style="display:flex; justify-content:space-between; flex-wrap:wrap;"><div><strong>Lote #${lote.id_lote}</strong> - ${lote.descripcion || 'Sin descripción'}<br><small>Generado el ${lote.fecha_calculo}</small></div><div style="text-align:right;"><div><strong>Total Lote:</strong> Bs. ${(lote.total_bs || 0).toFixed(2)}</div><div><small>Total USD: $${total_usd_lote.toFixed(2)}</small></div></div></div><br><small><strong>Cantidad de Empleados:</strong> ${lote.nominas ? lote.nominas.length : 0}</small>`;
-
                 if (lote.nominas && lote.nominas.length > 0) {
                     body.innerHTML = lote.nominas.map(n => `<tr><td><strong>${n.nombres || ''} ${n.apellidos || ''}</strong></td><td>${n.dias_pagados || 0}</td><td>$${(n.total_usd || 0).toFixed(2)}</td><td><strong>Bs. ${(n.total_bs || 0).toFixed(2)}</strong></td><td><button class="btn-warning" onclick="generarReciboCestaticket(${n.id})" style="font-size:11px; padding:4px 8px;">📄 PDF</button><button class="btn-primary" onclick="generarReciboCestaticketMatriz(${n.id})" style="font-size:11px; padding:4px 8px; background:#1a2a6c; color:white; border:none; border-radius:4px; cursor:pointer;">🖨️ Ver/Imprimir</button></td></tr>`).join('');
                 } else { body.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">No hay empleados en este lote.</td></tr>'; }
-            } catch (e) {
-                console.error('❌ Error en abrirModalDetalleCesta:', e);
-                Swal.fire('Error', `No se pudo cargar el detalle: ${e.message}`, 'error');
-                modal.classList.remove('show');
-                setTimeout(() => modal.style.display = 'none', 300);
-            }
+            } catch (e) { console.error('❌ Error en abrirModalDetalleCesta:', e); Swal.fire('Error', `No se pudo cargar el detalle: ${e.message}`, 'error'); modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300); }
         }
-
-        function cerrarModalDetalleCesta() {
-            const modal = document.getElementById('modalDetalleCesta');
-            modal.classList.remove('show');
-            setTimeout(() => modal.style.display = 'none', 300);
-        }
-
+        function cerrarModalDetalleCesta() { const modal = document.getElementById('modalDetalleCesta'); modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300); }
         async function eliminarLoteCestaticket(id) {
-            const result = await Swal.fire({ title: '⚠️ ¿Estás seguro?', text: "Esta acción eliminará TODO el lote de Cestaticket y sus registros.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
+            const result = await Swal.fire({ title: '⚠️ ¿Estás seguro?', text: "Esta acción eliminará TODO el lote de Cestaticket y sus registros.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí, eliminar' });
             if (result.isConfirmed) {
                 try {
                     const res = await secureFetch(`${API_URL}/api/lotes_cestaticket/${id}`, { method: 'DELETE' });
-                    if (!res) return;
-                    const resp = await res.json();
-                    Swal.fire('¡Eliminado!', 'El lote ha sido eliminado.', 'success');
-                    cargarLotesCestaticket();
+                    if (!res) return; const resp = await res.json();
+                    Swal.fire('¡Eliminado!', 'El lote ha sido eliminado.', 'success'); cargarLotesCestaticket();
                 } catch (e) { Swal.fire('Error', e.message, 'error'); }
             }
         }
-
         function generarReciboCestaticket(id) { downloadFile(`${API_URL}/api/generar_recibo_cestaticket/${id}`, `recibo_cesta_${id}.pdf`); }
 
+        // ============================================
+        // MÓDULO DE HISTORIAL Y DETALLE DE NÓMINA
+        // ============================================
         async function abrirModalDetalleLote(id) {
             const modal = document.getElementById('modalDetalleLote');
             const header = document.getElementById('lote_header_info');
             const body = document.getElementById('cuerpo_detalle_lote');
-            header.innerHTML = '<div class="loading"><span class="loading-spinner"></span> Cargando datos...</div>';
-            body.innerHTML = '';
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('show'), 10);
+            header.innerHTML = '<div class="loading"><span class="loading-spinner"></span> Cargando datos...</div>'; body.innerHTML = '';
+            modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10);
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes/${id}`);
                 if (!res) return;
@@ -1403,17 +1506,10 @@
             } catch (e) {
                 console.error('❌ Error en abrirModalDetalleLote:', e);
                 Swal.fire('Error', `No se pudo cargar el detalle del lote: ${e.message}`, 'error');
-                modal.classList.remove('show');
-                setTimeout(() => modal.style.display = 'none', 300);
+                modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300);
             }
         }
-
-        function cerrarModalDetalle() {
-            const modal = document.getElementById('modalDetalleLote');
-            modal.classList.remove('show');
-            setTimeout(() => modal.style.display = 'none', 300);
-        }
-
+        function cerrarModalDetalle() { const modal = document.getElementById('modalDetalleLote'); modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300); }
         async function generarReciboNomina(id_nomina) {
             const url = `${API_URL}/api/recibo_nomina_html/${id_nomina}`;
             try {
@@ -1422,58 +1518,10 @@
                 if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
                 const html = await res.text();
                 const ventana = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-                if (!ventana) {
-                    Swal.fire({ title: '⚠️ Bloqueador de ventanas', text: 'Por favor, permite las ventanas emergentes para este sitio.', icon: 'warning', confirmButtonText: 'Entendido' });
-                    return;
-                }
-                ventana.document.write(html);
-                ventana.document.close();
-            } catch (e) {
-                console.error('❌ Error:', e);
-                Swal.fire({ title: '❌ Error', text: `No se pudo generar el recibo: ${e.message}`, icon: 'error', confirmButtonText: 'Entendido' });
-            }
+                if (!ventana) { Swal.fire({ title: '⚠️ Bloqueador de ventanas', text: 'Por favor, permite las ventanas emergentes para este sitio.', icon: 'warning', confirmButtonText: 'Entendido' }); return; }
+                ventana.document.write(html); ventana.document.close();
+            } catch (e) { console.error('❌ Error:', e); Swal.fire({ title: '❌ Error', text: `No se pudo generar el recibo: ${e.message}`, icon: 'error', confirmButtonText: 'Entendido' }); }
         }
-
-        async function generarReciboCestaticketMatriz(id) {
-            const url = `${API_URL}/api/recibo_cestaticket_html/${id}`;
-            try {
-                Swal.fire({ title: '📄 Generando Recibo', text: 'El recibo se está generando...', icon: 'info', timer: 1500, showConfirmButton: false });
-                const res = await fetch(url, { credentials: 'include', headers: { 'Content-Type': 'text/html' } });
-                if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-                const html = await res.text();
-                const ventana = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-                if (!ventana) {
-                    Swal.fire({ title: '⚠️ Bloqueador de ventanas', text: 'Por favor, permite las ventanas emergentes para este sitio.', icon: 'warning', confirmButtonText: 'Entendido' });
-                    return;
-                }
-                ventana.document.write(html);
-                ventana.document.close();
-            } catch (e) {
-                console.error('❌ Error:', e);
-                Swal.fire({ title: '❌ Error', text: `No se pudo generar el recibo: ${e.message}`, icon: 'error', confirmButtonText: 'Entendido' });
-            }
-        }
-
-        async function downloadFile(url, filename) {
-            try {
-                const res = await fetch(url, { credentials: 'include' });
-                if (!res.ok) {
-                    const errorText = await res.text();
-                    throw new Error(`Error ${res.status}: ${errorText || 'Error desconocido'}`);
-                }
-                const blob = await res.blob();
-                const a = document.createElement('a');
-                a.href = window.URL.createObjectURL(blob);
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            } catch (e) { Swal.fire('Error', e.message, 'error'); }
-        }
-
-        // ... (Resto de funciones: cargarEmpleadosAdmin, guardarEmpleado, cargarSucursales, crearSucursal, cargarParametros, guardarParametros, pasivos, etc) ...
-        // He incluido el JS crítico que faltaba. Al copiar el archivo completo, el sistema se conectará correctamente.
 
         async function cargarLotes() {
             const tableBody = document.getElementById('tabla_historial');
@@ -1485,34 +1533,133 @@
                 const res = await secureFetch(url);
                 if (!res) return;
                 const lotes = await res.json();
-                if (lotes.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">📭 No hay lotes registrados.</td></tr>';
-                } else {
-                    tableBody.innerHTML = lotes.map(l => `<tr><td><strong>#${l.id_lote}</strong></td><td>${l.descripcion || 'Sin descripción'}</td><td>${l.fecha_calculo}</td><td>${l.cantidad_empleados_lote} empleados</td><td><small>${l.sucursales_involucradas || 'Sin sucursal'}</small></td><td><strong>$${l.total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td><td><button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size:10px; padding:3px 8px;">60%</button><button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size:10px; padding:3px 8px;">100%</button><button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size:10px; padding:3px 8px;">40%</button><button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size:10px; padding:3px 8px;">📄</button><button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})" style="font-size:10px; padding:3px 8px;">📂</button><button class="btn-danger" onclick="eliminarLote(${l.id_lote})" style="font-size:10px; padding:3px 8px;">🗑️</button></td></tr>`).join('');
-                }
-            } catch (e) {
-                console.error('❌ Error en cargarLotes:', e);
-                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">❌ Error al cargar historial: ${e.message}</td></tr>`;
-            }
+                if (lotes.length === 0) { tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">📭 No hay lotes registrados.</td></tr>'; } 
+                else { tableBody.innerHTML = lotes.map(l => `<tr><td><strong>#${l.id_lote}</strong></td><td>${l.descripcion || 'Sin descripción'}</td><td>${l.fecha_calculo}</td><td>${l.cantidad_empleados_lote} empleados</td><td><small>${l.sucursales_involucradas || 'Sin sucursal'}</small></td><td><strong>$${l.total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td><td><button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size:10px; padding:3px 8px;">60%</button><button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size:10px; padding:3px 8px;">100%</button><button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size:10px; padding:3px 8px;">40%</button><button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size:10px; padding:3px 8px;">📄</button><button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})" style="font-size:10px; padding:3px 8px;">📂</button><button class="btn-danger" onclick="eliminarLote(${l.id_lote})" style="font-size:10px; padding:3px 8px;">🗑️</button></td></tr>`).join(''); }
+            } catch (e) { console.error('❌ Error en cargarLotes:', e); tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">❌ Error al cargar historial: ${e.message}</td></tr>`; }
         }
-
         async function generarArchivoPago(id, tipo) {
             try {
                 const res = await secureFetch(`${API_URL}/api/generar_archivo_pago/${id}?tipo=${tipo}`);
-                if (!res) return;
-                const blob = await res.blob();
+                if (!res) return; const blob = await res.blob();
                 const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `PROV_${tipo}_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.txt`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
+                const a = document.createElement('a'); a.href = url; a.download = `PROV_${tipo}_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.txt`;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(url);
             } catch (e) { Swal.fire('Error', `No se pudo descargar el archivo: ${e.message}`, 'error'); }
         }
-
         function generarLotePDF(id) { downloadFile(`${API_URL}/api/generar_lote_pdf/${id}`, `lote_${id}.pdf`); }
+        async function eliminarLote(id) {
+            const result = await Swal.fire({ title: '⚠️ ¿Estás seguro?', text: "Esta acción eliminará TODO el lote de nómina y sus registros.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí, eliminar' });
+            if (result.isConfirmed) {
+                try {
+                    const res = await secureFetch(`${API_URL}/api/lotes/${id}`, { method: 'DELETE' });
+                    if (!res) return; const resp = await res.json();
+                    Swal.fire('¡Eliminado!', 'El lote ha sido eliminado.', 'success'); cargarLotes();
+                } catch (e) { Swal.fire('Error', e.message, 'error'); }
+            }
+        }
+        async function downloadFile(url, filename) {
+            try {
+                const res = await fetch(url, { credentials: 'include' });
+                if (!res.ok) { const errorText = await res.text(); throw new Error(`Error ${res.status}: ${errorText}`); }
+                const blob = await res.blob(); const a = document.createElement('a'); a.href = window.URL.createObjectURL(blob); a.download = filename;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(url);
+            } catch (e) { Swal.fire('Error', e.message, 'error'); }
+        }
+        async function generarReciboCestaticketMatriz(id) {
+            const url = `${API_URL}/api/recibo_cestaticket_html/${id}`;
+            try {
+                Swal.fire({ title: '📄 Generando Recibo', text: 'El recibo se está generando...', icon: 'info', timer: 1500, showConfirmButton: false });
+                const res = await fetch(url, { credentials: 'include', headers: { 'Content-Type': 'text/html' } });
+                if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+                const html = await res.text(); const ventana = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+                if (!ventana) { Swal.fire({ title: '⚠️ Bloqueador de ventanas', text: 'Por favor, permite las ventanas emergentes para este sitio.', icon: 'warning', confirmButtonText: 'Entendido' }); return; }
+                ventana.document.write(html); ventana.document.close();
+            } catch (e) { console.error('❌ Error:', e); Swal.fire({ title: '❌ Error', text: `No se pudo generar el recibo: ${e.message}`, icon: 'error', confirmButtonText: 'Entendido' }); }
+        }
+        async function cargarEmpleadosReportes() {
+            try {
+                const res = await secureFetch(`${API_URL}/api/empleados`);
+                if (!res) return; const data = await res.json();
+                ['reporte_pasivos_empleado', 'reporte_para_empleado', 'reporte_resumen_empleado'].forEach(id => {
+                    const select = document.getElementById(id);
+                    if (select) { const currentVal = select.value; select.innerHTML = '<option value="">Todos</option>'; data.forEach(e => { select.innerHTML += `<option value="${e.id_empleado}">${e.cedula} - ${e.nombres} ${e.apellidos}</option>`; }); if (currentVal) select.value = currentVal; }
+                });
+                const anioSelect = document.getElementById('reporte_anio');
+                if (anioSelect) { const currentYear = new Date().getFullYear(); anioSelect.innerHTML = ''; for (let y = currentYear; y >= 2020; y--) { anioSelect.innerHTML += `<option value="${y}">${y}</option>`; } anioSelect.value = currentYear; }
+            } catch (e) { console.error('❌ Error cargando empleados para reportes:', e); }
+        }
+        async function generarReportePasivos() {
+            const empleado_id = document.getElementById('reporte_pasivos_empleado').value;
+            const resultDiv = document.getElementById('resultado_pasivos_report');
+            resultDiv.innerHTML = '<div class="loading"><span class="loading-spinner"></span> Calculando pasivos laborales...</div>';
+            try {
+                const res = await secureFetch(`${API_URL}/api/reporte_pasivos`, { method: 'POST', body: JSON.stringify({ empleado_id: empleado_id ? parseInt(empleado_id) : null, calcular_para_todos: !empleado_id }) });
+                if (!res) return; const data = await res.json();
+                if (data.error) { resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`; return; }
+                let html = `<div style="background:#e8f4fd; padding:15px; border-radius:8px; margin-bottom:15px;"><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;"><div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div><div><strong>👥 Empleados:</strong> ${data.resultados.length}</div><div><strong>💰 Total General USD:</strong> $${data.total_general_usd.toFixed(2)}</div><div><strong>💰 Total General Bs:</strong> Bs. ${data.total_general_bs.toFixed(2)}</div></div></div><div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:13px;"><thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:8px 10px;">Empleado</th><th style="padding:8px 10px;">Antigüedad</th><th style="padding:8px 10px; text-align:right;">Salario Base</th><th style="padding:8px 10px; text-align:right;">Salario Integral</th><th style="padding:8px 10px; text-align:right;">Utilidades</th><th style="padding:8px 10px; text-align:right;">Aguinaldo</th><th style="padding:8px 10px; text-align:right;">Vacaciones</th><th style="padding:8px 10px; text-align:right;">Bono Vac.</th><th style="padding:8px 10px; text-align:right;">Total</th></tr></thead><tbody>`;
+                data.resultados.forEach(r => {
+                    const antiguedad = `${r.antiguedad.anos} años, ${r.antiguedad.meses} meses`;
+                    html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:6px 10px;"><strong>${r.empleado.nombre}</strong><br><small style="color:#6b7a8f;">${r.empleado.cedula}</small></td><td style="padding:6px 10px;">${antiguedad}</td><td style="padding:6px 10px; text-align:right;">$${r.salario_base_usd.toFixed(2)}</td><td style="padding:6px 10px; text-align:right;">$${r.salario_integral_usd.toFixed(2)}</td><td style="padding:6px 10px; text-align:right;">$${r.utilidades.usd.toFixed(2)}<br><small>${r.utilidades.dias} días</small></td><td style="padding:6px 10px; text-align:right;">$${r.aguinaldo.usd.toFixed(2)}<br><small>${r.aguinaldo.dias} días</small></td><td style="padding:6px 10px; text-align:right;">$${r.vacaciones.usd.toFixed(2)}<br><small>${r.vacaciones.dias} días</small></td><td style="padding:6px 10px; text-align:right;">$${r.bono_vacacional.usd.toFixed(2)}<br><small>${r.bono_vacacional.dias} días</small></td><td style="padding:6px 10px; text-align:right;"><strong>$${r.total_pasivos_usd.toFixed(2)}</strong><br><small>Bs. ${r.total_pasivos_bs.toFixed(2)}</small></td></tr>`;
+                });
+                html += `</tbody><tfoot><tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="8" style="padding:8px 10px; text-align:right;">TOTAL GENERAL</td><td style="padding:8px 10px; text-align:right;"><strong>$${data.total_general_usd.toFixed(2)}</strong><br><small>Bs. ${data.total_general_bs.toFixed(2)}</small></td></tr></tfoot></table></div>`;
+                resultDiv.innerHTML = html; Swal.fire('✅ Reporte Generado', 'El reporte de pasivos laborales se ha generado correctamente.', 'success');
+            } catch (e) { console.error('❌ Error:', e); resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error al generar el reporte: ${e.message}</div>`; }
+        }
+        async function generarReporteParafiscales() {
+            const fecha_inicio = document.getElementById('reporte_para_fecha_inicio').value;
+            const fecha_fin = document.getElementById('reporte_para_fecha_fin').value;
+            const empleado_id = document.getElementById('reporte_para_empleado').value;
+            if (!fecha_inicio || !fecha_fin) { Swal.fire('Atención', 'Selecciona un período de fechas.', 'warning'); return; }
+            const resultDiv = document.getElementById('resultado_parafiscales');
+            resultDiv.innerHTML = '<div class="loading"><span class="loading-spinner"></span> Generando reporte parafiscal...</div>';
+            try {
+                const res = await secureFetch(`${API_URL}/api/reporte_parafiscales`, { method: 'POST', body: JSON.stringify({ fecha_inicio: fecha_inicio, fecha_fin: fecha_fin, empleado_id: empleado_id ? parseInt(empleado_id) : null }) });
+                if (!res) return; const data = await res.json();
+                if (data.error) { resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`; return; }
+                let html = `<div style="background:#e8f4fd; padding:15px; border-radius:8px; margin-bottom:15px;"><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;"><div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div><div><strong>📅 Período:</strong> ${data.periodo.fecha_inicio} al ${data.periodo.fecha_fin}</div><div><strong>👥 Empleados:</strong> ${Object.keys(data.detalle_empleados).length}</div></div></div><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:15px;"><div style="background:#d4edda; padding:15px; border-radius:8px; text-align:center;"><div style="font-size:12px; color:#155724;">IVSS (4%)</div><div style="font-size:18px; font-weight:bold; color:#155724;">$${data.totales.ivss_usd.toFixed(2)}</div><div style="font-size:12px;">Bs. ${data.totales.ivss_bs.toFixed(2)}</div></div><div style="background:#fff3cd; padding:15px; border-radius:8px; text-align:center;"><div style="font-size:12px; color:#856404;">RPE (0.5%)</div><div style="font-size:18px; font-weight:bold; color:#856404;">$${data.totales.rpe_usd.toFixed(2)}</div><div style="font-size:12px;">Bs. ${data.totales.rpe_bs.toFixed(2)}</div></div><div style="background:#f8d7da; padding:15px; border-radius:8px; text-align:center;"><div style="font-size:12px; color:#721c24;">FAOV (1%)</div><div style="font-size:18px; font-weight:bold; color:#721c24;">$${data.totales.faov_usd.toFixed(2)}</div><div style="font-size:12px;">Bs. ${data.totales.faov_bs.toFixed(2)}</div></div><div style="background:#cce5ff; padding:15px; border-radius:8px; text-align:center;"><div style="font-size:12px; color:#004085;">LPPP (9%)</div><div style="font-size:18px; font-weight:bold; color:#004085;">$${data.totales.lppp_usd.toFixed(2)}</div><div style="font-size:12px;">Bs. ${data.totales.lppp_bs.toFixed(2)}</div></div></div><div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:13px;"><thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:8px 10px;">Empleado</th><th style="padding:8px 10px; text-align:right;">Asignaciones</th><th style="padding:8px 10px; text-align:right;">IVSS</th><th style="padding:8px 10px; text-align:right;">RPE</th><th style="padding:8px 10px; text-align:right;">FAOV</th><th style="padding:8px 10px; text-align:right;">LPPP</th></tr></thead><tbody>`;
+                for (const empId in data.detalle_empleados) {
+                    const emp = data.detalle_empleados[empId];
+                    html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:6px 10px;"><strong>${emp.nombre}</strong><br><small style="color:#6b7a8f;">${emp.cedula}</small></td><td style="padding:6px 10px; text-align:right;">$${emp.total_asignaciones.toFixed(2)}</td><td style="padding:6px 10px; text-align:right;">$${emp.total_ivss.toFixed(2)}</td><td style="padding:6px 10px; text-align:right;">$${emp.total_rpe.toFixed(2)}</td><td style="padding:6px 10px; text-align:right;">$${emp.total_faov.toFixed(2)}</td><td style="padding:6px 10px; text-align:right;">$${emp.total_lppp.toFixed(2)}</td></tr>`;
+                }
+                html += `</tbody><tfoot><tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td style="padding:8px 10px;">TOTAL</td><td style="padding:8px 10px; text-align:right;">$${data.totales.total_asignaciones_usd.toFixed(2)}</td><td style="padding:8px 10px; text-align:right;">$${data.totales.ivss_usd.toFixed(2)}</td><td style="padding:8px 10px; text-align:right;">$${data.totales.rpe_usd.toFixed(2)}</td><td style="padding:8px 10px; text-align:right;">$${data.totales.faov_usd.toFixed(2)}</td><td style="padding:8px 10px; text-align:right;">$${data.totales.lppp_usd.toFixed(2)}</td></tr></tfoot></table></div>`;
+                resultDiv.innerHTML = html; Swal.fire('✅ Reporte Generado', 'El reporte parafiscal se ha generado correctamente.', 'success');
+            } catch (e) { console.error('❌ Error:', e); resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error al generar el reporte: ${e.message}</div>`; }
+        }
+        async function generarResumenDolares() {
+            const mes = parseInt(document.getElementById('reporte_mes').value);
+            const anio = parseInt(document.getElementById('reporte_anio').value);
+            const empleado_id = document.getElementById('reporte_resumen_empleado').value;
+            const resultDiv = document.getElementById('resultado_resumen_dolares');
+            resultDiv.innerHTML = '<div class="loading"><span class="loading-spinner"></span> Generando resumen en dólares...</div>';
+            try {
+                const res = await secureFetch(`${API_URL}/api/resumen_dolares`, { method: 'POST', body: JSON.stringify({ mes: mes, anio: anio, empleado_id: empleado_id ? parseInt(empleado_id) : null }) });
+                if (!res) return; const data = await res.json();
+                if (data.error) { resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`; return; }
+                const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+                const nombreMes = meses[mes - 1];
+                let html = `<div style="background:#e8f4fd; padding:15px; border-radius:8px; margin-bottom:15px;"><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;"><div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div><div><strong>📅 Período:</strong> ${nombreMes} ${anio}</div><div><strong>👥 Empleados:</strong> ${Object.keys(data.detalle_empleados).length}</div></div></div><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:15px; margin-bottom:15px;"><div style="background:#d4edda; padding:15px; border-radius:8px; text-align:center;"><div style="font-size:12px; color:#155724;">💰 Salario</div><div style="font-size:18px; font-weight:bold; color:#155724;">$${data.totales.salario_usd.toFixed(2)}</div></div><div style="background:#fff3cd; padding:15px; border-radius:8px; text-align:center;"><div style="font-size:12px; color:#856404;">⏱️ Horas Extras</div><div style="font-size:18px; font-weight:bold; color:#856404;">$${data.totales.horas_extras_usd.toFixed(2)}</div></div><div style="background:#cce5ff; padding:15px; border-radius:8px; text-align:center;"><div style="font-size:12px; color:#004085;">🎁 Bono</div><div style="font-size:18px; font-weight:bold; color:#004085;">$${data.totales.bono_usd.toFixed(2)}</div></div><div style="background:#e9ecef; padding:15px; border-radius:8px; text-align:center;"><div style="font-size:12px; color:#212529;">📊 Neto</div><div style="font-size:18px; font-weight:bold; color:#1a2a6c;">$${data.totales.neto_usd.toFixed(2)}</div></div></div><div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:13px;"><thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:8px 10px;">Empleado</th><th style="padding:8px 10px; text-align:right;">Salario</th><th style="padding:8px 10px; text-align:right;">Horas Extras</th><th style="padding:8px 10px; text-align:right;">Bono</th><th style="padding:8px 10px; text-align:right;">Neto</th></tr></thead><tbody>`;
+                for (const empId in data.detalle_empleados) {
+                    const emp = data.detalle_empleados[empId];
+                    html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:6px 10px;"><strong>${emp.nombre}</strong><br><small style="color:#6b7a8f;">${emp.cedula}</small></td><td style="padding:6px 10px; text-align:right;">$${emp.salario_usd.toFixed(2)}</td><td style="padding:6px 10px; text-align:right;">$${emp.horas_extras_usd.toFixed(2)}</td><td style="padding:6px 10px; text-align:right;">$${emp.bono_usd.toFixed(2)}</td><td style="padding:6px 10px; text-align:right;"><strong>$${emp.neto_usd.toFixed(2)}</strong></td></tr>`;
+                }
+                html += `</tbody><tfoot><tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td style="padding:8px 10px;">TOTAL</td><td style="padding:8px 10px; text-align:right;">$${data.totales.salario_usd.toFixed(2)}</td><td style="padding:8px 10px; text-align:right;">$${data.totales.horas_extras_usd.toFixed(2)}</td><td style="padding:8px 10px; text-align:right;">$${data.totales.bono_usd.toFixed(2)}</td><td style="padding:8px 10px; text-align:right;"><strong>$${data.totales.neto_usd.toFixed(2)}</strong></td></tr></tfoot></table></div>`;
+                resultDiv.innerHTML = html; Swal.fire('✅ Resumen Generado', 'El resumen en dólares se ha generado correctamente.', 'success');
+            } catch (e) { console.error('❌ Error:', e); resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error al generar el resumen: ${e.message}</div>`; }
+        }
+        async function calcularPasivos() {
+            const salario_mensual = parseFloat(document.getElementById('pasivos_salario').value) || 0;
+            const dias = parseInt(document.getElementById('pasivos_dias').value) || 30;
+            const usar_base_60 = document.getElementById('pasivos_60').checked;
+            if (salario_mensual <= 0) { Swal.fire('Atención', 'Ingresa un salario mensual base válido en USD.', 'warning'); return; }
+            try {
+                const res = await secureFetch(`${API_URL}/api/calcular_pasivos`, { method: 'POST', body: JSON.stringify({ salario_mensual, dias, usar_base_60 }) });
+                if (!res) return; const data = await res.json();
+                if (data.error) { Swal.fire('Error', data.error, 'error'); return; }
+                let html = `<h4 style="color:#1a2a6c; margin:0 0 15px 0;">📊 Resultado del Cálculo</h4><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:15px; background:#f8f9fc; padding:15px; border-radius:8px;"><div><strong>📅 Días:</strong> ${data.dias}</div><div><strong>📌 Base:</strong> ${data.base_usada}</div><div><strong>💱 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(2)}</div></div><div style="margin-top:20px; font-size:1.3em; padding:20px; background:#d4edda; border-radius:8px; text-align:center; border:1px solid #c3e6cb;"><div><strong>Total en USD:</strong> <span style="color:#1a2a6c;">$${data.total_usd.toFixed(2)}</span></div><div><strong>Total en Bs:</strong> <span style="color:#1a2a6c;">Bs. ${data.total_bs.toFixed(2)}</span></div></div>`;
+                document.getElementById('resultado_pasivos').innerHTML = html;
+                document.getElementById('alert_pasivos').innerHTML = `<div class="alert alert-success">✅ Cálculo realizado correctamente.</div>`;
+            } catch (e) { console.error(e); Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error'); }
+        }
 
         // Cerrar modales al hacer clic fuera
         window.onclick = function(event) {
