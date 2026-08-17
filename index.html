@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* ============================================
-           ESTILOS BASE (Intactos)
+           ESTILOS BASE - DISEÑO PROFESIONAL
            ============================================ */
         :root {
             --primary: #1a2a6c;
@@ -25,6 +25,7 @@
             --radius: 10px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         * { box-sizing: border-box; }
         body { font-family: 'Inter', -apple-system, sans-serif; margin: 0; padding: 20px; background-color: var(--bg-body); color: var(--text-main); line-height: 1.5; }
         .header-title { text-align: center; color: var(--primary); margin-bottom: 20px; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
@@ -157,7 +158,7 @@
         <div id="calculadora" class="tab-content active">
             <div class="module-header">
                 <div>
-                    <h2 class="module-title">📊 Módulo de Nómina</h2>
+                    <h2 class="module-title">📊 Módulo de Nómina Profesional</h2>
                     <p class="module-subtitle">Genera y administra los cálculos de nómina de forma rápida y segura</p>
                 </div>
                 <span class="module-badge" id="empleados_seleccionados_badge">0 empleados seleccionados</span>
@@ -182,7 +183,7 @@
                         </select>
                     </div>
                     <div class="config-card">
-                        <label class="config-label">Período de Pago</label>
+                        <label class="config-label">Período de Pago (Automático)</label>
                         <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
                             <input type="date" id="fecha_inicio" class="config-input" style="flex:1; min-width:100px;">
                             <span style="color:#6b7a8f; font-weight:bold;">→</span>
@@ -256,13 +257,14 @@
                                 <span style="font-size:20px;">📋</span>
                                 <h3 style="font-size:15px; font-weight:600; color:#1a2a6c; margin:0;">Detalles por Empleado</h3>
                             </div>
-                            <span style="font-size:12px; color:#6b7a8f;">💡 Ingresa días de falta, horas extras y bonos</span>
+                            <span style="font-size:12px; color:#6b7a8f;">💡 Puedes modificar el sueldo base para este cálculo específico</span>
                         </div>
                         <div class="table-responsive">
-                            <table class="table-modern" style="min-width:700px;">
+                            <table class="table-modern" style="min-width:800px;">
                                 <thead>
                                     <tr>
                                         <th style="min-width:180px;">Empleado</th>
+                                        <th style="min-width:110px;">Salario Base (USD) ✏️</th>
                                         <th style="min-width:100px;">Faltas</th>
                                         <th style="min-width:100px;">Hrs Extras</th>
                                         <th style="min-width:120px;">Valor Hora (USD)</th>
@@ -276,13 +278,18 @@
                 </div>
 
                 <div style="display:flex; gap:15px; margin-top:24px; flex-wrap:wrap;">
-                    <button class="btn-primary" onclick="calcularNomina()" style="display:inline-flex; align-items:center; gap:10px; padding:14px 35px; font-size:16px;">
-                        <span style="font-size:20px;">📊</span> Calcular Nómina
+                    <button class="btn-primary" onclick="calcularNomina(true)" style="display:inline-flex; align-items:center; gap:10px; padding:14px 35px; font-size:16px;">
+                        <span style="font-size:20px;">💾</span> Guardar Nómina
+                    </button>
+                    <button onclick="calcularNomina(false)" style="display:inline-flex; align-items:center; gap:8px; padding:14px 25px; background:#f8f9fc; color:#1a2a6c; border:2px solid #1a2a6c; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:0.3s;">
+                        <span style="font-size:18px;">👁️</span> Vista Previa
+                    </button>
+                    <button onclick="copiarPeriodoAnterior()" style="display:inline-flex; align-items:center; gap:8px; padding:14px 25px; background:#e8f4fd; color:#004085; border:1px solid #b8daff; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:0.3s;">
+                        <span style="font-size:18px;">📋</span> Copiar Período Anterior
                     </button>
                     <button onclick="limpiarCamposNomina()" style="display:inline-flex; align-items:center; gap:8px; padding:14px 25px; background:#f1f4f9; color:#2d3748; border:1px solid #dce1e8; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:0.3s;">
                         <span style="font-size:18px;">🔄</span> Limpiar Campos
                     </button>
-                    <!-- NUEVO BOTÓN PARA VOLVER ATRÁS -->
                     <button onclick="toggleCrearNomina()" style="display:inline-flex; align-items:center; gap:8px; padding:14px 25px; background:#fee2e2; color:#991b1b; border:1px solid #fee2e2; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:var(--transition);">
                         <span style="font-size:18px;">❌</span> Cancelar
                     </button>
@@ -293,7 +300,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: EMPLEADOS (INTACTO) -->
+        <!-- MÓDULO: EMPLEADOS -->
         <!-- ============================================ -->
         <div id="empleados" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">👤 Gestión de Empleados</h2><p class="module-subtitle">Administra la información de todos los trabajadores</p></div><span class="module-badge" id="total_empleados_badge">0 empleados</span></div>
@@ -329,7 +336,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: SUCURSALES (INTACTO) -->
+        <!-- MÓDULO: SUCURSALES -->
         <!-- ============================================ -->
         <div id="sucursales" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">🏢 Gestión de Sucursales</h2><p class="module-subtitle">Administra las sucursales de la empresa</p></div></div>
@@ -339,7 +346,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: PARÁMETROS (INTACTO) -->
+        <!-- MÓDULO: PARÁMETROS -->
         <!-- ============================================ -->
         <div id="parametros" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">⚙️ Configuración</h2><p class="module-subtitle">Parámetros de cálculo y datos de la empresa</p></div></div>
@@ -372,7 +379,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: PASIVOS (INTACTO) -->
+        <!-- MÓDULO: PASIVOS -->
         <!-- ============================================ -->
         <div id="pasivos" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">📄 Pasivos Laborales</h2><p class="module-subtitle">Cálculo de utilidades, aguinaldo y vacaciones</p></div></div>
@@ -390,7 +397,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: CESTATICKET (INTACTO) -->
+        <!-- MÓDULO: CESTATICKET -->
         <!-- ============================================ -->
         <div id="cestaticket" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">🍽️ Cestaticket</h2><p class="module-subtitle">Cálculo del bono de alimentación según Ley</p></div><span class="module-badge" id="cesta_total_empleados_badge">0 empleados</span></div>
@@ -429,7 +436,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: HISTORIAL (INTACTO) -->
+        <!-- MÓDULO: HISTORIAL -->
         <!-- ============================================ -->
         <div id="historial" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">📋 Historial de Nóminas</h2><p class="module-subtitle">Registro de todas las nóminas procesadas</p></div></div>
@@ -439,7 +446,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: REPORTES (INTACTO) -->
+        <!-- MÓDULO: REPORTES -->
         <!-- ============================================ -->
         <div id="reportes" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">📊 Reportes Especiales</h2><p class="module-subtitle">Pasivos laborales, parafiscales y resumen en dólares</p></div></div>
@@ -449,7 +456,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: SEGURIDAD (INTACTO) -->
+        <!-- MÓDULO: SEGURIDAD -->
         <!-- ============================================ -->
         <div id="seguridad" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">🔐 Gestión de Usuarios</h2><p class="module-subtitle">Administración de usuarios y seguridad del sistema</p></div></div>
@@ -459,7 +466,7 @@
         </div>
     </div>
 
-    <!-- MODALES (INTACTOS) -->
+    <!-- MODALES -->
     <div id="modalDetalleLote" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3>📄 Detalle del Lote</h3><span class="close-btn" onclick="cerrarModalDetalle()">&times;</span></div>
@@ -475,7 +482,7 @@
         </div>
     </div>
 
-    <!-- JS COMPLETO E INTACTO (AGREGADA LA FUNCIÓN TOGGLE) -->
+    <!-- JS COMPLETO Y UNIFICADO -->
     <script>
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
         let editingEmployeeId = null;
@@ -562,7 +569,7 @@
                         this.classList.add('active');
                         if (tabId === 'empleados') { cargarEmpleadosAdmin(); actualizarTotalEmpleados(); }
                         else if (tabId === 'sucursales') cargarSucursales();
-                        else if (tabId === 'calculadora') { /* Cargamos solo el placeholder o el formulario si estaba abierto */ }
+                        else if (tabId === 'calculadora') { /* Se carga el placeholder */ }
                         else if (tabId === 'parametros') cargarParametros();
                         else if (tabId === 'cestaticket') { setTimeout(() => { initCestaticket(); cargarLotesCestaticket(); }, 100); }
                         else if (tabId === 'historial') cargarLotes();
@@ -581,29 +588,23 @@
                     }
                 });
                 cargarSucursalesCalc();
-                // Ya no cargamos empleados al inicio, se cargan al hacer clic en "Crear Nómina"
             } catch (error) {
                 console.error('❌ Error en DOMContentLoaded:', error);
                 Swal.fire({ title: '❌ Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Reintentar' }).then(() => { location.reload(); });
             }
         });
 
-        // ⭐ NUEVA FUNCIÓN DE EXPERTO: ABRIR/CERRAR EL DASHBOARD DE NÓMINA
+        // ⭐ ABRIR/CERRAR DASHBOARD DE NÓMINA
         function toggleCrearNomina() {
             const placeholder = document.getElementById('nomina_placeholder');
             const formContainer = document.getElementById('nomina_form_container');
-            
             if (formContainer.style.display === 'none') {
-                // Abrir el formulario
                 placeholder.style.display = 'none';
                 formContainer.style.display = 'block';
-                // Autocompletar las fechas automáticamente al abrir
                 autoFillPeriod();
-                // Cargar la lista de empleados
                 cargarEmpleadosCalc(document.getElementById('calc_sucursal').value, document.getElementById('calc_tipo_pago').value);
                 document.getElementById('resultado_content').innerHTML = '';
             } else {
-                // Cerrar el formulario
                 placeholder.style.display = 'block';
                 formContainer.style.display = 'none';
                 document.getElementById('resultado_content').innerHTML = '';
@@ -611,7 +612,7 @@
             }
         }
 
-        // ⭐ FUNCIÓN DE AUTORELLENADO DE PERÍODOS (Funciona igual que antes)
+        // ⭐ AUTORELLENADO DE PERÍODOS
         function autoFillPeriod() {
             const tipo = document.getElementById('tipo').value;
             const today = new Date();
@@ -622,35 +623,22 @@
                 const day = today.getDate();
                 const year = today.getFullYear();
                 const month = today.getMonth();
-                if (day <= 15) {
-                    startDate = new Date(year, month, 1);
-                    endDate = new Date(year, month, 15);
-                } else {
-                    startDate = new Date(year, month, 16);
-                    endDate = new Date(year, month + 1, 0);
-                }
+                if (day <= 15) { startDate = new Date(year, month, 1); endDate = new Date(year, month, 15); } 
+                else { startDate = new Date(year, month, 16); endDate = new Date(year, month + 1, 0); }
             } else if (tipo === 'Semanal') {
                 const dayOfWeek = today.getDay();
                 const diffToMonday = (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
                 startDate = new Date(today);
                 startDate.setDate(today.getDate() - diffToMonday);
-                
                 const diffToSunday = (dayOfWeek === 0 ? 0 : 7 - dayOfWeek);
                 endDate = new Date(today);
                 endDate.setDate(today.getDate() + diffToSunday);
             }
-
             const formatDate = (date) => date.toISOString().split('T')[0];
             document.getElementById('fecha_inicio').value = formatDate(startDate);
             document.getElementById('fecha_fin').value = formatDate(endDate);
             
-            Swal.fire({
-                icon: 'success',
-                title: '¡Período Autocompletado!',
-                text: `Calculado automáticamente del ${formatDate(startDate)} al ${formatDate(endDate)}`,
-                timer: 1500,
-                showConfirmButton: false
-            });
+            Swal.fire({ icon: 'success', title: '¡Período Autocompletado!', text: `Calculado automáticamente del ${formatDate(startDate)} al ${formatDate(endDate)}`, timer: 1500, showConfirmButton: false });
         }
 
         async function cerrarSesion() {
@@ -951,6 +939,8 @@
             document.getElementById('resultado_content').innerHTML = '';
             Swal.fire('🧹 Limpiado', 'Todos los campos de detalles han sido reiniciados.', 'info');
         }
+        
+        // ✅ MEJORA: CARGA DE EMPLEADOS CON COLUMNA DE SALARIO EDITABLE
         async function cargarEmpleadosCalc(sucursal_id = '', tipo_pago = '') {
             try {
                 const container = document.getElementById('lista_empleados');
@@ -984,12 +974,30 @@
                     actualizarBadgeEmpleados();
                     let detalleHtml = '';
                     if (quincenal.length > 0) {
-                        detalleHtml += `<tr style="background:#f0f7ff; font-weight:700; color:#1a2a6c;"><td colspan="5">📅 Quincenales</td></tr>`;
-                        detalleHtml += quincenal.map(e => `<tr data-cedula="${e.cedula}" style="display:table-row;"><td><strong>${e.nombres} ${e.apellidos}</strong></td><td><input type="number" class="input-detalle input_faltas" min="0" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td><td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td><td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td><td><input type="number" class="input-detalle input_bono" min="0" step="0.01" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td></tr>`).join('');
+                        detalleHtml += `<tr style="background:#f0f7ff; font-weight:700; color:#1a2a6c;"><td colspan="6">📅 Quincenales</td></tr>`;
+                        detalleHtml += quincenal.map(e => `
+                            <tr data-cedula="${e.cedula}" style="display:table-row;">
+                                <td><strong>${e.nombres} ${e.apellidos}</strong></td>
+                                <td><input type="number" class="input-detalle input_salario" step="0.01" value="${e.salario_mensual_usd}" style="width:90px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px; font-weight:bold; color:#1a2a6c;"></td>
+                                <td><input type="number" class="input-detalle input_faltas" min="0" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                                <td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                                <td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                                <td><input type="number" class="input-detalle input_bono" min="0" step="0.01" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                            </tr>
+                        `).join('');
                     }
                     if (semanal.length > 0) {
-                        detalleHtml += `<tr style="background:#fffbe6; font-weight:700; color:#856404;"><td colspan="5">📅 Semanales</td></tr>`;
-                        detalleHtml += semanal.map(e => `<tr data-cedula="${e.cedula}" style="display:table-row;"><td><strong>${e.nombres} ${e.apellidos}</strong></td><td><input type="number" class="input-detalle input_faltas" min="0" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td><td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td><td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td><td><input type="number" class="input-detalle input_bono" min="0" step="0.01" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td></tr>`).join('');
+                        detalleHtml += `<tr style="background:#fffbe6; font-weight:700; color:#856404;"><td colspan="6">📅 Semanales</td></tr>`;
+                        detalleHtml += semanal.map(e => `
+                            <tr data-cedula="${e.cedula}" style="display:table-row;">
+                                <td><strong>${e.nombres} ${e.apellidos}</strong></td>
+                                <td><input type="number" class="input-detalle input_salario" step="0.01" value="${e.salario_mensual_usd}" style="width:90px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px; font-weight:bold; color:#1a2a6c;"></td>
+                                <td><input type="number" class="input-detalle input_faltas" min="0" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                                <td><input type="number" class="input-detalle input_horas" min="0" step="0.5" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                                <td><input type="number" class="input-detalle input_valor_hora" min="0" step="0.01" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                                <td><input type="number" class="input-detalle input_bono" min="0" step="0.01" value="0" style="width:70px; padding:6px 8px; border:1px solid #dce1e8; border-radius:4px; text-align:center; font-size:13px;"></td>
+                            </tr>
+                        `).join('');
                     }
                     detalleContainer.innerHTML = detalleHtml;
                     inputsContainer.style.display = 'block';
@@ -1000,6 +1008,7 @@
                 console.error(e);
             }
         }
+
         function actualizarTablaNomina() {
             const checkboxes = document.querySelectorAll('.emp-check');
             const rows = document.querySelectorAll('#cuerpo_detalle_nomina tr');
@@ -1013,38 +1022,67 @@
                 }
             });
         }
-        async function calcularNomina() {
+
+        // ✅ MEJORA: CÁLCULO DE NÓMINA (Con Soporte para Vista Previa, Salarios Override y Copiado)
+        async function calcularNomina(guardar_en_bd = true) {
             const tipo = document.getElementById('tipo').value;
             const fecha_inicio = document.getElementById('fecha_inicio').value;
             const fecha_fin = document.getElementById('fecha_fin').value;
-            const descripcion = document.getElementById('calc_descripcion').value;
+            let descripcion = document.getElementById('calc_descripcion').value;
+
+            if (!descripcion) {
+                const fechaInicioStr = fecha_inicio.split('-').reverse().join('/');
+                const fechaFinStr = fecha_fin.split('-').reverse().join('/');
+                descripcion = `${tipo} del ${fechaInicioStr} al ${fechaFinStr}`;
+                document.getElementById('calc_descripcion').value = descripcion;
+            }
+
             const aplicar_deducciones = document.getElementById('aplicar_deducciones').checked;
             const split_60_40 = document.getElementById('split_60_40').checked;
             const calcular_solo_bono = document.getElementById('calcular_solo_bono').checked;
             const ids = Array.from(document.querySelectorAll('.emp-check:checked')).map(c => parseInt(c.value));
+
             if (!ids.length) { Swal.fire('Atención', 'Selecciona al menos un empleado.', 'warning'); return; }
-            const faltas = {}; const horas_extras = {}; const bonos = {};
+
+            const faltas = {}; const horas_extras = {}; const bonos = {}; const salarios_override = {};
+
             document.querySelectorAll('#cuerpo_detalle_nomina tr').forEach(row => {
                 if (row.hasAttribute('data-cedula') && row.style.display !== 'none') {
                     const cedula = row.getAttribute('data-cedula');
+                    const id = parseInt(row.querySelector('.emp-check')?.value) || 0; // Obtenemos el id para el override
+                    const salario_val = parseFloat(row.querySelector('.input_salario').value) || 0;
                     const faltas_val = parseInt(row.querySelector('.input_faltas').value) || 0;
                     const horas_val = parseFloat(row.querySelector('.input_horas').value) || 0;
                     const valor_val = parseFloat(row.querySelector('.input_valor_hora').value) || 0;
                     const bono_val = parseFloat(row.querySelector('.input_bono').value) || 0;
+                    
+                    if (id > 0) salarios_override[id] = salario_val;
                     if (faltas_val > 0) faltas[cedula] = faltas_val;
                     if (horas_val > 0 || valor_val > 0) horas_extras[cedula] = { horas: horas_val, valor_hora: valor_val };
                     if (bono_val > 0) bonos[cedula] = bono_val;
                 }
             });
+
             try {
-                const res = await secureFetch(`${API_URL}/api/calcular_nomina`, { method: 'POST', body: JSON.stringify({ tipo, fecha_inicio, fecha_fin, descripcion, empleados_ids: ids, faltas, horas_extras, bonos, aplicar_deducciones, split_60_40, calcular_solo_bono }) });
+                const res = await secureFetch(`${API_URL}/api/calcular_nomina`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        tipo, fecha_inicio, fecha_fin, descripcion,
+                        empleados_ids: ids, faltas, horas_extras, bonos, salarios_override,
+                        aplicar_deducciones, split_60_40, calcular_solo_bono,
+                        guardar_en_bd: guardar_en_bd
+                    })
+                });
                 if (!res) return;
                 const data = await res.json();
                 if (data.error) { Swal.fire('Error', data.error, 'error'); return; }
+
                 let total_usd = 0; let total_bs = 0;
                 data.resultados.forEach(r => { total_usd += r.neto_pagar_usd; total_bs += r.neto_pagar_bs; });
+
                 let html = `<h3 style="color:#1a2a6c;">📊 Resultado del Cálculo</h3>`;
-                html += `<div style="background:#e8f4fd; padding:15px; border-radius:8px; margin:10px 0;"><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;"><div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div><div><strong>📋 Lote ID:</strong> #${data.lote_id}</div><div><strong>👥 Empleados:</strong> ${data.resultados.length}</div></div></div>`;
+                html += `<div style="background:#e8f4fd; padding:15px; border-radius:8px; margin:10px 0;"><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;"><div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div><div><strong>📋 Lote ID:</strong> ${guardar_en_bd ? '#'+data.lote_id : 'VISTA PREVIA (NO GUARDADO)'}</div><div><strong>👥 Empleados:</strong> ${data.resultados.length}</div></div></div>`;
+
                 if (split_60_40) {
                     html += `<div style="overflow-x:auto;"><table style="min-width:800px; font-size:13px; width:100%; border-collapse:collapse;"><thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:10px 12px; text-align:left;">Empleado</th><th style="padding:10px 12px; text-align:center;">Días</th><th style="padding:10px 12px; text-align:right;">Base Full</th><th style="padding:10px 12px; text-align:right;">Hrs Extras</th><th style="padding:10px 12px; text-align:right;">Bono</th><th style="padding:10px 12px; text-align:right;">Asign.</th><th style="padding:10px 12px; text-align:right;">Deducc.</th><th style="padding:10px 12px; text-align:right;">Pago 60%</th><th style="padding:10px 12px; text-align:right;">Pago 40%</th><th style="padding:10px 12px; text-align:right;">Total Bs</th></tr></thead><tbody>`;
                     data.resultados.forEach(r => { html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:8px 12px;"><strong>${r.empleado.nombre_completo}</strong></td><td style="padding:8px 12px; text-align:center;">${r.dias_reales_trabajados}</td><td style="padding:8px 12px; text-align:right;">$${r.salario_base_full_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.horas_extras_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.bono_complementario_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_asignaciones_base_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_deducciones_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.pago_60_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.pago_40_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;"><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td></tr>`; });
@@ -1057,11 +1095,50 @@
                     html += `</tbody></table></div>`;
                 }
                 document.getElementById('resultado_content').innerHTML = html;
-                Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success');
-                cargarLotes();
+                if(guardar_en_bd) { Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success'); cargarLotes(); } 
+                else { Swal.fire('✅ Vista Previa', 'El cálculo se ha realizado correctamente. No se ha guardado en el historial.', 'info'); }
             } catch (e) { console.error(e); Swal.fire('Error', e.message, 'error'); }
         }
 
+        // ✅ MEJORA: COPIAR DATOS DEL PERÍODO ANTERIOR
+        async function copiarPeriodoAnterior() {
+            try {
+                const res = await secureFetch(`${API_URL}/api/lotes?search=&limit=1`);
+                if (!res) return;
+                const lotes = await res.json();
+                if (lotes.length === 0) return Swal.fire('Atención', 'No hay períodos anteriores guardados para copiar.', 'warning');
+                const ultimoLoteId = lotes[0].id_lote;
+
+                const resDetalle = await secureFetch(`${API_URL}/api/lotes/${ultimoLoteId}`);
+                if (!resDetalle) return;
+                const data = await resDetalle.json();
+                if (!data.nominas || data.nominas.length === 0) return Swal.fire('Atención', 'El período anterior no contiene empleados.', 'warning');
+
+                let empleadosMapeados = 0;
+                data.nominas.forEach(n => {
+                    const row = document.querySelector(`#cuerpo_detalle_nomina tr[data-cedula="${n.cedula}"]`);
+                    if (row && row.style.display !== 'none') {
+                        row.querySelector('.input_faltas').value = n.faltas_dias || 0;
+                        // Nota: Copiamos las horas extras base, el valor_hora deberá ajustarlo el usuario manualmente
+                        row.querySelector('.input_horas').value = n.horas_extras_usd > 0 ? n.horas_extras_usd : 0; 
+                        empleadosMapeados++;
+                    }
+                });
+
+                if (empleadosMapeados > 0) {
+                    Swal.fire('✅ Copiado', `Se han importado los datos de ${empleadosMapeados} empleados del Lote #${ultimoLoteId}. Revisa las horas extras y bonos.`, 'success');
+                } else {
+                    Swal.fire('Atención', 'No hay empleados en común entre la nómina actual y el período anterior.', 'info');
+                }
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', 'No se pudo copiar el período anterior.', 'error');
+            }
+        }
+
+        // ============================================
+        // CESTATICKET
+        // ============================================
         async function cargarSucursalesCesta() {
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
