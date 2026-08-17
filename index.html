@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* ============================================
-           ESTILOS BASE - DISEÑO PROFESIONAL
+           ESTILOS BASE (Intactos)
            ============================================ */
         :root {
             --primary: #1a2a6c;
@@ -25,7 +25,6 @@
             --radius: 10px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         * { box-sizing: border-box; }
         body { font-family: 'Inter', -apple-system, sans-serif; margin: 0; padding: 20px; background-color: var(--bg-body); color: var(--text-main); line-height: 1.5; }
         .header-title { text-align: center; color: var(--primary); margin-bottom: 20px; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
@@ -69,7 +68,6 @@
         .option-checkbox input:checked + .checkbox-custom { background: var(--primary); border-color: var(--primary); }
         .option-checkbox input:checked + .checkbox-custom::after { content: "✓"; color: white; font-size: 12px; font-weight: bold; }
 
-        /* Botones */
         .btn-primary { background: var(--primary); color: white; padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: var(--transition); font-size: 14px; }
         .btn-primary:hover { background: var(--primary-light); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26, 42, 108, 0.25); }
         .btn-success { background: #28a745; color: white; padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: var(--transition); font-size: 14px; }
@@ -83,7 +81,6 @@
         .btn-deselect-all { padding: 4px 14px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; transition: var(--transition); background: #fee2e2; color: #991b1b; }
         .btn-deselect-all:hover { background: #fecaca; }
 
-        /* Tablas */
         .table-responsive { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border-color); }
         .table-modern { width: 100%; border-collapse: collapse; font-size: 14px; }
         .table-modern thead th { padding: 14px 16px; background: #f8f9fc; color: var(--text-main); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border-color); text-align: left; position: sticky; top: 0; z-index: 10; }
@@ -156,132 +153,147 @@
             <button class="tab-btn" data-target="seguridad">🔐 Usuarios</button>
         </div>
 
-        <!-- 🚀 MÓDULO: NÓMINA (ACTUALIZADO Y DINÁMICO) -->
+        <!-- 🚀 MÓDULO: NÓMINA (REDISEÑADO CON DASHBOARD + BOTÓN DE CREACIÓN) -->
         <div id="calculadora" class="tab-content active">
             <div class="module-header">
                 <div>
-                    <h2 class="module-title">📊 Cálculo de Nómina Dinámico</h2>
-                    <p class="module-subtitle">Genera el período automáticamente y calcula con un solo clic</p>
+                    <h2 class="module-title">📊 Módulo de Nómina</h2>
+                    <p class="module-subtitle">Genera y administra los cálculos de nómina de forma rápida y segura</p>
                 </div>
-                <span class="module-badge" id="empleados_seleccionados_badge">0 empleados</span>
+                <span class="module-badge" id="empleados_seleccionados_badge">0 empleados seleccionados</span>
             </div>
 
-            <div class="config-grid">
-                <div class="config-card">
-                    <label class="config-label">Tipo de Pago</label>
-                    <select id="tipo" class="config-select" onchange="autoFillPeriod()">
-                        <option value="Quincenal">📆 Quincenal</option>
-                        <option value="Semanal">📅 Semanal</option>
-                    </select>
-                </div>
-                <div class="config-card">
-                    <label class="config-label">Período de Pago (Automático)</label>
-                    <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-                        <input type="date" id="fecha_inicio" class="config-input" style="flex:1; min-width:100px;">
-                        <span style="color:#6b7a8f; font-weight:bold;">→</span>
-                        <input type="date" id="fecha_fin" class="config-input" style="flex:1; min-width:100px;">
-                        <button class="btn-warning" onclick="autoFillPeriod()" style="padding:6px 12px; font-size:11px; font-weight:700; white-space:nowrap;">⏳ Autocompletar</button>
-                    </div>
-                    <small style="color:#6b7a8f; margin-top:4px;">💡 Cambia el tipo de pago o haz clic en "Autocompletar" para generar el período correcto.</small>
-                </div>
-                <div class="config-card">
-                    <label class="config-label">Descripción</label>
-                    <input type="text" id="calc_descripcion" class="config-input" placeholder="Ej: Nómina 1ra Quincena Agosto 2026">
-                </div>
+            <!-- ESTADO 1: VISTA DE INICIO (DASHBOARD VACÍO) -->
+            <div id="nomina_placeholder" style="padding: 60px 20px; text-align: center; background: #fafbfc; border-radius: 12px; border: 2px dashed var(--border-color);">
+                <div style="font-size: 60px; margin-bottom: 15px;">🧮</div>
+                <h3 style="color: var(--primary); margin-bottom: 10px;">Iniciar Nueva Nómina</h3>
+                <p style="color: #6b7a8f; margin-bottom: 20px;">Crea una nueva nómina seleccionando el tipo de pago (Semanal o Quincenal) y los empleados involucrados.</p>
+                <button class="btn-primary" onclick="toggleCrearNomina()" style="font-size: 18px; padding: 15px 35px;">➕ Crear Nómina</button>
             </div>
 
-            <div class="filters-modern">
-                <div class="filter-group">
-                    <div class="filter-item">
-                        <label class="filter-label">🏢 Sucursal</label>
-                        <select id="calc_sucursal" class="config-select">
-                            <option value="">Todas las sucursales</option>
+            <!-- ESTADO 2: FORMULARIO DE NÓMINA (OCULTO POR DEFECTO) -->
+            <div id="nomina_form_container" style="display: none;">
+                <div class="config-grid">
+                    <div class="config-card">
+                        <label class="config-label">Tipo de Pago</label>
+                        <select id="tipo" class="config-select" onchange="autoFillPeriod()">
+                            <option value="Quincenal">📆 Quincenal</option>
+                            <option value="Semanal">📅 Semanal</option>
                         </select>
                     </div>
-                    <div class="filter-item">
-                        <label class="filter-label">💳 Tipo de Pago</label>
-                        <select id="calc_tipo_pago" class="config-select">
-                            <option value="">Todos</option>
-                            <option value="Quincenal">Quincenal</option>
-                            <option value="Semanal">Semanal</option>
-                        </select>
+                    <div class="config-card">
+                        <label class="config-label">Período de Pago</label>
+                        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                            <input type="date" id="fecha_inicio" class="config-input" style="flex:1; min-width:100px;">
+                            <span style="color:#6b7a8f; font-weight:bold;">→</span>
+                            <input type="date" id="fecha_fin" class="config-input" style="flex:1; min-width:100px;">
+                            <button class="btn-warning" onclick="autoFillPeriod()" style="padding:6px 12px; font-size:11px; font-weight:700; white-space:nowrap;">⏳ Autocompletar</button>
+                        </div>
+                        <small style="color:#6b7a8f; margin-top:4px;">💡 Cambia el tipo de pago o haz clic en "Autocompletar" para generar el período correcto.</small>
+                    </div>
+                    <div class="config-card">
+                        <label class="config-label">Descripción</label>
+                        <input type="text" id="calc_descripcion" class="config-input" placeholder="Ej: Nómina 1ra Quincena Agosto 2026">
                     </div>
                 </div>
-                <div class="options-group">
-                    <label class="option-checkbox">
-                        <input type="checkbox" id="aplicar_deducciones" checked>
-                        <span class="checkbox-custom"></span>
-                        Aplicar deducciones (IVSS, RPE, FAOV)
-                    </label>
-                    <label class="option-checkbox">
-                        <input type="checkbox" id="split_60_40">
-                        <span class="checkbox-custom"></span>
-                        Dividir pago (60% Cuenta / 40% Efectivo)
-                    </label>
-                    <label class="option-checkbox option-highlight" style="background:#eef2ff; padding:4px 12px 4px 10px; border-radius:6px; border:1px solid #c7d2fe;">
-                        <input type="checkbox" id="calcular_solo_bono" onchange="toggleSoloBono()">
-                        <span class="checkbox-custom"></span>
-                        🔘 Calcular solo Bono
-                    </label>
-                </div>
-            </div>
 
-            <div style="border:1px solid var(--border-color); border-radius:var(--radius); overflow:hidden; margin-top:20px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; padding:14px 20px; background:#f8f9fc; border-bottom:1px solid var(--border-color);">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span style="font-size:20px;">👥</span>
-                        <h3 style="font-size:15px; font-weight:600; color:#1a2a6c; margin:0;">Empleados Seleccionados</h3>
+                <div class="filters-modern">
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label class="filter-label">🏢 Sucursal</label>
+                            <select id="calc_sucursal" class="config-select">
+                                <option value="">Todas las sucursales</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label class="filter-label">💳 Tipo de Pago</label>
+                            <select id="calc_tipo_pago" class="config-select">
+                                <option value="">Todos</option>
+                                <option value="Quincenal">Quincenal</option>
+                                <option value="Semanal">Semanal</option>
+                            </select>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn-select-all" onclick="seleccionarTodosEmpleados()">✅ Todos</button>
-                        <button class="btn-deselect-all" onclick="deseleccionarTodosEmpleados()">❌ Ninguno</button>
+                    <div class="options-group">
+                        <label class="option-checkbox">
+                            <input type="checkbox" id="aplicar_deducciones" checked>
+                            <span class="checkbox-custom"></span>
+                            Aplicar deducciones (IVSS, RPE, FAOV)
+                        </label>
+                        <label class="option-checkbox">
+                            <input type="checkbox" id="split_60_40">
+                            <span class="checkbox-custom"></span>
+                            Dividir pago (60% Cuenta / 40% Efectivo)
+                        </label>
+                        <label class="option-checkbox option-highlight" style="background:#eef2ff; padding:4px 12px 4px 10px; border-radius:6px; border:1px solid #c7d2fe;">
+                            <input type="checkbox" id="calcular_solo_bono" onchange="toggleSoloBono()">
+                            <span class="checkbox-custom"></span>
+                            🔘 Calcular solo Bono
+                        </label>
                     </div>
                 </div>
-                <div id="lista_empleados" style="padding:16px 20px; display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:6px;">
-                    <div class="loading"><span class="loading-spinner"></span> Cargando empleados...</div>
-                </div>
-            </div>
 
-            <div id="nomina_inputs_container" style="display:none; margin-top:24px;">
-                <div style="border:1px solid var(--border-color); border-radius:var(--radius); overflow:hidden;">
+                <div style="border:1px solid var(--border-color); border-radius:var(--radius); overflow:hidden; margin-top:20px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; padding:14px 20px; background:#f8f9fc; border-bottom:1px solid var(--border-color);">
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-size:20px;">📋</span>
-                            <h3 style="font-size:15px; font-weight:600; color:#1a2a6c; margin:0;">Detalles por Empleado</h3>
+                            <span style="font-size:20px;">👥</span>
+                            <h3 style="font-size:15px; font-weight:600; color:#1a2a6c; margin:0;">Empleados Seleccionados</h3>
                         </div>
-                        <span style="font-size:12px; color:#6b7a8f;">💡 Ingresa días de falta, horas extras y bonos</span>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-select-all" onclick="seleccionarTodosEmpleados()">✅ Todos</button>
+                            <button class="btn-deselect-all" onclick="deseleccionarTodosEmpleados()">❌ Ninguno</button>
+                        </div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table-modern" style="min-width:700px;">
-                            <thead>
-                                <tr>
-                                    <th style="min-width:180px;">Empleado</th>
-                                    <th style="min-width:100px;">Faltas</th>
-                                    <th style="min-width:100px;">Hrs Extras</th>
-                                    <th style="min-width:120px;">Valor Hora (USD)</th>
-                                    <th style="min-width:130px;">Bono Comp. (USD)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cuerpo_detalle_nomina"></tbody>
-                        </table>
+                    <div id="lista_empleados" style="padding:16px 20px; display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:6px;">
+                        <div class="loading"><span class="loading-spinner"></span> Cargando empleados...</div>
                     </div>
                 </div>
-            </div>
 
-            <div style="display:flex; gap:15px; margin-top:24px; flex-wrap:wrap;">
-                <button class="btn-primary" onclick="calcularNomina()" style="display:inline-flex; align-items:center; gap:10px; padding:14px 35px; font-size:16px;">
-                    <span style="font-size:20px;">📊</span> Calcular Nómina
-                </button>
-                <button onclick="limpiarCamposNomina()" style="display:inline-flex; align-items:center; gap:8px; padding:14px 25px; background:#f1f4f9; color:#2d3748; border:1px solid #dce1e8; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:0.3s;">
-                    <span style="font-size:18px;">🔄</span> Limpiar Campos
-                </button>
-            </div>
+                <div id="nomina_inputs_container" style="display:none; margin-top:24px;">
+                    <div style="border:1px solid var(--border-color); border-radius:var(--radius); overflow:hidden;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; padding:14px 20px; background:#f8f9fc; border-bottom:1px solid var(--border-color);">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:20px;">📋</span>
+                                <h3 style="font-size:15px; font-weight:600; color:#1a2a6c; margin:0;">Detalles por Empleado</h3>
+                            </div>
+                            <span style="font-size:12px; color:#6b7a8f;">💡 Ingresa días de falta, horas extras y bonos</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table-modern" style="min-width:700px;">
+                                <thead>
+                                    <tr>
+                                        <th style="min-width:180px;">Empleado</th>
+                                        <th style="min-width:100px;">Faltas</th>
+                                        <th style="min-width:100px;">Hrs Extras</th>
+                                        <th style="min-width:120px;">Valor Hora (USD)</th>
+                                        <th style="min-width:130px;">Bono Comp. (USD)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuerpo_detalle_nomina"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
-            <div id="resultado_content" class="results-container"></div>
+                <div style="display:flex; gap:15px; margin-top:24px; flex-wrap:wrap;">
+                    <button class="btn-primary" onclick="calcularNomina()" style="display:inline-flex; align-items:center; gap:10px; padding:14px 35px; font-size:16px;">
+                        <span style="font-size:20px;">📊</span> Calcular Nómina
+                    </button>
+                    <button onclick="limpiarCamposNomina()" style="display:inline-flex; align-items:center; gap:8px; padding:14px 25px; background:#f1f4f9; color:#2d3748; border:1px solid #dce1e8; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:0.3s;">
+                        <span style="font-size:18px;">🔄</span> Limpiar Campos
+                    </button>
+                    <!-- NUEVO BOTÓN PARA VOLVER ATRÁS -->
+                    <button onclick="toggleCrearNomina()" style="display:inline-flex; align-items:center; gap:8px; padding:14px 25px; background:#fee2e2; color:#991b1b; border:1px solid #fee2e2; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:var(--transition);">
+                        <span style="font-size:18px;">❌</span> Cancelar
+                    </button>
+                </div>
+
+                <div id="resultado_content" class="results-container"></div>
+            </div>
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: EMPLEADOS -->
+        <!-- MÓDULO: EMPLEADOS (INTACTO) -->
         <!-- ============================================ -->
         <div id="empleados" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">👤 Gestión de Empleados</h2><p class="module-subtitle">Administra la información de todos los trabajadores</p></div><span class="module-badge" id="total_empleados_badge">0 empleados</span></div>
@@ -317,7 +329,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: SUCURSALES -->
+        <!-- MÓDULO: SUCURSALES (INTACTO) -->
         <!-- ============================================ -->
         <div id="sucursales" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">🏢 Gestión de Sucursales</h2><p class="module-subtitle">Administra las sucursales de la empresa</p></div></div>
@@ -327,7 +339,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: PARÁMETROS -->
+        <!-- MÓDULO: PARÁMETROS (INTACTO) -->
         <!-- ============================================ -->
         <div id="parametros" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">⚙️ Configuración</h2><p class="module-subtitle">Parámetros de cálculo y datos de la empresa</p></div></div>
@@ -360,7 +372,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: PASIVOS -->
+        <!-- MÓDULO: PASIVOS (INTACTO) -->
         <!-- ============================================ -->
         <div id="pasivos" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">📄 Pasivos Laborales</h2><p class="module-subtitle">Cálculo de utilidades, aguinaldo y vacaciones</p></div></div>
@@ -378,7 +390,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: CESTATICKET -->
+        <!-- MÓDULO: CESTATICKET (INTACTO) -->
         <!-- ============================================ -->
         <div id="cestaticket" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">🍽️ Cestaticket</h2><p class="module-subtitle">Cálculo del bono de alimentación según Ley</p></div><span class="module-badge" id="cesta_total_empleados_badge">0 empleados</span></div>
@@ -417,7 +429,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: HISTORIAL -->
+        <!-- MÓDULO: HISTORIAL (INTACTO) -->
         <!-- ============================================ -->
         <div id="historial" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">📋 Historial de Nóminas</h2><p class="module-subtitle">Registro de todas las nóminas procesadas</p></div></div>
@@ -427,7 +439,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: REPORTES -->
+        <!-- MÓDULO: REPORTES (INTACTO) -->
         <!-- ============================================ -->
         <div id="reportes" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">📊 Reportes Especiales</h2><p class="module-subtitle">Pasivos laborales, parafiscales y resumen en dólares</p></div></div>
@@ -437,7 +449,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- MÓDULO: SEGURIDAD -->
+        <!-- MÓDULO: SEGURIDAD (INTACTO) -->
         <!-- ============================================ -->
         <div id="seguridad" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">🔐 Gestión de Usuarios</h2><p class="module-subtitle">Administración de usuarios y seguridad del sistema</p></div></div>
@@ -447,7 +459,7 @@
         </div>
     </div>
 
-    <!-- MODALES -->
+    <!-- MODALES (INTACTOS) -->
     <div id="modalDetalleLote" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3>📄 Detalle del Lote</h3><span class="close-btn" onclick="cerrarModalDetalle()">&times;</span></div>
@@ -463,7 +475,7 @@
         </div>
     </div>
 
-    <!-- JS COMPLETO -->
+    <!-- JS COMPLETO E INTACTO (AGREGADA LA FUNCIÓN TOGGLE) -->
     <script>
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
         let editingEmployeeId = null;
@@ -550,7 +562,7 @@
                         this.classList.add('active');
                         if (tabId === 'empleados') { cargarEmpleadosAdmin(); actualizarTotalEmpleados(); }
                         else if (tabId === 'sucursales') cargarSucursales();
-                        else if (tabId === 'calculadora') cargarEmpleadosCalc();
+                        else if (tabId === 'calculadora') { /* Cargamos solo el placeholder o el formulario si estaba abierto */ }
                         else if (tabId === 'parametros') cargarParametros();
                         else if (tabId === 'cestaticket') { setTimeout(() => { initCestaticket(); cargarLotesCestaticket(); }, 100); }
                         else if (tabId === 'historial') cargarLotes();
@@ -559,20 +571,47 @@
                     });
                 });
                 document.getElementById('calc_sucursal').addEventListener('change', function() {
-                    cargarEmpleadosCalc(this.value, document.getElementById('calc_tipo_pago').value);
+                    if (document.getElementById('nomina_form_container').style.display !== 'none') {
+                        cargarEmpleadosCalc(this.value, document.getElementById('calc_tipo_pago').value);
+                    }
                 });
                 document.getElementById('calc_tipo_pago').addEventListener('change', function() {
-                    cargarEmpleadosCalc(document.getElementById('calc_sucursal').value, this.value);
+                    if (document.getElementById('nomina_form_container').style.display !== 'none') {
+                        cargarEmpleadosCalc(document.getElementById('calc_sucursal').value, this.value);
+                    }
                 });
                 cargarSucursalesCalc();
-                cargarEmpleadosCalc('', '');
+                // Ya no cargamos empleados al inicio, se cargan al hacer clic en "Crear Nómina"
             } catch (error) {
                 console.error('❌ Error en DOMContentLoaded:', error);
                 Swal.fire({ title: '❌ Error de conexión', text: 'No se pudo conectar con el servidor.', icon: 'error', confirmButtonText: 'Reintentar' }).then(() => { location.reload(); });
             }
         });
 
-        // ⭐ NUEVA FUNCIÓN DE EXPERTO: AUTORELLENADO DE PERÍODOS
+        // ⭐ NUEVA FUNCIÓN DE EXPERTO: ABRIR/CERRAR EL DASHBOARD DE NÓMINA
+        function toggleCrearNomina() {
+            const placeholder = document.getElementById('nomina_placeholder');
+            const formContainer = document.getElementById('nomina_form_container');
+            
+            if (formContainer.style.display === 'none') {
+                // Abrir el formulario
+                placeholder.style.display = 'none';
+                formContainer.style.display = 'block';
+                // Autocompletar las fechas automáticamente al abrir
+                autoFillPeriod();
+                // Cargar la lista de empleados
+                cargarEmpleadosCalc(document.getElementById('calc_sucursal').value, document.getElementById('calc_tipo_pago').value);
+                document.getElementById('resultado_content').innerHTML = '';
+            } else {
+                // Cerrar el formulario
+                placeholder.style.display = 'block';
+                formContainer.style.display = 'none';
+                document.getElementById('resultado_content').innerHTML = '';
+                document.getElementById('empleados_seleccionados_badge').textContent = '0 empleados seleccionados';
+            }
+        }
+
+        // ⭐ FUNCIÓN DE AUTORELLENADO DE PERÍODOS (Funciona igual que antes)
         function autoFillPeriod() {
             const tipo = document.getElementById('tipo').value;
             const today = new Date();
@@ -588,7 +627,7 @@
                     endDate = new Date(year, month, 15);
                 } else {
                     startDate = new Date(year, month, 16);
-                    endDate = new Date(year, month + 1, 0); // Último día del mes
+                    endDate = new Date(year, month + 1, 0);
                 }
             } else if (tipo === 'Semanal') {
                 const dayOfWeek = today.getDay();
