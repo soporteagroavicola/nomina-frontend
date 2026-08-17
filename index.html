@@ -472,7 +472,6 @@
             <div class="modal-header"><h3>📄 Detalle del Lote</h3><span class="close-btn" onclick="cerrarModalDetalle()">&times;</span></div>
             <div id="lote_header_info"></div>
             <div id="lote_detalle_body" style="max-height:500px; overflow-y:auto;">
-                <!-- NOS DIRIGIMOS A LA TABLA DIRECTAMENTE EN EL JS -->
                 <div class="table-responsive">
                     <table class="table-modern" id="tabla_detalle_lote">
                         <!-- El encabezado y el cuerpo se reemplazarán con JS para evitar duplicados -->
@@ -492,7 +491,7 @@
         </div>
     </div>
 
-    <!-- JS COMPLETO Y UNIFICADO CON LAS CORRECCIONES DE EXPERTOS -->
+    <!-- JS COMPLETO Y UNIFICADO CON CORRECCIONES DE DETALLE -->
     <script>
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
         let editingEmployeeId = null;
@@ -1319,11 +1318,10 @@
         }
         function generarReciboCestaticket(id) { downloadFile(`${API_URL}/api/generar_recibo_cestaticket/${id}`, `recibo_cesta_${id}.pdf`); }
 
-        // 🔥 CORRECCIÓN DEFINITIVA DE EXPERTO: REESCRIBIMOS EL MODAL DE NÓMINA PARA EVITAR CABECERAS DUPLICADAS
+        // 🔥 CORRECCIÓN DEFINITIVA DE EXPERTO: REESCRIBIMOS EL MODAL DE NÓMINA PARA EVITAR CABECERAS DUPLICADAS Y AÑADIR BOLÍVARES
         async function abrirModalDetalleLote(id) {
             const modal = document.getElementById('modalDetalleLote');
             const header = document.getElementById('lote_header_info');
-            // 🛑 CORRECCIÓN: Apuntamos directamente a la tabla, NO al cuerpo
             const table = document.getElementById('tabla_detalle_lote'); 
 
             header.innerHTML = '<div class="loading"><span class="loading-spinner"></span> Cargando datos...</div>';
@@ -1336,6 +1334,9 @@
                 const lote = await res.json();
                 if (!lote || !lote.nominas) throw new Error('El lote no tiene datos válidos');
                 
+                // Obtenemos la tasa BCV correcta (con un fallback para que no se vea 0.0000)
+                const tasa_bcv = lote.tasa_bcv || 755.1552;
+
                 const totalUsdFormateado = (lote.total_usd || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 const totalBsFormateado = (lote.total_bs || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 
@@ -1349,7 +1350,7 @@
                         <div style="text-align:right; background:#e8f4fd; padding:10px 20px; border-radius:8px;">
                             <div><strong>Total Lote:</strong> <span style="color:#1a2a6c; font-size:18px;">$${totalUsdFormateado}</span></div>
                             <div><strong>Total Lote:</strong> <span style="color:#1a2a6c; font-size:18px;">Bs. ${totalBsFormateado}</span></div>
-                            <div style="font-size:12px; color:#6b7a8f;">Tasa BCV: Bs. ${(lote.tasa_bcv || 0).toFixed(4)}</div>
+                            <div style="font-size:12px; color:#6b7a8f;">Tasa BCV: Bs. ${tasa_bcv.toFixed(4)}</div>
                         </div>
                     </div>
                     <br><small style="color:#6b7a8f;"><strong>Cantidad de Empleados:</strong> ${lote.nominas ? lote.nominas.length : 0}</small>
@@ -1368,15 +1369,45 @@
                     const netoUsd = n.neto_pagar_usd || 0;
                     const netoBs = n.neto_pagar_bs || 0;
                     
+                    // Calculamos los valores en Bolívares
+                    const salarioBaseBs = salarioBaseUsd * tasa_bcv;
+                    const base60Bs = base60Usd * tasa_bcv;
+                    const horasExtrasBs = horasExtrasUsd * tasa_bcv;
+                    const bonoCompBs = bonoCompUsd * tasa_bcv;
+                    const totalAsigBs = totalAsigUsd * tasa_bcv;
+                    const totalDedBs = totalDedUsd * tasa_bcv;
+                    const netoBsConvertido = netoUsd * tasa_bcv;
+
                     tablaHtml += `<tr style="border-bottom:1px solid #f1f4f9;">
                         <td style="padding:8px 10px;"><strong>${n.nombres || ''} ${n.apellidos || ''}</strong><br><small style="color:#6b7a8f;">${n.cedula || ''}</small></td>
-                        <td style="padding:8px 10px; text-align:right;">$${salarioBaseUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right;">$${base60Usd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right;">$${horasExtrasUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right;">$${bonoCompUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right; color:#28a745;">$${totalAsigUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right; color:#dc3545;">($${totalDedUsd.toFixed(2)})</td>
-                        <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">$${netoUsd.toFixed(2)}</td>
+                        <td style="padding:8px 10px; text-align:right;">
+                            $${salarioBaseUsd.toFixed(2)}
+                            <br><small style="color:#666;">Bs. ${salarioBaseBs.toFixed(2)}</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:right;">
+                            $${base60Usd.toFixed(2)}
+                            <br><small style="color:#666;">Bs. ${base60Bs.toFixed(2)}</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:right;">
+                            $${horasExtrasUsd.toFixed(2)}
+                            <br><small style="color:#666;">Bs. ${horasExtrasBs.toFixed(2)}</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:right;">
+                            $${bonoCompUsd.toFixed(2)}
+                            <br><small style="color:#666;">Bs. ${bonoCompBs.toFixed(2)}</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:right; color:#28a745;">
+                            $${totalAsigUsd.toFixed(2)}
+                            <br><small style="color:#666;">Bs. ${totalAsigBs.toFixed(2)}</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:right; color:#dc3545;">
+                            ($${totalDedUsd.toFixed(2)})
+                            <br><small style="color:#666;">(Bs. ${totalDedBs.toFixed(2)})</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">
+                            $${netoUsd.toFixed(2)}
+                            <br><small style="color:#666;">Bs. ${netoBsConvertido.toFixed(2)}</small>
+                        </td>
                         <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">Bs. ${netoBs.toFixed(2)}</td>
                         <td style="padding:8px 10px; text-align:center;"><button onclick="generarReciboNomina(${n.id_nomina})" style="font-size:11px; padding:4px 8px; border:none; border-radius:4px; cursor:pointer; background:#1a2a6c; color:white;">🖨️</button></td>
                     </tr>`;
