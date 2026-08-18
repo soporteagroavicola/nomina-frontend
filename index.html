@@ -7,9 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* ============================================
-           ESTILOS BASE - DISEÑO PROFESIONAL
-           ============================================ */
         :root {
             --primary: #1a2a6c;
             --primary-dark: #11214b;
@@ -25,50 +22,41 @@
             --radius: 10px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         * { box-sizing: border-box; }
         body { font-family: 'Inter', -apple-system, sans-serif; margin: 0; padding: 20px; background-color: var(--bg-body); color: var(--text-main); line-height: 1.5; }
         .header-title { text-align: center; color: var(--primary); margin-bottom: 20px; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
-        
         .top-navbar { display: flex; justify-content: flex-end; align-items: center; padding: 14px 25px; background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 24px; }
         .user-profile { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .user-profile span { font-weight: 600; color: var(--primary); font-size: 14px; }
         .btn-logout { background: #dc3545; color: white; border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: var(--transition); }
         .btn-logout:hover { background: #c82333; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(220, 53, 69, 0.25); }
-        
         .tab-container { background: var(--bg-card); padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow-md); }
         .tabs { border-bottom: 1px solid var(--border-color); display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; padding-bottom: 2px; }
         .tab-btn { padding: 10px 20px; border: none; background: transparent; cursor: pointer; border-radius: 6px 6px 0 0; font-weight: 600; font-size: 14px; color: var(--text-muted); transition: var(--transition); white-space: nowrap; }
         .tab-btn:hover { background: #f1f4f9; color: var(--primary); }
         .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(26, 42, 108, 0.3); }
-        
         .tab-content { display: none; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; }
         .tab-content.active { display: block; opacity: 1; transform: translateY(0); }
-
         .module-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 20px 25px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: var(--radius); margin-bottom: 24px; color: white; box-shadow: 0 4px 6px rgba(26, 42, 108, 0.1); }
         .module-title { font-size: 22px; font-weight: 700; margin: 0; color: white; }
         .module-subtitle { font-size: 13px; opacity: 0.8; margin: 4px 0 0 0; }
         .module-badge { background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.15); }
-
         .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
         .config-card { display: flex; flex-direction: column; gap: 6px; padding: 16px 20px; background: #f8f9fc; border-radius: var(--radius); border: 1px solid var(--border-color); transition: var(--transition); }
         .config-card:hover { border-color: var(--primary-light); box-shadow: var(--shadow-sm); }
         .config-label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 2px; }
         .config-select, .config-input, .form-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; font-family: inherit; background: white; transition: var(--transition); color: var(--text-main); }
         .config-select:focus, .config-input:focus, .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26, 42, 108, 0.1); }
-
         .filters-modern { background: #f8f9fc; border-radius: var(--radius); padding: 20px; margin-bottom: 24px; border: 1px solid var(--border-color); }
         .filter-group { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
         .filter-item { flex: 1; min-width: 180px; }
         .filter-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
         .options-group { display: flex; gap: 16px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--border-color); }
-        
         .option-checkbox { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-main); cursor: pointer; user-select: none; }
         .option-checkbox input[type="checkbox"] { display: none; }
         .checkbox-custom { width: 18px; height: 18px; border: 2px solid #cbd5e0; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: var(--transition); flex-shrink: 0; }
         .option-checkbox input:checked + .checkbox-custom { background: var(--primary); border-color: var(--primary); }
         .option-checkbox input:checked + .checkbox-custom::after { content: "✓"; color: white; font-size: 12px; font-weight: bold; }
-
         .btn-primary { background: var(--primary); color: white; padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: var(--transition); font-size: 14px; }
         .btn-primary:hover { background: var(--primary-light); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26, 42, 108, 0.25); }
         .btn-success { background: #28a745; color: white; padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: var(--transition); font-size: 14px; }
@@ -81,22 +69,18 @@
         .btn-select-all:hover { background: #bfdbfe; }
         .btn-deselect-all { padding: 4px 14px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; transition: var(--transition); background: #fee2e2; color: #991b1b; }
         .btn-deselect-all:hover { background: #fecaca; }
-
         .table-responsive { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border-color); }
         .table-modern { width: 100%; border-collapse: collapse; font-size: 14px; }
         .table-modern thead th { padding: 14px 16px; background: #f8f9fc; color: var(--text-main); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border-color); text-align: left; position: sticky; top: 0; z-index: 10; }
         .table-modern tbody td { padding: 12px 16px; border-bottom: 1px solid #f1f4f9; vertical-align: middle; }
         .table-modern tbody tr:last-child td { border-bottom: none; }
         .table-modern tbody tr:hover { background: #f8fafd; }
-
         .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #e8ecf1; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading { color: var(--text-muted); font-style: italic; padding: 30px; text-align: center; font-size: 14px; }
-
         .alert { padding: 12px 16px; border-radius: 6px; margin: 12px 0; font-size: 14px; }
         .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
         .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
-
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
         .modal.show { opacity: 1; }
         .modal-content { background: white; padding: 30px; border-radius: var(--radius); width: 900px; max-width: 95%; box-shadow: var(--shadow-lg); position: relative; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.3s ease; }
@@ -105,34 +89,22 @@
         .modal-header h3 { margin: 0; color: var(--primary); font-weight: 700; font-size: 20px; }
         .close-btn { font-size: 28px; font-weight: bold; cursor: pointer; color: var(--text-muted); transition: var(--transition); }
         .close-btn:hover { color: #dc3545; transform: rotate(90deg); }
-
         .action-card { border: 1px solid var(--border-color); padding: 24px; border-radius: var(--radius); background: #fafbfc; margin-bottom: 24px; transition: var(--transition); }
         .action-card:hover { box-shadow: var(--shadow-sm); }
         .action-card-title { font-size: 16px; font-weight: 600; color: var(--primary); margin: 0 0 16px 0; display: flex; align-items: center; gap: 10px; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
         .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
         .results-container { margin-top: 24px; padding: 20px; background: #f8f9fc; border-radius: var(--radius); border: 1px solid var(--border-color); min-height: 80px; }
-        
         .badge-quincenal { background: #dbeafe; color: var(--primary); padding: 2px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; }
         .badge-semanal { background: #fef3c7; color: #92400e; padding: 2px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; }
         .connection-status { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 10px; }
         .status-online { background: #d4edda; color: #155724; }
         .status-offline { background: #f8d7da; color: #721c24; }
-
-        @media (max-width: 768px) {
-            body { padding: 12px; } .header-title { font-size: 22px; } .top-navbar { padding: 12px 16px; flex-direction: column; gap: 12px; align-items: stretch; }
-            .user-profile { justify-content: space-between; } .module-header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 20px; }
-            .module-title { font-size: 18px; } .config-grid { grid-template-columns: 1fr; } .filters-modern { padding: 16px; }
-            .filter-group { flex-direction: column; gap: 10px; } .options-group { flex-direction: column; gap: 8px; }
-            .form-grid { grid-template-columns: 1fr; } .modal-content { padding: 20px; width: 98%; }
-            .table-modern { font-size: 12px; } .table-modern thead th, .table-modern tbody td { padding: 8px 10px; }
-            .tabs { flex-wrap: nowrap; justify-content: flex-start; }
-        }
+        @media (max-width: 768px) { body { padding: 12px; } .header-title { font-size: 22px; } .top-navbar { padding: 12px 16px; flex-direction: column; gap: 12px; align-items: stretch; } .user-profile { justify-content: space-between; } .module-header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 20px; } .module-title { font-size: 18px; } .config-grid { grid-template-columns: 1fr; } .filters-modern { padding: 16px; } .filter-group { flex-direction: column; gap: 10px; } .options-group { flex-direction: column; gap: 8px; } .form-grid { grid-template-columns: 1fr; } .modal-content { padding: 20px; width: 98%; } .table-modern { font-size: 12px; } .table-modern thead th, .table-modern tbody td { padding: 8px 10px; } .tabs { flex-wrap: nowrap; justify-content: flex-start; } }
     </style>
 </head>
 <body>
     <h1 class="header-title">🏭 Nómina Agroavícola del Llano</h1>
-
     <div class="top-navbar">
         <div class="user-profile">
             <span id="username_display">👤 Cargando...</span>
@@ -154,7 +126,7 @@
             <button class="tab-btn" data-target="seguridad">🔐 Usuarios</button>
         </div>
 
-        <!-- 🚀 MÓDULO: NÓMINA (REDISEÑADO CON DASHBOARD + BOTÓN DE CREACIÓN) -->
+        <!-- NÓMINA -->
         <div id="calculadora" class="tab-content active">
             <div class="module-header">
                 <div>
@@ -164,7 +136,6 @@
                 <span class="module-badge" id="empleados_seleccionados_badge">0 empleados seleccionados</span>
             </div>
 
-            <!-- ESTADO 1: VISTA DE INICIO (DASHBOARD VACÍO) -->
             <div id="nomina_placeholder" style="padding: 60px 20px; text-align: center; background: #fafbfc; border-radius: 12px; border: 2px dashed var(--border-color);">
                 <div style="font-size: 60px; margin-bottom: 15px;">🧮</div>
                 <h3 style="color: var(--primary); margin-bottom: 10px;">Iniciar Nueva Nómina</h3>
@@ -172,7 +143,6 @@
                 <button class="btn-primary" onclick="toggleCrearNomina()" style="font-size: 18px; padding: 15px 35px;">➕ Crear Nómina</button>
             </div>
 
-            <!-- ESTADO 2: FORMULARIO DE NÓMINA (OCULTO POR DEFECTO) -->
             <div id="nomina_form_container" style="display: none;">
                 <div class="config-grid">
                     <div class="config-card">
@@ -221,7 +191,7 @@
                             <span class="checkbox-custom"></span>
                             Aplicar deducciones (IVSS, RPE, FAOV)
                         </label>
-                        <!-- Se eliminaron los checkboxes de Split 60/40 y Calcular solo Bono -->
+                        <!-- ELIMINADOS: split_60_40 y calcular_solo_bono -->
                     </div>
                 </div>
 
@@ -285,14 +255,11 @@
                         <span style="font-size:18px;">❌</span> Cancelar
                     </button>
                 </div>
-
                 <div id="resultado_content" class="results-container"></div>
             </div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- MÓDULO: EMPLEADOS -->
-        <!-- ============================================ -->
+        <!-- EMPLEADOS -->
         <div id="empleados" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">👤 Gestión de Empleados</h2><p class="module-subtitle">Administra la información de todos los trabajadores</p></div><span class="module-badge" id="total_empleados_badge">0 empleados</span></div>
             <div id="alert_emp"></div>
@@ -326,9 +293,7 @@
             <div class="table-responsive"><table class="table-modern"><thead><tr><th>ID</th><th>Cédula</th><th>Nombre</th><th>Cargo</th><th>Salario USD</th><th>Pago</th><th>Fec. Ingreso</th><th>Acciones</th></tr></thead><tbody id="tabla_empleados"><tr><td colspan="8" class="loading"><span class="loading-spinner"></span> Cargando empleados...</td></tr></tbody></table></div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- MÓDULO: SUCURSALES -->
-        <!-- ============================================ -->
+        <!-- SUCURSALES -->
         <div id="sucursales" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">🏢 Gestión de Sucursales</h2><p class="module-subtitle">Administra las sucursales de la empresa</p></div></div>
             <div id="alert_suc"></div>
@@ -336,9 +301,7 @@
             <div class="table-responsive"><table class="table-modern"><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="tabla_sucursales"><tr><td colspan="3" class="loading"><span class="loading-spinner"></span> Cargando sucursales...</td></tr></tbody></table></div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- MÓDULO: PARÁMETROS -->
-        <!-- ============================================ -->
+        <!-- PARÁMETROS -->
         <div id="parametros" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">⚙️ Configuración</h2><p class="module-subtitle">Parámetros de cálculo y datos de la empresa</p></div></div>
             <div id="alert_params"></div>
@@ -369,9 +332,7 @@
             </div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- MÓDULO: PASIVOS -->
-        <!-- ============================================ -->
+        <!-- PASIVOS -->
         <div id="pasivos" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">📄 Pasivos Laborales</h2><p class="module-subtitle">Cálculo de utilidades, aguinaldo y vacaciones</p></div></div>
             <div id="alert_pasivos"></div>
@@ -387,9 +348,7 @@
             </div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- MÓDULO: CESTATICKET -->
-        <!-- ============================================ -->
+        <!-- CESTATICKET -->
         <div id="cestaticket" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">🍽️ Cestaticket</h2><p class="module-subtitle">Cálculo del bono de alimentación según Ley</p></div><span class="module-badge" id="cesta_total_empleados_badge">0 empleados</span></div>
             <div class="config-grid">
@@ -426,9 +385,7 @@
             <div class="table-responsive"><table class="table-modern"><thead><tr><th>ID Lote</th><th>Descripción</th><th>Fecha Cálculo</th><th>Empleados</th><th>Total Bs</th><th>Acciones</th></tr></thead><tbody id="tabla_historial_cesta"><tr><td colspan="6" class="loading"><span class="loading-spinner"></span> Cargando...</td></tr></tbody></table></div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- MÓDULO: HISTORIAL -->
-        <!-- ============================================ -->
+        <!-- HISTORIAL -->
         <div id="historial" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">📋 Historial de Nóminas</h2><p class="module-subtitle">Registro de todas las nóminas procesadas</p></div></div>
             <div id="alert_hist"></div>
@@ -436,9 +393,7 @@
             <div class="table-responsive"><table class="table-modern"><thead><tr><th>ID Lote</th><th>Descripción</th><th>Fecha Cálculo</th><th>Empleados</th><th>Sucursales</th><th>Total USD</th><th>Total Bs</th><th>Acciones</th></tr></thead><tbody id="tabla_historial"><tr><td colspan="8" class="loading"><span class="loading-spinner"></span> Cargando lotes...</td></tr></tbody></table></div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- MÓDULO: REPORTES -->
-        <!-- ============================================ -->
+        <!-- REPORTES -->
         <div id="reportes" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">📊 Reportes Especiales</h2><p class="module-subtitle">Pasivos laborales, parafiscales y resumen en dólares</p></div></div>
             <div class="action-card" style="border-left: 4px solid #1a2a6c;"><h4 class="action-card-title"><span class="icon">📄</span> Reporte de Pasivos Laborales</h4><div class="form-grid"><div><label class="form-label">👤 Empleado</label><select id="reporte_pasivos_empleado" class="form-input"><option value="">Todos</option></select></div><div style="display:flex; align-items:flex-end;"><button class="btn-primary" onclick="generarReportePasivos()" style="width:100%;">📊 Calcular Pasivos</button></div></div><div id="resultado_pasivos_report" style="margin-top:20px;"></div></div>
@@ -446,9 +401,7 @@
             <div class="action-card" style="border-left: 4px solid #ffc107; margin-top:20px;"><h4 class="action-card-title"><span class="icon">💵</span> Resumen en Dólares</h4><div class="form-grid"><div><label class="form-label">📅 Mes</label><select id="reporte_mes" class="form-input"></select></div><div><label class="form-label">📅 Año</label><select id="reporte_anio" class="form-input"></select></div><div><label class="form-label">👤 Empleado</label><select id="reporte_resumen_empleado" class="form-input"><option value="">Todos</option></select></div><div style="display:flex; align-items:flex-end;"><button class="btn-warning" onclick="generarResumenDolares()" style="width:100%;">💵 Generar Resumen</button></div></div><div id="resultado_resumen_dolares" style="margin-top:20px;"></div></div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- MÓDULO: SEGURIDAD -->
-        <!-- ============================================ -->
+        <!-- SEGURIDAD -->
         <div id="seguridad" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">🔐 Gestión de Usuarios</h2><p class="module-subtitle">Administración de usuarios y seguridad del sistema</p></div></div>
             <div class="action-card"><h4 class="action-card-title"><span class="icon">🔑</span> Cambiar mi Contraseña</h4><div class="form-grid"><div><label class="form-label">Contraseña Actual</label><input type="password" id="seg_old_pass" class="form-input"></div><div><label class="form-label">Nueva Contraseña</label><input type="password" id="seg_new_pass" class="form-input"></div><div style="display:flex; align-items:flex-end;"><button class="btn-primary" onclick="cambiarPassword()" style="width:100%;">🔑 Cambiar Contraseña</button></div></div></div>
@@ -457,7 +410,7 @@
         </div>
     </div>
 
-    <!-- MODALES CORREGIDOS -->
+    <!-- MODALES -->
     <div id="modalDetalleLote" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3>📄 Detalle del Lote</h3><span class="close-btn" onclick="cerrarModalDetalle()">&times;</span></div>
@@ -465,13 +418,12 @@
             <div id="lote_detalle_body" style="max-height:500px; overflow-y:auto;">
                 <div class="table-responsive">
                     <table class="table-modern" id="tabla_detalle_lote">
-                        <!-- El encabezado y el cuerpo se reemplazarán con JS para evitar duplicados -->
+                        <!-- Se llena con JS -->
                     </table>
                 </div>
             </div>
         </div>
     </div>
-    
     <div id="modalDetalleCesta" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3>🍽️ Detalle del Lote de Cestaticket</h3><span class="close-btn" onclick="cerrarModalDetalleCesta()">&times;</span></div>
@@ -482,7 +434,6 @@
         </div>
     </div>
 
-    <!-- JS COMPLETO Y UNIFICADO CON CORRECCIONES DE DETALLE -->
     <script>
         const API_URL = 'https://nomina-backend-kc2j.onrender.com';
         let editingEmployeeId = null;
@@ -535,8 +486,6 @@
             }
         }
 
-        // ❌ Eliminamos toggleSoloBono porque ya no existe
-
         document.addEventListener('DOMContentLoaded', async function() {
             try {
                 const res = await secureFetch(`${API_URL}/api/check_auth`);
@@ -561,7 +510,6 @@
                         this.classList.add('active');
                         if (tabId === 'empleados') { cargarEmpleadosAdmin(); actualizarTotalEmpleados(); }
                         else if (tabId === 'sucursales') cargarSucursales();
-                        else if (tabId === 'calculadora') { /* Se carga el placeholder */ }
                         else if (tabId === 'parametros') cargarParametros();
                         else if (tabId === 'cestaticket') { setTimeout(() => { initCestaticket(); cargarLotesCestaticket(); }, 100); }
                         else if (tabId === 'historial') cargarLotes();
@@ -586,7 +534,6 @@
             }
         });
 
-        // ⭐ ABRIR/CERRAR DASHBOARD DE NÓMINA
         function toggleCrearNomina() {
             const placeholder = document.getElementById('nomina_placeholder');
             const formContainer = document.getElementById('nomina_form_container');
@@ -604,13 +551,11 @@
             }
         }
 
-        // ⭐ AUTORELLENADO DE PERÍODOS
         function autoFillPeriod() {
             const tipo = document.getElementById('tipo').value;
             const today = new Date();
             let startDate = new Date(today);
             let endDate = new Date(today);
-
             if (tipo === 'Quincenal') {
                 const day = today.getDate();
                 const year = today.getFullYear();
@@ -629,7 +574,6 @@
             const formatDate = (date) => date.toISOString().split('T')[0];
             document.getElementById('fecha_inicio').value = formatDate(startDate);
             document.getElementById('fecha_fin').value = formatDate(endDate);
-            
             Swal.fire({ icon: 'success', title: '¡Período Autocompletado!', text: `Calculado automáticamente del ${formatDate(startDate)} al ${formatDate(endDate)}`, timer: 1500, showConfirmButton: false });
         }
 
@@ -931,8 +875,7 @@
             document.getElementById('resultado_content').innerHTML = '';
             Swal.fire('🧹 Limpiado', 'Todos los campos de detalles han sido reiniciados.', 'info');
         }
-        
-        // ✅ CARGA DE EMPLEADOS CON COLUMNA DE SALARIO EDITABLE
+
         async function cargarEmpleadosCalc(sucursal_id = '', tipo_pago = '') {
             try {
                 const container = document.getElementById('lista_empleados');
@@ -1015,7 +958,7 @@
             });
         }
 
-        // ✅ CÁLCULO DE NÓMINA SIMPLIFICADO (sin 60/40 ni solo bono)
+        // ✅ CÁLCULO DE NÓMINA SIMPLIFICADO (Solo deducciones y salario directo)
         async function calcularNomina(guardar_en_bd = true) {
             const tipo = document.getElementById('tipo').value;
             const fecha_inicio = document.getElementById('fecha_inicio').value;
@@ -1039,7 +982,7 @@
             document.querySelectorAll('#cuerpo_detalle_nomina tr').forEach(row => {
                 if (row.hasAttribute('data-cedula') && row.style.display !== 'none') {
                     const cedula = row.getAttribute('data-cedula');
-                    const id = parseInt(row.querySelector('.emp-check')?.value) || 0;
+                    const id = parseInt(row.querySelector('.emp-check')?.value) || 0; 
                     const salario_val = parseFloat(row.querySelector('.input_salario').value) || 0;
                     const faltas_val = parseInt(row.querySelector('.input_faltas').value) || 0;
                     const horas_val = parseFloat(row.querySelector('.input_horas').value) || 0;
@@ -1073,7 +1016,6 @@
                 let html = `<h3 style="color:#1a2a6c;">📊 Resultado del Cálculo</h3>`;
                 html += `<div style="background:#e8f4fd; padding:15px; border-radius:8px; margin:10px 0;"><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;"><div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div><div><strong>📋 Lote ID:</strong> ${guardar_en_bd ? '#'+data.lote_id : 'VISTA PREVIA (NO GUARDADO)'}</div><div><strong>👥 Empleados:</strong> ${data.resultados.length}</div></div></div>`;
 
-                // Tabla simplificada SIN columnas de 60/40
                 html += `<div style="overflow-x:auto;"><table style="min-width:700px; font-size:13px; width:100%; border-collapse:collapse;"><thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:10px 12px; text-align:left;">Empleado</th><th style="padding:10px 12px; text-align:center;">Días</th><th style="padding:10px 12px; text-align:right;">Base Full</th><th style="padding:10px 12px; text-align:right;">Hrs Extras</th><th style="padding:10px 12px; text-align:right;">Bono</th><th style="padding:10px 12px; text-align:right;">Asign.</th><th style="padding:10px 12px; text-align:right;">Deducc.</th><th style="padding:10px 12px; text-align:right;">Neto USD</th><th style="padding:10px 12px; text-align:right;">Neto Bs</th></tr></thead><tbody>`;
                 data.resultados.forEach(r => {
                     html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:8px 12px;"><strong>${r.empleado.nombre_completo}</strong></td><td style="padding:8px 12px; text-align:center;">${r.dias_reales_trabajados}</td><td style="padding:8px 12px; text-align:right;">$${r.salario_base_full_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.horas_extras_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.bono_complementario_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_asignaciones_base_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_deducciones_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;"><strong>$${r.neto_pagar_usd.toFixed(2)}</strong></td><td style="padding:8px 12px; text-align:right;"><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td></tr>`;
@@ -1086,7 +1028,7 @@
             } catch (e) { console.error(e); Swal.fire('Error', e.message, 'error'); }
         }
 
-        // ✅ COPIAR DATOS DEL PERÍODO ANTERIOR (sin cambios)
+        // COPIAR PERÍODO ANTERIOR
         async function copiarPeriodoAnterior() {
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes?search=&limit=1`);
@@ -1094,12 +1036,10 @@
                 const lotes = await res.json();
                 if (lotes.length === 0) return Swal.fire('Atención', 'No hay períodos anteriores guardados para copiar.', 'warning');
                 const ultimoLoteId = lotes[0].id_lote;
-
                 const resDetalle = await secureFetch(`${API_URL}/api/lotes/${ultimoLoteId}`);
                 if (!resDetalle) return;
                 const data = await resDetalle.json();
                 if (!data.nominas || data.nominas.length === 0) return Swal.fire('Atención', 'El período anterior no contiene empleados.', 'warning');
-
                 let empleadosMapeados = 0;
                 data.nominas.forEach(n => {
                     const row = document.querySelector(`#cuerpo_detalle_nomina tr[data-cedula="${n.cedula}"]`);
@@ -1109,7 +1049,6 @@
                         empleadosMapeados++;
                     }
                 });
-
                 if (empleadosMapeados > 0) {
                     Swal.fire('✅ Copiado', `Se han importado los datos de ${empleadosMapeados} empleados del Lote #${ultimoLoteId}. Revisa las horas extras y bonos.`, 'success');
                 } else {
@@ -1121,9 +1060,7 @@
             }
         }
 
-        // ============================================
-        // CESTATICKET (sin cambios)
-        // ============================================
+        // CESTATICKET
         async function cargarSucursalesCesta() {
             try {
                 const res = await secureFetch(`${API_URL}/api/sucursales`);
@@ -1295,28 +1232,22 @@
         }
         function generarReciboCestaticket(id) { downloadFile(`${API_URL}/api/generar_recibo_cestaticket/${id}`, `recibo_cesta_${id}.pdf`); }
 
-        // 🔥 CORRECCIÓN DEFINITIVA DE EXPERTO: REESCRIBIMOS EL MODAL DE NÓMINA PARA EVITAR CABECERAS DUPLICADAS Y AÑADIR BOLÍVARES
+        // MODAL DE LOTE DE NÓMINA (CORREGIDO)
         async function abrirModalDetalleLote(id) {
             const modal = document.getElementById('modalDetalleLote');
             const header = document.getElementById('lote_header_info');
-            const table = document.getElementById('tabla_detalle_lote'); 
-
+            const table = document.getElementById('tabla_detalle_lote');
             header.innerHTML = '<div class="loading"><span class="loading-spinner"></span> Cargando datos...</div>';
             modal.style.display = 'flex'; 
             setTimeout(() => modal.classList.add('show'), 10);
-            
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes/${id}`);
                 if (!res) return;
                 const lote = await res.json();
                 if (!lote || !lote.nominas) throw new Error('El lote no tiene datos válidos');
-                
-                // Obtenemos la tasa BCV correcta
                 const tasa_bcv = lote.tasa_bcv || 755.1552;
-
                 const totalUsdFormateado = (lote.total_usd || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 const totalBsFormateado = (lote.total_bs || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                
                 header.innerHTML = `
                     <div style="display:flex; justify-content:space-between; flex-wrap:wrap; align-items:center;">
                         <div>
@@ -1332,39 +1263,33 @@
                     </div>
                     <br><small style="color:#6b7a8f;"><strong>Cantidad de Empleados:</strong> ${lote.nominas ? lote.nominas.length : 0}</small>
                 `;
-                
-                // 🛑 CONSTRUIMOS LA TABLA COMPLETA SIN COLUMNA DE 60% (opcional)
-                let tablaHtml = `<thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:8px 10px; text-align:left;">Empleado</th><th style="padding:8px 10px; text-align:right;">Base Full</th><th style="padding:8px 10px; text-align:right;">Hrs Extras</th><th style="padding:8px 10px; text-align:right;">Bono Comp.</th><th style="padding:8px 10px; text-align:right;">Asign.</th><th style="padding:8px 10px; text-align:right;">Deducc.</th><th style="padding:8px 10px; text-align:right;">Neto</th><th style="padding:8px 10px; text-align:right;">Neto Bs</th><th style="padding:8px 10px; text-align:center;">Acciones</th></tr></thead><tbody>`;
-                
+                let tablaHtml = `<thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:8px 10px; text-align:left;">Empleado</th><th style="padding:8px 10px; text-align:right;">Base Full</th><th style="padding:8px 10px; text-align:right;">Base 60%</th><th style="padding:8px 10px; text-align:right;">Hrs Extras</th><th style="padding:8px 10px; text-align:right;">Bono Comp.</th><th style="padding:8px 10px; text-align:right;">Asign.</th><th style="padding:8px 10px; text-align:right;">Deducc.</th><th style="padding:8px 10px; text-align:right;">Neto</th><th style="padding:8px 10px; text-align:right;">Neto Bs</th><th style="padding:8px 10px; text-align:center;">Acciones</th></tr></thead><tbody>`;
                 lote.nominas.forEach((n) => {
                     const salarioBaseUsd = n.salario_base_usd || 0;
+                    const base60Usd = salarioBaseUsd * 0.60;
                     const horasExtrasUsd = n.horas_extras_usd || 0;
                     const bonoCompUsd = n.bono_complementario_usd || 0;
                     const totalAsigUsd = n.total_asignaciones_usd || 0;
                     const totalDedUsd = n.total_deducciones_usd || 0;
                     const netoUsd = n.neto_pagar_usd || 0;
                     const netoBs = n.neto_pagar_bs || 0;
-                    
                     tablaHtml += `<tr style="border-bottom:1px solid #f1f4f9;">
                         <td style="padding:8px 10px;"><strong>${n.nombres || ''} ${n.apellidos || ''}</strong><br><small style="color:#6b7a8f;">${n.cedula || ''}</small></td>
-                        <td style="padding:8px 10px; text-align:right;">$${salarioBaseUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right;">$${horasExtrasUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right;">$${bonoCompUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right; color:#28a745;">$${totalAsigUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right; color:#dc3545;">($${totalDedUsd.toFixed(2)})</td>
-                        <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">$${netoUsd.toFixed(2)}</td>
+                        <td style="padding:8px 10px; text-align:right;">$${salarioBaseUsd.toFixed(2)}<br><small style="color:#666;">Bs. ${(salarioBaseUsd * tasa_bcv).toFixed(2)}</small></td>
+                        <td style="padding:8px 10px; text-align:right;">$${base60Usd.toFixed(2)}<br><small style="color:#666;">Bs. ${(base60Usd * tasa_bcv).toFixed(2)}</small></td>
+                        <td style="padding:8px 10px; text-align:right;">$${horasExtrasUsd.toFixed(2)}<br><small style="color:#666;">Bs. ${(horasExtrasUsd * tasa_bcv).toFixed(2)}</small></td>
+                        <td style="padding:8px 10px; text-align:right;">$${bonoCompUsd.toFixed(2)}<br><small style="color:#666;">Bs. ${(bonoCompUsd * tasa_bcv).toFixed(2)}</small></td>
+                        <td style="padding:8px 10px; text-align:right; color:#28a745;">$${totalAsigUsd.toFixed(2)}<br><small style="color:#666;">Bs. ${(totalAsigUsd * tasa_bcv).toFixed(2)}</small></td>
+                        <td style="padding:8px 10px; text-align:right; color:#dc3545;">($${totalDedUsd.toFixed(2)})<br><small style="color:#666;">(Bs. ${(totalDedUsd * tasa_bcv).toFixed(2)})</small></td>
+                        <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">$${netoUsd.toFixed(2)}<br><small style="color:#666;">Bs. ${(netoUsd * tasa_bcv).toFixed(2)}</small></td>
                         <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">Bs. ${netoBs.toFixed(2)}</td>
                         <td style="padding:8px 10px; text-align:center;"><button onclick="generarReciboNomina(${n.id_nomina})" style="font-size:11px; padding:4px 8px; border:none; border-radius:4px; cursor:pointer; background:#1a2a6c; color:white;">🖨️</button></td>
                     </tr>`;
                 });
-                
                 let totalUsdGeneral = 0; let totalBsGeneral = 0;
                 lote.nominas.forEach(n => { totalUsdGeneral += (n.neto_pagar_usd || 0); totalBsGeneral += (n.neto_pagar_bs || 0); });
-                
-                tablaHtml += `</tbody><tfoot><tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="6" style="padding:10px 12px; text-align:right;">TOTAL GENERAL DEL LOTE</td><td style="padding:10px 12px; text-align:right; color:#1a2a6c;">$${totalUsdGeneral.toFixed(2)}</td><td style="padding:10px 12px; text-align:right; color:#1a2a6c;">Bs. ${totalBsGeneral.toFixed(2)}</td><td style="padding:10px 12px;"></td></tr></tfoot>`;
-                
+                tablaHtml += `</tbody><tfoot><tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="7" style="padding:10px 12px; text-align:right;">TOTAL GENERAL DEL LOTE</td><td style="padding:10px 12px; text-align:right; color:#1a2a6c;">$${totalUsdGeneral.toFixed(2)}</td><td style="padding:10px 12px; text-align:right; color:#1a2a6c;">Bs. ${totalBsGeneral.toFixed(2)}</td><td style="padding:10px 12px;"></td></tr></tfoot>`;
                 table.innerHTML = tablaHtml;
-                
             } catch (e) {
                 console.error('❌ Error en abrirModalDetalleLote:', e);
                 Swal.fire('Error', `No se pudo cargar el detalle del lote: ${e.message}`, 'error');
@@ -1372,7 +1297,6 @@
                 setTimeout(() => modal.style.display = 'none', 300);
             }
         }
-
         function cerrarModalDetalle() { const modal = document.getElementById('modalDetalleLote'); modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300); }
         async function generarReciboNomina(id_nomina) {
             const url = `${API_URL}/api/recibo_nomina_html/${id_nomina}`;
@@ -1387,6 +1311,7 @@
             } catch (e) { console.error('❌ Error:', e); Swal.fire({ title: '❌ Error', text: `No se pudo generar el recibo: ${e.message}`, icon: 'error', confirmButtonText: 'Entendido' }); }
         }
 
+        // HISTORIAL
         async function cargarLotes() {
             const tableBody = document.getElementById('tabla_historial');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading"><span class="loading-spinner"></span> Cargando lotes...</td></tr>';
@@ -1440,6 +1365,8 @@
                 ventana.document.write(html); ventana.document.close();
             } catch (e) { console.error('❌ Error:', e); Swal.fire({ title: '❌ Error', text: `No se pudo generar el recibo: ${e.message}`, icon: 'error', confirmButtonText: 'Entendido' }); }
         }
+
+        // REPORTES
         async function cargarEmpleadosReportes() {
             try {
                 const res = await secureFetch(`${API_URL}/api/empleados`);
@@ -1457,7 +1384,7 @@
             const resultDiv = document.getElementById('resultado_pasivos_report');
             resultDiv.innerHTML = '<div class="loading"><span class="loading-spinner"></span> Calculando pasivos laborales...</div>';
             try {
-                const res = await secureFetch(`${API_URL}/api/reporte_pasivos`, { method: 'POST', body: JSON.stringify({ empleado_id: empleado_id ? parseInt(empleado_id) : null, calcular_para_todos: !empleado_id }) });
+                const res = await secureFetch(`${API_URL}/api/reporte_pasivos`, { method: 'POST', body: JSON.stringify({ empleado_id: empleado_id ? parseInt(empleado_id) : null }) });
                 if (!res) return; const data = await res.json();
                 if (data.error) { resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`; return; }
                 let html = `<div style="background:#e8f4fd; padding:15px; border-radius:8px; margin-bottom:15px;"><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;"><div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div><div><strong>👥 Empleados:</strong> ${data.resultados.length}</div><div><strong>💰 Total General USD:</strong> $${data.total_general_usd.toFixed(2)}</div><div><strong>💰 Total General Bs:</strong> Bs. ${data.total_general_bs.toFixed(2)}</div></div></div><div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:13px;"><thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:8px 10px;">Empleado</th><th style="padding:8px 10px;">Antigüedad</th><th style="padding:8px 10px; text-align:right;">Salario Base</th><th style="padding:8px 10px; text-align:right;">Salario Integral</th><th style="padding:8px 10px; text-align:right;">Utilidades</th><th style="padding:8px 10px; text-align:right;">Aguinaldo</th><th style="padding:8px 10px; text-align:right;">Vacaciones</th><th style="padding:8px 10px; text-align:right;">Bono Vac.</th><th style="padding:8px 10px; text-align:right;">Total</th></tr></thead><tbody>`;
@@ -1510,6 +1437,8 @@
                 resultDiv.innerHTML = html; Swal.fire('✅ Resumen Generado', 'El resumen en dólares se ha generado correctamente.', 'success');
             } catch (e) { console.error('❌ Error:', e); resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error al generar el resumen: ${e.message}</div>`; }
         }
+
+        // PASIVOS
         async function calcularPasivos() {
             const salario_mensual = parseFloat(document.getElementById('pasivos_salario').value) || 0;
             const dias = parseInt(document.getElementById('pasivos_dias').value) || 30;
