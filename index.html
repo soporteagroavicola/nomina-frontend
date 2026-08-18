@@ -221,16 +221,7 @@
                             <span class="checkbox-custom"></span>
                             Aplicar deducciones (IVSS, RPE, FAOV)
                         </label>
-                        <label class="option-checkbox">
-                            <input type="checkbox" id="split_60_40">
-                            <span class="checkbox-custom"></span>
-                            Dividir pago (60% Cuenta / 40% Efectivo)
-                        </label>
-                        <label class="option-checkbox option-highlight" style="background:#eef2ff; padding:4px 12px 4px 10px; border-radius:6px; border:1px solid #c7d2fe;">
-                            <input type="checkbox" id="calcular_solo_bono" onchange="toggleSoloBono()">
-                            <span class="checkbox-custom"></span>
-                            🔘 Calcular solo Bono
-                        </label>
+                        <!-- Se eliminaron los checkboxes de Split 60/40 y Calcular solo Bono -->
                     </div>
                 </div>
 
@@ -544,15 +535,7 @@
             }
         }
 
-        function toggleSoloBono() {
-            const isSoloBono = document.getElementById('calcular_solo_bono').checked;
-            document.getElementById('tipo').disabled = isSoloBono;
-            document.getElementById('fecha_inicio').disabled = isSoloBono;
-            document.getElementById('fecha_fin').disabled = isSoloBono;
-            document.querySelectorAll('.input_faltas').forEach(el => el.disabled = isSoloBono);
-            document.querySelectorAll('.input_horas').forEach(el => el.disabled = isSoloBono);
-            document.querySelectorAll('.input_valor_hora').forEach(el => el.disabled = isSoloBono);
-        }
+        // ❌ Eliminamos toggleSoloBono porque ya no existe
 
         document.addEventListener('DOMContentLoaded', async function() {
             try {
@@ -1032,7 +1015,7 @@
             });
         }
 
-        // ✅ CÁLCULO DE NÓMINA (Con Soporte para Vista Previa, Salarios Override y Copiado)
+        // ✅ CÁLCULO DE NÓMINA SIMPLIFICADO (sin 60/40 ni solo bono)
         async function calcularNomina(guardar_en_bd = true) {
             const tipo = document.getElementById('tipo').value;
             const fecha_inicio = document.getElementById('fecha_inicio').value;
@@ -1047,8 +1030,6 @@
             }
 
             const aplicar_deducciones = document.getElementById('aplicar_deducciones').checked;
-            const split_60_40 = document.getElementById('split_60_40').checked;
-            const calcular_solo_bono = document.getElementById('calcular_solo_bono').checked;
             const ids = Array.from(document.querySelectorAll('.emp-check:checked')).map(c => parseInt(c.value));
 
             if (!ids.length) { Swal.fire('Atención', 'Selecciona al menos un empleado.', 'warning'); return; }
@@ -1058,7 +1039,7 @@
             document.querySelectorAll('#cuerpo_detalle_nomina tr').forEach(row => {
                 if (row.hasAttribute('data-cedula') && row.style.display !== 'none') {
                     const cedula = row.getAttribute('data-cedula');
-                    const id = parseInt(row.querySelector('.emp-check')?.value) || 0; // Obtenemos el id para el override
+                    const id = parseInt(row.querySelector('.emp-check')?.value) || 0;
                     const salario_val = parseFloat(row.querySelector('.input_salario').value) || 0;
                     const faltas_val = parseInt(row.querySelector('.input_faltas').value) || 0;
                     const horas_val = parseFloat(row.querySelector('.input_horas').value) || 0;
@@ -1078,7 +1059,7 @@
                     body: JSON.stringify({
                         tipo, fecha_inicio, fecha_fin, descripcion,
                         empleados_ids: ids, faltas, horas_extras, bonos, salarios_override,
-                        aplicar_deducciones, split_60_40, calcular_solo_bono,
+                        aplicar_deducciones,
                         guardar_en_bd: guardar_en_bd
                     })
                 });
@@ -1092,24 +1073,20 @@
                 let html = `<h3 style="color:#1a2a6c;">📊 Resultado del Cálculo</h3>`;
                 html += `<div style="background:#e8f4fd; padding:15px; border-radius:8px; margin:10px 0;"><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;"><div><strong>📌 Tasa BCV:</strong> Bs. ${data.tasa_bcv.toFixed(4)}</div><div><strong>📋 Lote ID:</strong> ${guardar_en_bd ? '#'+data.lote_id : 'VISTA PREVIA (NO GUARDADO)'}</div><div><strong>👥 Empleados:</strong> ${data.resultados.length}</div></div></div>`;
 
-                if (split_60_40) {
-                    html += `<div style="overflow-x:auto;"><table style="min-width:800px; font-size:13px; width:100%; border-collapse:collapse;"><thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:10px 12px; text-align:left;">Empleado</th><th style="padding:10px 12px; text-align:center;">Días</th><th style="padding:10px 12px; text-align:right;">Base Full</th><th style="padding:10px 12px; text-align:right;">Hrs Extras</th><th style="padding:10px 12px; text-align:right;">Bono</th><th style="padding:10px 12px; text-align:right;">Asign.</th><th style="padding:10px 12px; text-align:right;">Deducc.</th><th style="padding:10px 12px; text-align:right;">Pago 60%</th><th style="padding:10px 12px; text-align:right;">Pago 40%</th><th style="padding:10px 12px; text-align:right;">Total Bs</th></tr></thead><tbody>`;
-                    data.resultados.forEach(r => { html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:8px 12px;"><strong>${r.empleado.nombre_completo}</strong></td><td style="padding:8px 12px; text-align:center;">${r.dias_reales_trabajados}</td><td style="padding:8px 12px; text-align:right;">$${r.salario_base_full_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.horas_extras_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.bono_complementario_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_asignaciones_base_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_deducciones_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.pago_60_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.pago_40_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;"><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td></tr>`; });
-                    html += `<tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="6" style="padding:10px 12px; text-align:right;">TOTAL</td><td style="padding:10px 12px; text-align:right;">$${total_usd.toFixed(2)}</td><td colspan="2" style="padding:10px 12px; text-align:right;"></td><td style="padding:10px 12px; text-align:right;"><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr>`;
-                    html += `</tbody></table></div>`;
-                } else {
-                    html += `<div style="overflow-x:auto;"><table style="min-width:700px; font-size:13px; width:100%; border-collapse:collapse;"><thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:10px 12px; text-align:left;">Empleado</th><th style="padding:10px 12px; text-align:center;">Días</th><th style="padding:10px 12px; text-align:right;">Base Full</th><th style="padding:10px 12px; text-align:right;">Hrs Extras</th><th style="padding:10px 12px; text-align:right;">Bono</th><th style="padding:10px 12px; text-align:right;">Asign.</th><th style="padding:10px 12px; text-align:right;">Deducc.</th><th style="padding:10px 12px; text-align:right;">Neto USD</th><th style="padding:10px 12px; text-align:right;">Neto Bs</th></tr></thead><tbody>`;
-                    data.resultados.forEach(r => { html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:8px 12px;"><strong>${r.empleado.nombre_completo}</strong></td><td style="padding:8px 12px; text-align:center;">${r.dias_reales_trabajados}</td><td style="padding:8px 12px; text-align:right;">$${r.salario_base_full_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.horas_extras_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.bono_complementario_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_asignaciones_base_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_deducciones_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;"><strong>$${r.neto_pagar_usd.toFixed(2)}</strong></td><td style="padding:8px 12px; text-align:right;"><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td></tr>`; });
-                    html += `<tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="5" style="padding:10px 12px; text-align:right;">TOTAL</td><td style="padding:10px 12px; text-align:right;">$${total_usd.toFixed(2)}</td><td style="padding:10px 12px; text-align:right;"></td><td style="padding:10px 12px; text-align:right;"><strong>$${total_usd.toFixed(2)}</strong></td><td style="padding:10px 12px; text-align:right;"><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr>`;
-                    html += `</tbody></table></div>`;
-                }
+                // Tabla simplificada SIN columnas de 60/40
+                html += `<div style="overflow-x:auto;"><table style="min-width:700px; font-size:13px; width:100%; border-collapse:collapse;"><thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:10px 12px; text-align:left;">Empleado</th><th style="padding:10px 12px; text-align:center;">Días</th><th style="padding:10px 12px; text-align:right;">Base Full</th><th style="padding:10px 12px; text-align:right;">Hrs Extras</th><th style="padding:10px 12px; text-align:right;">Bono</th><th style="padding:10px 12px; text-align:right;">Asign.</th><th style="padding:10px 12px; text-align:right;">Deducc.</th><th style="padding:10px 12px; text-align:right;">Neto USD</th><th style="padding:10px 12px; text-align:right;">Neto Bs</th></tr></thead><tbody>`;
+                data.resultados.forEach(r => {
+                    html += `<tr style="border-bottom:1px solid #f1f4f9;"><td style="padding:8px 12px;"><strong>${r.empleado.nombre_completo}</strong></td><td style="padding:8px 12px; text-align:center;">${r.dias_reales_trabajados}</td><td style="padding:8px 12px; text-align:right;">$${r.salario_base_full_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.horas_extras_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.bono_complementario_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_asignaciones_base_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;">$${r.total_deducciones_usd.toFixed(2)}</td><td style="padding:8px 12px; text-align:right;"><strong>$${r.neto_pagar_usd.toFixed(2)}</strong></td><td style="padding:8px 12px; text-align:right;"><strong>Bs. ${r.neto_pagar_bs.toFixed(2)}</strong></td></tr>`;
+                });
+                html += `<tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="5" style="padding:10px 12px; text-align:right;">TOTAL</td><td style="padding:10px 12px; text-align:right;">$${total_usd.toFixed(2)}</td><td style="padding:10px 12px; text-align:right;"></td><td style="padding:10px 12px; text-align:right;"><strong>$${total_usd.toFixed(2)}</strong></td><td style="padding:10px 12px; text-align:right;"><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr>`;
+                html += `</tbody></table></div>`;
                 document.getElementById('resultado_content').innerHTML = html;
                 if(guardar_en_bd) { Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success'); cargarLotes(); } 
                 else { Swal.fire('✅ Vista Previa', 'El cálculo se ha realizado correctamente. No se ha guardado en el historial.', 'info'); }
             } catch (e) { console.error(e); Swal.fire('Error', e.message, 'error'); }
         }
 
-        // ✅ COPIAR DATOS DEL PERÍODO ANTERIOR
+        // ✅ COPIAR DATOS DEL PERÍODO ANTERIOR (sin cambios)
         async function copiarPeriodoAnterior() {
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes?search=&limit=1`);
@@ -1145,7 +1122,7 @@
         }
 
         // ============================================
-        // CESTATICKET
+        // CESTATICKET (sin cambios)
         // ============================================
         async function cargarSucursalesCesta() {
             try {
@@ -1334,7 +1311,7 @@
                 const lote = await res.json();
                 if (!lote || !lote.nominas) throw new Error('El lote no tiene datos válidos');
                 
-                // Obtenemos la tasa BCV correcta (con un fallback para que no se vea 0.0000)
+                // Obtenemos la tasa BCV correcta
                 const tasa_bcv = lote.tasa_bcv || 755.1552;
 
                 const totalUsdFormateado = (lote.total_usd || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -1356,12 +1333,11 @@
                     <br><small style="color:#6b7a8f;"><strong>Cantidad de Empleados:</strong> ${lote.nominas ? lote.nominas.length : 0}</small>
                 `;
                 
-                // 🛑 CONSTRUIMOS LA TABLA COMPLETA, INCLUYENDO EL <thead> Y EL <tfoot>
-                let tablaHtml = `<thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:8px 10px; text-align:left;">Empleado</th><th style="padding:8px 10px; text-align:right;">Base Full</th><th style="padding:8px 10px; text-align:right;">Base 60%</th><th style="padding:8px 10px; text-align:right;">Hrs Extras</th><th style="padding:8px 10px; text-align:right;">Bono Comp.</th><th style="padding:8px 10px; text-align:right;">Asign.</th><th style="padding:8px 10px; text-align:right;">Deducc.</th><th style="padding:8px 10px; text-align:right;">Neto</th><th style="padding:8px 10px; text-align:right;">Neto Bs</th><th style="padding:8px 10px; text-align:center;">Acciones</th></tr></thead><tbody>`;
+                // 🛑 CONSTRUIMOS LA TABLA COMPLETA SIN COLUMNA DE 60% (opcional)
+                let tablaHtml = `<thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:8px 10px; text-align:left;">Empleado</th><th style="padding:8px 10px; text-align:right;">Base Full</th><th style="padding:8px 10px; text-align:right;">Hrs Extras</th><th style="padding:8px 10px; text-align:right;">Bono Comp.</th><th style="padding:8px 10px; text-align:right;">Asign.</th><th style="padding:8px 10px; text-align:right;">Deducc.</th><th style="padding:8px 10px; text-align:right;">Neto</th><th style="padding:8px 10px; text-align:right;">Neto Bs</th><th style="padding:8px 10px; text-align:center;">Acciones</th></tr></thead><tbody>`;
                 
                 lote.nominas.forEach((n) => {
                     const salarioBaseUsd = n.salario_base_usd || 0;
-                    const base60Usd = salarioBaseUsd * 0.60;
                     const horasExtrasUsd = n.horas_extras_usd || 0;
                     const bonoCompUsd = n.bono_complementario_usd || 0;
                     const totalAsigUsd = n.total_asignaciones_usd || 0;
@@ -1369,45 +1345,14 @@
                     const netoUsd = n.neto_pagar_usd || 0;
                     const netoBs = n.neto_pagar_bs || 0;
                     
-                    // Calculamos los valores en Bolívares
-                    const salarioBaseBs = salarioBaseUsd * tasa_bcv;
-                    const base60Bs = base60Usd * tasa_bcv;
-                    const horasExtrasBs = horasExtrasUsd * tasa_bcv;
-                    const bonoCompBs = bonoCompUsd * tasa_bcv;
-                    const totalAsigBs = totalAsigUsd * tasa_bcv;
-                    const totalDedBs = totalDedUsd * tasa_bcv;
-                    const netoBsConvertido = netoUsd * tasa_bcv;
-
                     tablaHtml += `<tr style="border-bottom:1px solid #f1f4f9;">
                         <td style="padding:8px 10px;"><strong>${n.nombres || ''} ${n.apellidos || ''}</strong><br><small style="color:#6b7a8f;">${n.cedula || ''}</small></td>
-                        <td style="padding:8px 10px; text-align:right;">
-                            $${salarioBaseUsd.toFixed(2)}
-                            <br><small style="color:#666;">Bs. ${salarioBaseBs.toFixed(2)}</small>
-                        </td>
-                        <td style="padding:8px 10px; text-align:right;">
-                            $${base60Usd.toFixed(2)}
-                            <br><small style="color:#666;">Bs. ${base60Bs.toFixed(2)}</small>
-                        </td>
-                        <td style="padding:8px 10px; text-align:right;">
-                            $${horasExtrasUsd.toFixed(2)}
-                            <br><small style="color:#666;">Bs. ${horasExtrasBs.toFixed(2)}</small>
-                        </td>
-                        <td style="padding:8px 10px; text-align:right;">
-                            $${bonoCompUsd.toFixed(2)}
-                            <br><small style="color:#666;">Bs. ${bonoCompBs.toFixed(2)}</small>
-                        </td>
-                        <td style="padding:8px 10px; text-align:right; color:#28a745;">
-                            $${totalAsigUsd.toFixed(2)}
-                            <br><small style="color:#666;">Bs. ${totalAsigBs.toFixed(2)}</small>
-                        </td>
-                        <td style="padding:8px 10px; text-align:right; color:#dc3545;">
-                            ($${totalDedUsd.toFixed(2)})
-                            <br><small style="color:#666;">(Bs. ${totalDedBs.toFixed(2)})</small>
-                        </td>
-                        <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">
-                            $${netoUsd.toFixed(2)}
-                            <br><small style="color:#666;">Bs. ${netoBsConvertido.toFixed(2)}</small>
-                        </td>
+                        <td style="padding:8px 10px; text-align:right;">$${salarioBaseUsd.toFixed(2)}</td>
+                        <td style="padding:8px 10px; text-align:right;">$${horasExtrasUsd.toFixed(2)}</td>
+                        <td style="padding:8px 10px; text-align:right;">$${bonoCompUsd.toFixed(2)}</td>
+                        <td style="padding:8px 10px; text-align:right; color:#28a745;">$${totalAsigUsd.toFixed(2)}</td>
+                        <td style="padding:8px 10px; text-align:right; color:#dc3545;">($${totalDedUsd.toFixed(2)})</td>
+                        <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">$${netoUsd.toFixed(2)}</td>
                         <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">Bs. ${netoBs.toFixed(2)}</td>
                         <td style="padding:8px 10px; text-align:center;"><button onclick="generarReciboNomina(${n.id_nomina})" style="font-size:11px; padding:4px 8px; border:none; border-radius:4px; cursor:pointer; background:#1a2a6c; color:white;">🖨️</button></td>
                     </tr>`;
@@ -1416,9 +1361,8 @@
                 let totalUsdGeneral = 0; let totalBsGeneral = 0;
                 lote.nominas.forEach(n => { totalUsdGeneral += (n.neto_pagar_usd || 0); totalBsGeneral += (n.neto_pagar_bs || 0); });
                 
-                tablaHtml += `</tbody><tfoot><tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="7" style="padding:10px 12px; text-align:right;">TOTAL GENERAL DEL LOTE</td><td style="padding:10px 12px; text-align:right; color:#1a2a6c;">$${totalUsdGeneral.toFixed(2)}</td><td style="padding:10px 12px; text-align:right; color:#1a2a6c;">Bs. ${totalBsGeneral.toFixed(2)}</td><td style="padding:10px 12px;"></td></tr></tfoot>`;
+                tablaHtml += `</tbody><tfoot><tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="6" style="padding:10px 12px; text-align:right;">TOTAL GENERAL DEL LOTE</td><td style="padding:10px 12px; text-align:right; color:#1a2a6c;">$${totalUsdGeneral.toFixed(2)}</td><td style="padding:10px 12px; text-align:right; color:#1a2a6c;">Bs. ${totalBsGeneral.toFixed(2)}</td><td style="padding:10px 12px;"></td></tr></tfoot>`;
                 
-                // 🛑 SOBRESCRIBIMOS TODO EL CONTENIDO DE LA TABLA DE UNA SOLA VEZ
                 table.innerHTML = tablaHtml;
                 
             } catch (e) {
