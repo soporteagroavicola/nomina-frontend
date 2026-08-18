@@ -191,7 +191,7 @@
                             <span class="checkbox-custom"></span>
                             Aplicar deducciones (IVSS, RPE, FAOV)
                         </label>
-                        <!-- ELIMINADOS: split_60_40 y calcular_solo_bono -->
+                        <!-- Eliminados: split_60_40 y calcular_solo_bono -->
                     </div>
                 </div>
 
@@ -385,7 +385,7 @@
             <div class="table-responsive"><table class="table-modern"><thead><tr><th>ID Lote</th><th>Descripción</th><th>Fecha Cálculo</th><th>Empleados</th><th>Total Bs</th><th>Acciones</th></tr></thead><tbody id="tabla_historial_cesta"><tr><td colspan="6" class="loading"><span class="loading-spinner"></span> Cargando...</td></tr></tbody></table></div>
         </div>
 
-        <!-- HISTORIAL -->
+        <!-- HISTORIAL (MODIFICADO: UN SOLO BOTÓN TXT) -->
         <div id="historial" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">📋 Historial de Nóminas</h2><p class="module-subtitle">Registro de todas las nóminas procesadas</p></div></div>
             <div id="alert_hist"></div>
@@ -418,7 +418,7 @@
             <div id="lote_detalle_body" style="max-height:500px; overflow-y:auto;">
                 <div class="table-responsive">
                     <table class="table-modern" id="tabla_detalle_lote">
-                        <!-- Se llena con JS -->
+                        <!-- El contenido se genera con JS (modificado para quitar columnas 60/40) -->
                     </table>
                 </div>
             </div>
@@ -958,7 +958,7 @@
             });
         }
 
-        // ✅ CÁLCULO DE NÓMINA SIMPLIFICADO (Solo deducciones y salario directo)
+        // CÁLCULO DE NÓMINA (simplificado)
         async function calcularNomina(guardar_en_bd = true) {
             const tipo = document.getElementById('tipo').value;
             const fecha_inicio = document.getElementById('fecha_inicio').value;
@@ -1028,7 +1028,6 @@
             } catch (e) { console.error(e); Swal.fire('Error', e.message, 'error'); }
         }
 
-        // COPIAR PERÍODO ANTERIOR
         async function copiarPeriodoAnterior() {
             try {
                 const res = await secureFetch(`${API_URL}/api/lotes?search=&limit=1`);
@@ -1232,7 +1231,7 @@
         }
         function generarReciboCestaticket(id) { downloadFile(`${API_URL}/api/generar_recibo_cestaticket/${id}`, `recibo_cesta_${id}.pdf`); }
 
-        // MODAL DE LOTE DE NÓMINA (CORREGIDO)
+        // MODAL DE LOTE DE NÓMINA (MODIFICADO: quitamos columnas de 60/40)
         async function abrirModalDetalleLote(id) {
             const modal = document.getElementById('modalDetalleLote');
             const header = document.getElementById('lote_header_info');
@@ -1263,10 +1262,20 @@
                     </div>
                     <br><small style="color:#6b7a8f;"><strong>Cantidad de Empleados:</strong> ${lote.nominas ? lote.nominas.length : 0}</small>
                 `;
-                let tablaHtml = `<thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;"><th style="padding:8px 10px; text-align:left;">Empleado</th><th style="padding:8px 10px; text-align:right;">Base Full</th><th style="padding:8px 10px; text-align:right;">Base 60%</th><th style="padding:8px 10px; text-align:right;">Hrs Extras</th><th style="padding:8px 10px; text-align:right;">Bono Comp.</th><th style="padding:8px 10px; text-align:right;">Asign.</th><th style="padding:8px 10px; text-align:right;">Deducc.</th><th style="padding:8px 10px; text-align:right;">Neto</th><th style="padding:8px 10px; text-align:right;">Neto Bs</th><th style="padding:8px 10px; text-align:center;">Acciones</th></tr></thead><tbody>`;
+                // Definimos el encabezado SIN columnas de 60/40, y SIN conversiones repetidas
+                let tablaHtml = `<thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;">
+                    <th style="padding:8px 10px; text-align:left;">Empleado</th>
+                    <th style="padding:8px 10px; text-align:right;">Base Full (USD)</th>
+                    <th style="padding:8px 10px; text-align:right;">Hrs Extras (USD)</th>
+                    <th style="padding:8px 10px; text-align:right;">Bono (USD)</th>
+                    <th style="padding:8px 10px; text-align:right;">Asign. (USD)</th>
+                    <th style="padding:8px 10px; text-align:right;">Deducc. (USD)</th>
+                    <th style="padding:8px 10px; text-align:right;">Neto (USD)</th>
+                    <th style="padding:8px 10px; text-align:right;">Neto (Bs)</th>
+                    <th style="padding:8px 10px; text-align:center;">Acciones</th>
+                </tr></thead><tbody>`;
                 lote.nominas.forEach((n) => {
                     const salarioBaseUsd = n.salario_base_usd || 0;
-                    const base60Usd = salarioBaseUsd * 0.60;
                     const horasExtrasUsd = n.horas_extras_usd || 0;
                     const bonoCompUsd = n.bono_complementario_usd || 0;
                     const totalAsigUsd = n.total_asignaciones_usd || 0;
@@ -1275,20 +1284,24 @@
                     const netoBs = n.neto_pagar_bs || 0;
                     tablaHtml += `<tr style="border-bottom:1px solid #f1f4f9;">
                         <td style="padding:8px 10px;"><strong>${n.nombres || ''} ${n.apellidos || ''}</strong><br><small style="color:#6b7a8f;">${n.cedula || ''}</small></td>
-                        <td style="padding:8px 10px; text-align:right;">$${salarioBaseUsd.toFixed(2)}<br><small style="color:#666;">Bs. ${(salarioBaseUsd * tasa_bcv).toFixed(2)}</small></td>
-                        <td style="padding:8px 10px; text-align:right;">$${base60Usd.toFixed(2)}<br><small style="color:#666;">Bs. ${(base60Usd * tasa_bcv).toFixed(2)}</small></td>
-                        <td style="padding:8px 10px; text-align:right;">$${horasExtrasUsd.toFixed(2)}<br><small style="color:#666;">Bs. ${(horasExtrasUsd * tasa_bcv).toFixed(2)}</small></td>
-                        <td style="padding:8px 10px; text-align:right;">$${bonoCompUsd.toFixed(2)}<br><small style="color:#666;">Bs. ${(bonoCompUsd * tasa_bcv).toFixed(2)}</small></td>
-                        <td style="padding:8px 10px; text-align:right; color:#28a745;">$${totalAsigUsd.toFixed(2)}<br><small style="color:#666;">Bs. ${(totalAsigUsd * tasa_bcv).toFixed(2)}</small></td>
-                        <td style="padding:8px 10px; text-align:right; color:#dc3545;">($${totalDedUsd.toFixed(2)})<br><small style="color:#666;">(Bs. ${(totalDedUsd * tasa_bcv).toFixed(2)})</small></td>
-                        <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">$${netoUsd.toFixed(2)}<br><small style="color:#666;">Bs. ${(netoUsd * tasa_bcv).toFixed(2)}</small></td>
+                        <td style="padding:8px 10px; text-align:right;">$${salarioBaseUsd.toFixed(2)}</td>
+                        <td style="padding:8px 10px; text-align:right;">$${horasExtrasUsd.toFixed(2)}</td>
+                        <td style="padding:8px 10px; text-align:right;">$${bonoCompUsd.toFixed(2)}</td>
+                        <td style="padding:8px 10px; text-align:right; color:#28a745;">$${totalAsigUsd.toFixed(2)}</td>
+                        <td style="padding:8px 10px; text-align:right; color:#dc3545;">($${totalDedUsd.toFixed(2)})</td>
+                        <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">$${netoUsd.toFixed(2)}</td>
                         <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">Bs. ${netoBs.toFixed(2)}</td>
                         <td style="padding:8px 10px; text-align:center;"><button onclick="generarReciboNomina(${n.id_nomina})" style="font-size:11px; padding:4px 8px; border:none; border-radius:4px; cursor:pointer; background:#1a2a6c; color:white;">🖨️</button></td>
                     </tr>`;
                 });
                 let totalUsdGeneral = 0; let totalBsGeneral = 0;
                 lote.nominas.forEach(n => { totalUsdGeneral += (n.neto_pagar_usd || 0); totalBsGeneral += (n.neto_pagar_bs || 0); });
-                tablaHtml += `</tbody><tfoot><tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="7" style="padding:10px 12px; text-align:right;">TOTAL GENERAL DEL LOTE</td><td style="padding:10px 12px; text-align:right; color:#1a2a6c;">$${totalUsdGeneral.toFixed(2)}</td><td style="padding:10px 12px; text-align:right; color:#1a2a6c;">Bs. ${totalBsGeneral.toFixed(2)}</td><td style="padding:10px 12px;"></td></tr></tfoot>`;
+                tablaHtml += `</tbody><tfoot><tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;">
+                    <td colspan="6" style="padding:10px 12px; text-align:right;">TOTAL GENERAL DEL LOTE</td>
+                    <td style="padding:10px 12px; text-align:right; color:#1a2a6c;">$${totalUsdGeneral.toFixed(2)}</td>
+                    <td style="padding:10px 12px; text-align:right; color:#1a2a6c;">Bs. ${totalBsGeneral.toFixed(2)}</td>
+                    <td style="padding:10px 12px;"></td>
+                </tr></tfoot>`;
                 table.innerHTML = tablaHtml;
             } catch (e) {
                 console.error('❌ Error en abrirModalDetalleLote:', e);
@@ -1311,7 +1324,7 @@
             } catch (e) { console.error('❌ Error:', e); Swal.fire({ title: '❌ Error', text: `No se pudo generar el recibo: ${e.message}`, icon: 'error', confirmButtonText: 'Entendido' }); }
         }
 
-        // HISTORIAL
+        // HISTORIAL (con un solo botón TXT)
         async function cargarLotes() {
             const tableBody = document.getElementById('tabla_historial');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading"><span class="loading-spinner"></span> Cargando lotes...</td></tr>';
@@ -1323,9 +1336,28 @@
                 if (!res) return;
                 const lotes = await res.json();
                 if (lotes.length === 0) { tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">📭 No hay lotes registrados.</td></tr>'; } 
-                else { tableBody.innerHTML = lotes.map(l => `<tr><td><strong>#${l.id_lote}</strong></td><td>${l.descripcion || 'Sin descripción'}</td><td>${l.fecha_calculo}</td><td>${l.cantidad_empleados_lote} empleados</td><td><small>${l.sucursales_involucradas || 'Sin sucursal'}</small></td><td><strong>$${l.total_usd.toFixed(2)}</strong></td><td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td><td><button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '60')" style="font-size:10px; padding:3px 8px;">60%</button><button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size:10px; padding:3px 8px;">100%</button><button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '40')" style="font-size:10px; padding:3px 8px;">40%</button><button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size:10px; padding:3px 8px;">📄</button><button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})" style="font-size:10px; padding:3px 8px;">📂</button><button class="btn-danger" onclick="eliminarLote(${l.id_lote})" style="font-size:10px; padding:3px 8px;">🗑️</button></td></tr>`).join(''); }
+                else {
+                    tableBody.innerHTML = lotes.map(l => `
+                        <tr>
+                            <td><strong>#${l.id_lote}</strong></td>
+                            <td>${l.descripcion || 'Sin descripción'}</td>
+                            <td>${l.fecha_calculo}</td>
+                            <td>${l.cantidad_empleados_lote} empleados</td>
+                            <td><small>${l.sucursales_involucradas || 'Sin sucursal'}</small></td>
+                            <td><strong>$${l.total_usd.toFixed(2)}</strong></td>
+                            <td><strong>Bs. ${l.total_bs.toFixed(2)}</strong></td>
+                            <td>
+                                <button class="btn-success" onclick="generarArchivoPago(${l.id_lote}, '100')" style="font-size:11px; padding:4px 10px;">📄 TXT</button>
+                                <button class="btn-warning" onclick="generarLotePDF(${l.id_lote})" style="font-size:11px; padding:4px 10px;">📄 PDF</button>
+                                <button class="btn-warning" onclick="abrirModalDetalleLote(${l.id_lote})" style="font-size:11px; padding:4px 10px;">📂 Ver</button>
+                                <button class="btn-danger" onclick="eliminarLote(${l.id_lote})" style="font-size:11px; padding:4px 10px;">🗑️</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
             } catch (e) { console.error('❌ Error en cargarLotes:', e); tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">❌ Error al cargar historial: ${e.message}</td></tr>`; }
         }
+
         async function generarArchivoPago(id, tipo) {
             try {
                 const res = await secureFetch(`${API_URL}/api/generar_archivo_pago/${id}?tipo=${tipo}`);
