@@ -418,7 +418,7 @@
             <div id="lote_detalle_body" style="max-height:500px; overflow-y:auto;">
                 <div class="table-responsive">
                     <table class="table-modern" id="tabla_detalle_lote">
-                        <!-- El contenido se genera con JS (modificado para mostrar USD y Bs en todas las columnas) -->
+                        <!-- El contenido se genera con JS -->
                     </table>
                 </div>
             </div>
@@ -958,7 +958,6 @@
             });
         }
 
-        // CÁLCULO DE NÓMINA (simplificado)
         async function calcularNomina(guardar_en_bd = true) {
             const tipo = document.getElementById('tipo').value;
             const fecha_inicio = document.getElementById('fecha_inicio').value;
@@ -1231,7 +1230,7 @@
         }
         function generarReciboCestaticket(id) { downloadFile(`${API_URL}/api/generar_recibo_cestaticket/${id}`, `recibo_cesta_${id}.pdf`); }
 
-        // MODAL DE LOTE DE NÓMINA (MODIFICADO: muestra USD y Bs en todas las columnas)
+        // MODAL DE LOTE DE NÓMINA (muestra USD y Bs en todas las columnas)
         async function abrirModalDetalleLote(id) {
             const modal = document.getElementById('modalDetalleLote');
             const header = document.getElementById('lote_header_info');
@@ -1262,7 +1261,6 @@
                     </div>
                     <br><small style="color:#6b7a8f;"><strong>Cantidad de Empleados:</strong> ${lote.nominas ? lote.nominas.length : 0}</small>
                 `;
-                // Encabezado de la tabla: mostramos USD y Bs en cada columna de montos
                 let tablaHtml = `<thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;">
                     <th style="padding:8px 10px; text-align:left;">Empleado</th>
                     <th style="padding:8px 10px; text-align:right;">Base Full</th>
@@ -1274,7 +1272,6 @@
                     <th style="padding:8px 10px; text-align:center;">Acciones</th>
                 </tr></thead><tbody>`;
                 lote.nominas.forEach((n) => {
-                    // Datos en USD
                     const salarioBaseUsd = n.salario_base_usd || 0;
                     const horasExtrasUsd = n.horas_extras_usd || 0;
                     const bonoCompUsd = n.bono_complementario_usd || 0;
@@ -1283,7 +1280,6 @@
                     const netoUsd = n.neto_pagar_usd || 0;
                     const netoBs = n.neto_pagar_bs || 0;
 
-                    // Convertir a Bs
                     const salarioBaseBs = salarioBaseUsd * tasa_bcv;
                     const horasExtrasBs = horasExtrasUsd * tasa_bcv;
                     const bonoCompBs = bonoCompUsd * tasa_bcv;
