@@ -385,7 +385,7 @@
             <div class="table-responsive"><table class="table-modern"><thead><tr><th>ID Lote</th><th>Descripción</th><th>Fecha Cálculo</th><th>Empleados</th><th>Total Bs</th><th>Acciones</th></tr></thead><tbody id="tabla_historial_cesta"><tr><td colspan="6" class="loading"><span class="loading-spinner"></span> Cargando...</td></tr></tbody></table></div>
         </div>
 
-        <!-- HISTORIAL (MODIFICADO: UN SOLO BOTÓN TXT) -->
+        <!-- HISTORIAL -->
         <div id="historial" class="tab-content">
             <div class="module-header"><div><h2 class="module-title">📋 Historial de Nóminas</h2><p class="module-subtitle">Registro de todas las nóminas procesadas</p></div></div>
             <div id="alert_hist"></div>
@@ -418,7 +418,7 @@
             <div id="lote_detalle_body" style="max-height:500px; overflow-y:auto;">
                 <div class="table-responsive">
                     <table class="table-modern" id="tabla_detalle_lote">
-                        <!-- El contenido se genera con JS (modificado para quitar columnas 60/40) -->
+                        <!-- El contenido se genera con JS (modificado para mostrar USD y Bs en todas las columnas) -->
                     </table>
                 </div>
             </div>
@@ -1231,7 +1231,7 @@
         }
         function generarReciboCestaticket(id) { downloadFile(`${API_URL}/api/generar_recibo_cestaticket/${id}`, `recibo_cesta_${id}.pdf`); }
 
-        // MODAL DE LOTE DE NÓMINA (MODIFICADO: quitamos columnas de 60/40)
+        // MODAL DE LOTE DE NÓMINA (MODIFICADO: muestra USD y Bs en todas las columnas)
         async function abrirModalDetalleLote(id) {
             const modal = document.getElementById('modalDetalleLote');
             const header = document.getElementById('lote_header_info');
@@ -1262,19 +1262,19 @@
                     </div>
                     <br><small style="color:#6b7a8f;"><strong>Cantidad de Empleados:</strong> ${lote.nominas ? lote.nominas.length : 0}</small>
                 `;
-                // Definimos el encabezado SIN columnas de 60/40, y SIN conversiones repetidas
+                // Encabezado de la tabla: mostramos USD y Bs en cada columna de montos
                 let tablaHtml = `<thead><tr style="background:#f8f9fc; border-bottom:2px solid #e8ecf1;">
                     <th style="padding:8px 10px; text-align:left;">Empleado</th>
-                    <th style="padding:8px 10px; text-align:right;">Base Full (USD)</th>
-                    <th style="padding:8px 10px; text-align:right;">Hrs Extras (USD)</th>
-                    <th style="padding:8px 10px; text-align:right;">Bono (USD)</th>
-                    <th style="padding:8px 10px; text-align:right;">Asign. (USD)</th>
-                    <th style="padding:8px 10px; text-align:right;">Deducc. (USD)</th>
-                    <th style="padding:8px 10px; text-align:right;">Neto (USD)</th>
-                    <th style="padding:8px 10px; text-align:right;">Neto (Bs)</th>
+                    <th style="padding:8px 10px; text-align:right;">Base Full</th>
+                    <th style="padding:8px 10px; text-align:right;">Hrs Extras</th>
+                    <th style="padding:8px 10px; text-align:right;">Bono</th>
+                    <th style="padding:8px 10px; text-align:right;">Asign.</th>
+                    <th style="padding:8px 10px; text-align:right;">Deducc.</th>
+                    <th style="padding:8px 10px; text-align:right;">Neto</th>
                     <th style="padding:8px 10px; text-align:center;">Acciones</th>
                 </tr></thead><tbody>`;
                 lote.nominas.forEach((n) => {
+                    // Datos en USD
                     const salarioBaseUsd = n.salario_base_usd || 0;
                     const horasExtrasUsd = n.horas_extras_usd || 0;
                     const bonoCompUsd = n.bono_complementario_usd || 0;
@@ -1282,16 +1282,43 @@
                     const totalDedUsd = n.total_deducciones_usd || 0;
                     const netoUsd = n.neto_pagar_usd || 0;
                     const netoBs = n.neto_pagar_bs || 0;
+
+                    // Convertir a Bs
+                    const salarioBaseBs = salarioBaseUsd * tasa_bcv;
+                    const horasExtrasBs = horasExtrasUsd * tasa_bcv;
+                    const bonoCompBs = bonoCompUsd * tasa_bcv;
+                    const totalAsigBs = totalAsigUsd * tasa_bcv;
+                    const totalDedBs = totalDedUsd * tasa_bcv;
+
                     tablaHtml += `<tr style="border-bottom:1px solid #f1f4f9;">
                         <td style="padding:8px 10px;"><strong>${n.nombres || ''} ${n.apellidos || ''}</strong><br><small style="color:#6b7a8f;">${n.cedula || ''}</small></td>
-                        <td style="padding:8px 10px; text-align:right;">$${salarioBaseUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right;">$${horasExtrasUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right;">$${bonoCompUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right; color:#28a745;">$${totalAsigUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right; color:#dc3545;">($${totalDedUsd.toFixed(2)})</td>
-                        <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">$${netoUsd.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">Bs. ${netoBs.toFixed(2)}</td>
-                        <td style="padding:8px 10px; text-align:center;"><button onclick="generarReciboNomina(${n.id_nomina})" style="font-size:11px; padding:4px 8px; border:none; border-radius:4px; cursor:pointer; background:#1a2a6c; color:white;">🖨️</button></td>
+                        <td style="padding:8px 10px; text-align:right;">
+                            $${salarioBaseUsd.toFixed(2)}
+                            <br><small style="color:#6b7a8f;">Bs. ${salarioBaseBs.toFixed(2)}</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:right;">
+                            $${horasExtrasUsd.toFixed(2)}
+                            <br><small style="color:#6b7a8f;">Bs. ${horasExtrasBs.toFixed(2)}</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:right;">
+                            $${bonoCompUsd.toFixed(2)}
+                            <br><small style="color:#6b7a8f;">Bs. ${bonoCompBs.toFixed(2)}</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:right; color:#28a745;">
+                            $${totalAsigUsd.toFixed(2)}
+                            <br><small style="color:#6b7a8f;">Bs. ${totalAsigBs.toFixed(2)}</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:right; color:#dc3545;">
+                            ($${totalDedUsd.toFixed(2)})
+                            <br><small style="color:#6b7a8f;">(Bs. ${totalDedBs.toFixed(2)})</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:right; font-weight:bold; color:#1a2a6c;">
+                            $${netoUsd.toFixed(2)}
+                            <br><small style="color:#6b7a8f;">Bs. ${netoBs.toFixed(2)}</small>
+                        </td>
+                        <td style="padding:8px 10px; text-align:center;">
+                            <button onclick="generarReciboNomina(${n.id_nomina})" style="font-size:11px; padding:4px 8px; border:none; border-radius:4px; cursor:pointer; background:#1a2a6c; color:white;">🖨️</button>
+                        </td>
                     </tr>`;
                 });
                 let totalUsdGeneral = 0; let totalBsGeneral = 0;
@@ -1324,7 +1351,7 @@
             } catch (e) { console.error('❌ Error:', e); Swal.fire({ title: '❌ Error', text: `No se pudo generar el recibo: ${e.message}`, icon: 'error', confirmButtonText: 'Entendido' }); }
         }
 
-        // HISTORIAL (con un solo botón TXT)
+        // HISTORIAL
         async function cargarLotes() {
             const tableBody = document.getElementById('tabla_historial');
             tableBody.innerHTML = '<tr><td colspan="8" class="loading"><span class="loading-spinner"></span> Cargando lotes...</td></tr>';
