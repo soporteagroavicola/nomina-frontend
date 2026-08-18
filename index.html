@@ -238,11 +238,15 @@
                     </div>
                 </div>
 
+                <!-- BOTONERA CON NUEVO BOTÓN "GUARDAR Y TXT" -->
                 <div style="display:flex; gap:15px; margin-top:24px; flex-wrap:wrap;">
-                    <button class="btn-primary" onclick="calcularNomina(true)" style="display:inline-flex; align-items:center; gap:10px; padding:14px 35px; font-size:16px;">
+                    <button class="btn-primary" onclick="calcularNomina(true, false)" style="display:inline-flex; align-items:center; gap:10px; padding:14px 35px; font-size:16px;">
                         <span style="font-size:20px;">💾</span> Guardar Nómina
                     </button>
-                    <button onclick="calcularNomina(false)" style="display:inline-flex; align-items:center; gap:8px; padding:14px 25px; background:#f8f9fc; color:#1a2a6c; border:2px solid #1a2a6c; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:0.3s;">
+                    <button class="btn-success" onclick="calcularNomina(true, true)" style="display:inline-flex; align-items:center; gap:10px; padding:14px 35px; font-size:16px; background:#28a745; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s;">
+                        <span style="font-size:20px;">📦</span> Guardar y TXT (60/40)
+                    </button>
+                    <button onclick="calcularNomina(false, false)" style="display:inline-flex; align-items:center; gap:8px; padding:14px 25px; background:#f8f9fc; color:#1a2a6c; border:2px solid #1a2a6c; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:0.3s;">
                         <span style="font-size:18px;">👁️</span> Vista Previa
                     </button>
                     <button onclick="copiarPeriodoAnterior()" style="display:inline-flex; align-items:center; gap:8px; padding:14px 25px; background:#e8f4fd; color:#004085; border:1px solid #b8daff; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:0.3s;">
@@ -958,7 +962,8 @@
             });
         }
 
-        async function calcularNomina(guardar_en_bd = true) {
+        // ⭐ FUNCIÓN CALCULAR NÓMINA (ACTUALIZADA CON DESCARGA AUTOMÁTICA DE TXT)
+        async function calcularNomina(guardar_en_bd = true, descargar_txt = false) {
             const tipo = document.getElementById('tipo').value;
             const fecha_inicio = document.getElementById('fecha_inicio').value;
             const fecha_fin = document.getElementById('fecha_fin').value;
@@ -1022,9 +1027,35 @@
                 html += `<tr style="background:#e9ecef; font-weight:bold; border-top:2px solid #1a2a6c;"><td colspan="5" style="padding:10px 12px; text-align:right;">TOTAL</td><td style="padding:10px 12px; text-align:right;">$${total_usd.toFixed(2)}</td><td style="padding:10px 12px; text-align:right;"></td><td style="padding:10px 12px; text-align:right;"><strong>$${total_usd.toFixed(2)}</strong></td><td style="padding:10px 12px; text-align:right;"><strong>Bs. ${total_bs.toFixed(2)}</strong></td></tr>`;
                 html += `</tbody></table></div>`;
                 document.getElementById('resultado_content').innerHTML = html;
-                if(guardar_en_bd) { Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success'); cargarLotes(); } 
-                else { Swal.fire('✅ Vista Previa', 'El cálculo se ha realizado correctamente. No se ha guardado en el historial.', 'info'); }
-            } catch (e) { console.error(e); Swal.fire('Error', e.message, 'error'); }
+
+                if(guardar_en_bd) {
+                    Swal.fire('¡Éxito!', `Nómina guardada como Lote #${data.lote_id}`, 'success');
+                    cargarLotes();
+
+                    // 🚀 Si se pidió descargar los TXT, los generamos automáticamente
+                    if (descargar_txt && data.lote_id) {
+                        Swal.fire({
+                            title: '📦 Generando archivos TXT',
+                            text: 'Descargando 60% y 40%...',
+                            icon: 'info',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+
+                        // Descargar 60%
+                        await generarArchivoPago(data.lote_id, '60');
+                        // Pequeña pausa para evitar bloqueo del navegador
+                        setTimeout(() => {
+                            generarArchivoPago(data.lote_id, '40');
+                        }, 800);
+                    }
+                } else {
+                    Swal.fire('✅ Vista Previa', 'El cálculo se ha realizado correctamente. No se ha guardado en el historial.', 'info');
+                }
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', e.message, 'error');
+            }
         }
 
         async function copiarPeriodoAnterior() {
